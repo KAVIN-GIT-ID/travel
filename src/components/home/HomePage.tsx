@@ -299,6 +299,21 @@ export const HomePage: React.FC<HomePageProps> = ({
   const [selectedDays, setSelectedDays] = useState<number>(3);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedVehicleType, setSelectedVehicleType] = useState<string>('SUV'); // 'Sedan' | 'SUV' | 'Van' | 'Bus'
+  const [heroDestFilter, setHeroDestFilter] = useState<string>('All');
+
+  // Helper for starting fare per destination card
+  const getDestStartingFare = (dest: TouristDestination) => {
+    const estKm = dest.baseKmFromHub * 2 + dest.defaultDays * 70;
+    return Math.round((estKm * 15 + 600 * dest.defaultDays + 500) / 100) * 100;
+  };
+
+  const visibleDestinations = useMemo(() => {
+    if (heroDestFilter === 'All') return TOURIST_DESTINATIONS;
+    if (heroDestFilter === 'Tamil Nadu' || heroDestFilter === 'Kerala' || heroDestFilter === 'Karnataka') {
+      return TOURIST_DESTINATIONS.filter((d) => d.state === heroDestFilter);
+    }
+    return TOURIST_DESTINATIONS.filter((d) => d.category === heroDestFilter);
+  }, [heroDestFilter]);
 
   // Active Destination
   const currentDestination = useMemo(() => {
@@ -368,106 +383,53 @@ export const HomePage: React.FC<HomePageProps> = ({
   return (
     <div className="space-y-8 sm:space-y-14 -mt-1 sm:-mt-2">
       {/* ============================================================ */}
-      {/* 1. TOURIST TRIP PLANNER HERO BANNER */}
+      {/* 1. TOURIST TRIP PLANNER & VISUAL DESTINATION HERO BANNER */}
       {/* ============================================================ */}
-      <div className="relative bg-[#051329] text-white rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden border border-slate-800">
-        <div className="relative z-10 px-3.5 py-6 sm:px-10 sm:pt-10 sm:pb-14 max-w-6xl mx-auto">
+      <div className="relative bg-gradient-to-br from-[#061826] via-[#09223a] to-[#04101c] text-white rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden border border-slate-800">
+        <div className="relative z-10 px-3.5 py-4 sm:px-8 sm:py-7 max-w-6xl mx-auto">
           {/* Header Subtitle Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-3 text-xs font-medium text-slate-300">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2 sm:mb-3">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="eyebrow text-blue-400">
-                South India Holiday Specialist
+              <span className="eyebrow bg-blue-500/20 text-blue-300 px-2.5 py-0.5 rounded-full border border-blue-400/30 text-[10px] sm:text-xs">
+                🌴 Tamil Nadu • Kerala • Karnataka
               </span>
-              <span className="text-slate-600 hidden sm:inline">|</span>
-              <span className="text-slate-300 text-[11px] sm:text-xs">
-                Tamil Nadu • Kerala • Karnataka
+              <span className="text-emerald-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1">
+                ✓ All-India Tourist Permit (AITP)
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-emerald-400 font-semibold text-[11px] sm:text-xs">
-                ✓ Verified Tourist Chauffeurs
-              </span>
+            <div className="flex items-center gap-2 text-slate-300 text-[11px] sm:text-xs">
+              <span className="text-amber-400">★ 4.9/5</span>
+              <span>(12,400+ Holiday Travelers)</span>
             </div>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white mb-2 sm:mb-3 leading-tight">
-            Plan Your South India Holiday &amp; Tourist Trips
+          <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white mb-1.5 sm:mb-2 leading-tight">
+            Curated South India Holidays &amp; Tourist Fleets
           </h1>
-          <p className="text-slate-300 text-xs sm:text-base max-w-3xl mb-5 sm:mb-8 leading-relaxed">
-            Handcrafted tour packages, day-by-day sightseeing itineraries, and private tourist vehicles across Ooty, Munnar, Coorg, Kodaikanal, Wayanad &amp; heritage circuits.
+          <p className="text-slate-300 text-xs sm:text-sm max-w-2xl mb-3 sm:mb-4 leading-relaxed">
+            Private AC tourist cabs, tempo travellers &amp; luxury coaches for families and group tours with verified local sightseeing chauffeurs.
           </p>
 
           {/* ------------------------------------------------------------ */}
-          {/* INTERACTIVE TOUR TRIP PLANNER WIDGET */}
+          {/* COMPACT MOBILE-FIRST TRIP PLANNER WIDGET */}
           {/* ------------------------------------------------------------ */}
-          <div id="tourist-planner-anchor" className="bg-white text-gray-900 rounded-xl sm:rounded-2xl shadow-2xl border border-gray-100 p-3.5 sm:p-7">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
-              <div className="flex items-center gap-2">
-                <span className="text-lg sm:text-xl">🗺️</span>
-                <div>
-                  <h2 className="text-sm sm:text-base font-extrabold text-gray-900">
-                    Interactive Holiday &amp; Itinerary Planner
-                  </h2>
-                  <p className="text-[11px] sm:text-xs text-gray-500">
-                    Tap a destination below or customize duration &amp; vehicle for an instant plan.
-                  </p>
-                </div>
+          <div id="tourist-planner-anchor" className="bg-white text-gray-900 rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 p-3 sm:p-4 mb-4 sm:mb-5">
+            <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-gray-100">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-gray-900">
+                <span className="text-blue-600">⚡</span>
+                <span>Instant Holiday Route &amp; Fare Planner</span>
               </div>
-              <span className="hidden md:inline-block text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">
-                ✓ Interstate Permits &amp; Sightseeing Tolls Included
+              <span className="text-[11px] text-emerald-700 font-semibold">
+                ✓ Tolls, Driver &amp; Fuel Included
               </span>
             </div>
 
-            {/* Mobile-First Visual Destination Swipe Carousel */}
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                  Popular Holiday Destinations (1-Tap Select):
-                </span>
-                <span className="text-[10px] text-blue-600 font-semibold sm:hidden">Swipe ➔</span>
-              </div>
-              <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar scroll-smooth">
-                {TOURIST_DESTINATIONS.map((dest) => {
-                  const isSelected = selectedDestId === dest.id;
-                  return (
-                    <button
-                      key={dest.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedDestId(dest.id);
-                        setSelectedDays(dest.defaultDays);
-                      }}
-                      className={`shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl border text-left transition active:scale-95 cursor-pointer ${
-                        isSelected
-                          ? 'bg-blue-600 text-white border-blue-600 shadow-sm ring-2 ring-blue-300'
-                          : 'bg-slate-50 hover:bg-gray-100 text-gray-800 border-gray-200'
-                      }`}
-                    >
-                      <img
-                        src={dest.imageUrl}
-                        alt={dest.name}
-                        className="w-8 h-8 rounded-lg object-cover shrink-0"
-                      />
-                      <div>
-                        <div className="text-xs font-bold whitespace-nowrap leading-none">
-                          {dest.name}
-                        </div>
-                        <div className={`text-[10px] mt-0.5 whitespace-nowrap ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
-                          {dest.defaultDays} Days • {dest.state}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 4-Step Tourist Planner Selector Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              {/* 1. Tourist Destination */}
-              <div className="bg-slate-50 hover:bg-blue-50/50 p-3 sm:p-3.5 rounded-xl border border-gray-200 transition">
-                <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-                  1. Holiday Destination
+            {/* 4 Compact Inputs Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+              {/* 1. Destination */}
+              <div className="col-span-2 sm:col-span-1 bg-slate-50 hover:bg-blue-50/50 p-2 sm:p-2.5 rounded-lg border border-gray-200 transition">
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">
+                  📍 Destination
                 </label>
                 <select
                   value={selectedDestId}
@@ -476,7 +438,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     const dest = TOURIST_DESTINATIONS.find((d) => d.id === e.target.value);
                     if (dest) setSelectedDays(dest.defaultDays);
                   }}
-                  className="w-full bg-transparent font-bold text-sm text-gray-900 focus:outline-none cursor-pointer py-1"
+                  className="w-full bg-transparent font-bold text-xs sm:text-sm text-gray-900 focus:outline-none cursor-pointer py-0.5"
                 >
                   {TOURIST_DESTINATIONS.map((dest) => (
                     <option key={dest.id} value={dest.id}>
@@ -484,20 +446,17 @@ export const HomePage: React.FC<HomePageProps> = ({
                     </option>
                   ))}
                 </select>
-                <div className="text-[11px] text-blue-600 font-semibold mt-0.5 truncate">
-                  {currentDestination.tagline}
-                </div>
               </div>
 
               {/* 2. Departure Hub */}
-              <div className="bg-slate-50 hover:bg-blue-50/50 p-3.5 rounded-xl border border-gray-200 transition">
-                <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-                  2. Starting Departure Hub
+              <div className="col-span-1 bg-slate-50 hover:bg-blue-50/50 p-2 sm:p-2.5 rounded-lg border border-gray-200 transition">
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">
+                  🛫 Starting From
                 </label>
                 <select
                   value={selectedHubId}
                   onChange={(e) => setSelectedHubId(e.target.value)}
-                  className="w-full bg-transparent font-bold text-sm text-gray-900 focus:outline-none cursor-pointer"
+                  className="w-full bg-transparent font-bold text-xs sm:text-sm text-gray-900 focus:outline-none cursor-pointer py-0.5"
                 >
                   {DEPARTURE_HUBS.map((hub) => (
                     <option key={hub.id} value={hub.id}>
@@ -505,84 +464,52 @@ export const HomePage: React.FC<HomePageProps> = ({
                     </option>
                   ))}
                 </select>
-                <div className="text-[11px] text-gray-500 font-medium mt-1">
-                  Home / Hotel / Airport Pickup
-                </div>
               </div>
 
-              {/* 3. Tour Duration */}
-              <div className="bg-slate-50 hover:bg-blue-50/50 p-3.5 rounded-xl border border-gray-200 transition">
-                <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-                  3. Tour Duration (Days / Nights)
+              {/* 3. Duration */}
+              <div className="col-span-1 bg-slate-50 hover:bg-blue-50/50 p-2 sm:p-2.5 rounded-lg border border-gray-200 transition">
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">
+                  🗓️ Duration
                 </label>
                 <select
                   value={selectedDays}
                   onChange={(e) => setSelectedDays(Number(e.target.value))}
-                  className="w-full bg-transparent font-bold text-sm text-gray-900 focus:outline-none cursor-pointer"
+                  className="w-full bg-transparent font-bold text-xs sm:text-sm text-gray-900 focus:outline-none cursor-pointer py-0.5"
                 >
-                  <option value={2}>2 Days / 1 Night (Weekend Trip)</option>
-                  <option value={3}>3 Days / 2 Nights (Classic Holiday)</option>
-                  <option value={4}>4 Days / 3 Nights (Explorer Tour)</option>
-                  <option value={5}>5 Days / 4 Nights (Grand Circuit)</option>
-                  <option value={6}>6 Days / 5 Nights (Extended Tour)</option>
+                  <option value={2}>2 Days / 1N</option>
+                  <option value={3}>3 Days / 2N</option>
+                  <option value={4}>4 Days / 3N</option>
+                  <option value={5}>5 Days / 4N</option>
+                  <option value={6}>6 Days / 5N</option>
                 </select>
-                <div className="text-[11px] text-emerald-700 font-semibold mt-1">
-                  {selectedDays} Days sightseeing plan
-                </div>
               </div>
 
-              {/* 4. Tourist Vehicle */}
-              <div className="bg-slate-50 hover:bg-blue-50/50 p-3.5 rounded-xl border border-gray-200 transition">
-                <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-                  4. Travel Group Vehicle
+              {/* 4. Vehicle Type */}
+              <div className="col-span-2 sm:col-span-1 bg-slate-50 hover:bg-blue-50/50 p-2 sm:p-2.5 rounded-lg border border-gray-200 transition">
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">
+                  🚗 Vehicle Type
                 </label>
                 <select
                   value={selectedVehicleType}
                   onChange={(e) => setSelectedVehicleType(e.target.value)}
-                  className="w-full bg-transparent font-bold text-sm text-gray-900 focus:outline-none cursor-pointer"
+                  className="w-full bg-transparent font-bold text-xs sm:text-sm text-gray-900 focus:outline-none cursor-pointer py-0.5"
                 >
-                  <option value="Sedan">AC Sedan (Swift Dzire / Etios - 4 Seats)</option>
-                  <option value="SUV">Prime SUV (Innova Crysta - 6-7 Seats)</option>
-                  <option value="Van">Tempo Traveller (12-16 Pushback Seats)</option>
-                  <option value="Bus">Luxury Tourist Coach (21-40 Seater)</option>
+                  <option value="Sedan">AC Sedan (Dzire - 4 Seats)</option>
+                  <option value="SUV">Prime SUV (Innova Crysta - 7 Seats)</option>
+                  <option value="Van">Tempo Traveller (12-16 Seats)</option>
+                  <option value="Bus">Luxury Tourist Coach (21-40 Seats)</option>
                 </select>
-                <div className="text-[11px] text-gray-600 font-medium mt-1 truncate">
-                  {chosenVehicle?.name || 'Innova Crysta'} (₹{chosenVehicle?.per_km_rate}/km)
-                </div>
               </div>
             </div>
 
-            {/* Quick Holiday Vibe Chips */}
-            <div className="mt-5 pt-4 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex flex-wrap items-center gap-2 text-xs">
-                <span className="font-bold text-gray-500 mr-1 text-[11px] uppercase tracking-wider">
-                  Holiday Vibes:
-                </span>
-                {[
-                  { label: '🏔️ Hill Stations', destId: 'dest-ooty' },
-                  { label: '🌴 Backwaters', destId: 'dest-munnar' },
-                  { label: '☕ Coffee Highlands', destId: 'dest-coorg' },
-                  { label: '🛕 Temple Circuits', destId: 'dest-ramesh' },
-                  { label: '🏛️ World Heritage', destId: 'dest-hampi' },
-                  { label: '🐅 Wildlife Forests', destId: 'dest-wayanad' },
-                ].map((vibe) => (
-                  <button
-                    key={vibe.label}
-                    type="button"
-                    onClick={() => {
-                      setSelectedDestId(vibe.destId);
-                      const d = TOURIST_DESTINATIONS.find((x) => x.id === vibe.destId);
-                      if (d) setSelectedDays(d.defaultDays);
-                    }}
-                    className={`px-3 py-1 rounded-md text-xs font-semibold transition cursor-pointer border ${
-                      selectedDestId === vibe.destId
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-200'
-                    }`}
-                  >
-                    {vibe.label}
-                  </button>
-                ))}
+            {/* Quick Action & Total Summary */}
+            <div className="mt-2.5 pt-2.5 border-t border-gray-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs flex-wrap">
+                <span className="font-bold text-blue-600">Selected Tour:</span>
+                <span className="font-semibold text-gray-900">{currentHub.name} ➔ {currentDestination.name}</span>
+                <span className="text-gray-400 hidden sm:inline">•</span>
+                <span className="text-xs font-black text-gray-900 price">{formatINR(estimatedTourFare)}</span>
+                <span className="text-[11px] text-gray-500">({chosenVehicle?.name || 'Innova Crysta'})</span>
               </div>
 
               <button
@@ -591,11 +518,121 @@ export const HomePage: React.FC<HomePageProps> = ({
                   const el = document.getElementById('generated-itinerary-card');
                   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
-                className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider shadow-sm transition cursor-pointer flex items-center justify-center gap-1.5"
+                className="bg-[#008cff] hover:bg-[#0077e6] active:bg-[#0060cc] text-white font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
               >
                 <span>View Trip Plan &amp; Itinerary</span>
                 <span>➔</span>
               </button>
+            </div>
+          </div>
+
+          {/* ------------------------------------------------------------ */}
+          {/* MAIN VISUAL DESTINATIONS CONTENT (VISIBLE RIGHT ON HERO!) */}
+          {/* ------------------------------------------------------------ */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <span className="eyebrow text-blue-400 block text-[10px]">
+                  Visual Holiday Explorer (Tap to Select)
+                </span>
+                <h2 className="text-sm sm:text-base font-bold text-white leading-tight">
+                  Top Tourist Destinations Across South India
+                </h2>
+              </div>
+              <div className="text-[11px] text-slate-300 font-medium hidden sm:flex items-center gap-1">
+                <span>Swipe to explore</span>
+                <span>➔</span>
+              </div>
+            </div>
+
+            {/* Category Filter Pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-2 no-scrollbar mb-2.5">
+              {['All', 'Tamil Nadu', 'Kerala', 'Karnataka', 'Hill Station', 'Backwaters', 'Heritage', 'Wildlife'].map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setHeroDestFilter(f)}
+                  className={`shrink-0 px-2.5 py-1 rounded-full text-[11px] font-semibold transition cursor-pointer border ${
+                    heroDestFilter === f
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                      : 'bg-white/10 text-slate-200 hover:bg-white/20 border-white/15'
+                  }`}
+                >
+                  {f === 'All' ? '🌟 All Destinations' : f}
+                </button>
+              ))}
+            </div>
+
+            {/* Rich Visual Cards Horizontal Carousel */}
+            <div className="flex items-stretch gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar scroll-smooth">
+              {visibleDestinations.map((dest) => {
+                const isSelected = selectedDestId === dest.id;
+                const startFare = getDestStartingFare(dest);
+                return (
+                  <div
+                    key={dest.id}
+                    onClick={() => {
+                      setSelectedDestId(dest.id);
+                      setSelectedDays(dest.defaultDays);
+                      const el = document.getElementById('generated-itinerary-card');
+                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }}
+                    className={`shrink-0 w-52 sm:w-60 bg-white text-gray-900 rounded-xl overflow-hidden border transition-all duration-200 cursor-pointer flex flex-col group ${
+                      isSelected
+                        ? 'ring-3 ring-blue-400 shadow-lg scale-[1.02] border-blue-400'
+                        : 'border-slate-700/60 hover:border-slate-400 shadow-md hover:shadow-lg'
+                    }`}
+                  >
+                    <div className="relative h-28 sm:h-32 bg-gray-200 overflow-hidden">
+                      <img
+                        src={dest.imageUrl}
+                        alt={dest.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                        loading="lazy"
+                      />
+                      <span className="absolute top-2 left-2 bg-gray-900/85 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                        {dest.state}
+                      </span>
+                      <span className="absolute top-2 right-2 bg-blue-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded shadow-xs">
+                        {dest.defaultDays}D / {dest.defaultDays - 1}N
+                      </span>
+                      <span className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-xs text-white text-[10px] font-semibold px-2 py-0.5 rounded">
+                        {dest.category}
+                      </span>
+                    </div>
+
+                    <div className="p-3 flex flex-col flex-1 justify-between">
+                      <div>
+                        <h3 className="font-bold text-sm text-gray-900 group-hover:text-blue-600 transition leading-snug">
+                          {dest.name}
+                        </h3>
+                        <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-1">
+                          {dest.tagline}
+                        </p>
+                        <div className="text-[10px] text-gray-600 mt-1.5 truncate">
+                          ★ {dest.topSights.slice(0, 2).join(' • ')}
+                        </div>
+                      </div>
+
+                      <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between">
+                        <div>
+                          <span className="text-[9px] text-gray-400 uppercase font-semibold block">Tour From</span>
+                          <span className="text-xs font-black text-gray-900 price">
+                            {formatINR(startFare)}
+                          </span>
+                        </div>
+                        <span className={`text-[11px] font-bold px-2 py-1 rounded transition ${
+                          isSelected
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white'
+                        }`}>
+                          {isSelected ? 'Selected ✓' : 'Plan Trip ➔'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -629,23 +666,23 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
 
             {/* Total Tour Fare & Booking CTA */}
-            <div className="bg-slate-50 border border-slate-200 p-3.5 sm:p-4 rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-5 w-full lg:w-auto justify-between lg:justify-start">
+            <div className="bg-slate-50 border border-slate-200 p-3 sm:p-4 rounded-xl flex flex-row items-center justify-between gap-3 sm:gap-5 w-full lg:w-auto">
               <div>
-                <span className="eyebrow block">
-                  Complete Tour Package From
+                <span className="eyebrow block text-[10px]">
+                  Tour Package From
                 </span>
-                <div className="text-2xl sm:text-3xl font-black text-gray-900 leading-none mt-0.5 price">
+                <div className="text-xl sm:text-3xl font-black text-gray-900 leading-none mt-0.5 price">
                   {formatINR(estimatedTourFare)}
                 </div>
-                <span className="text-[11px] text-emerald-700 font-semibold block mt-1">
-                  ✓ Fuel, Driver Batta &amp; Tolls Included
+                <span className="text-[10px] sm:text-[11px] text-emerald-700 font-semibold block mt-0.5">
+                  ✓ Fuel, Driver &amp; Tolls
                 </span>
               </div>
 
               <button
                 type="button"
                 onClick={handleBookCurrentPlan}
-                className="bg-[#008cff] hover:bg-[#0077e6] active:bg-[#0055ff] text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider px-5 py-3 rounded-lg shadow-md transition cursor-pointer text-center"
+                className="bg-[#008cff] hover:bg-[#0077e6] active:bg-[#0055ff] text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg shadow-md transition cursor-pointer text-center whitespace-nowrap shrink-0"
               >
                 Book This Tour
               </button>
