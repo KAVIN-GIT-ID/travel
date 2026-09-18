@@ -94,41 +94,41 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Main Bar with MakeMyTrip Navigation Layout */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-15 sm:h-18">
+        <div className="flex items-center justify-between h-16 sm:h-18 gap-2">
           {/* Brand Logo with Moving Bus Emblem */}
           <div
-            className="cursor-pointer select-none py-1"
+            className="cursor-pointer select-none py-1 shrink-0 mr-2 sm:mr-4 xl:mr-8"
             onClick={() => handleTabClick('home')}
           >
             <div className="block sm:hidden">
               <BusLogo size="sm" showTagline={false} />
             </div>
             <div className="hidden sm:block">
-              <BusLogo size="md" />
+              <BusLogo size="sm" showTagline={false} />
             </div>
           </div>
 
           {/* Desktop Category Navigation Icons */}
-          <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1 h-full">
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2 h-full shrink-0">
             {navCategories.map((item) => {
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
                   onClick={() => handleTabClick(item.id)}
-                  className={`h-full px-2 xl:px-3.5 flex flex-col items-center justify-center transition-all border-b-3 cursor-pointer ${
+                  className={`h-full px-2 xl:px-3 flex flex-col items-center justify-center transition-all border-b-2 cursor-pointer shrink-0 ${
                     isActive
                       ? 'border-[#008cff] text-[#008cff] bg-blue-50/40'
                       : 'border-transparent text-gray-600 hover:text-[#008cff] hover:bg-gray-50'
                   }`}
                 >
-                  <div className="mb-1 flex items-center justify-center">
+                  <div className="mb-0.5 flex items-center justify-center">
                     <NavIcon tab={item.id} active={isActive} size="md" />
                   </div>
-                  <span className={`text-xs font-bold leading-tight whitespace-nowrap ${isActive ? 'text-[#008cff]' : 'text-gray-800'}`}>
+                  <span className={`text-xs font-semibold leading-tight whitespace-nowrap ${isActive ? 'text-[#008cff]' : 'text-gray-800'}`}>
                     {item.label}
                   </span>
-                  <span className="text-[10px] text-gray-500 font-normal leading-tight hidden xl:block whitespace-nowrap">
+                  <span className="text-[10px] text-gray-400 font-normal leading-tight hidden xl:block whitespace-nowrap">
                     {item.sublabel}
                   </span>
                 </button>

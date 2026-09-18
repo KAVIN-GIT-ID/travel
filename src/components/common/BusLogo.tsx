@@ -60,9 +60,9 @@ export const BusLogo: React.FC<BusLogoProps> = ({
 
   // Horizontal layout for Navbar
   const busHeights = {
-    sm: 'h-8 w-20',
-    md: 'h-11 w-28',
-    lg: 'h-14 w-36',
+    sm: 'h-7 w-16',
+    md: 'h-8 sm:h-9 w-20 sm:w-22',
+    lg: 'h-11 w-26',
   }[size];
 
   const titleSizes = {
@@ -73,12 +73,12 @@ export const BusLogo: React.FC<BusLogoProps> = ({
 
   const taglineSizes = {
     sm: 'text-[8px]',
-    md: 'text-[9px] sm:text-[10px]',
-    lg: 'text-xs',
+    md: 'text-[9px]',
+    lg: 'text-[10px]',
   }[size];
 
   return (
-    <div className="inline-flex items-center gap-2.5 select-none group cursor-pointer">
+    <div className="inline-flex items-center gap-2 select-none group cursor-pointer shrink-0">
       {/* Dynamic Speeding Bus in 3/4 Perspective with Motion Trails */}
       <div
         className={`relative shrink-0 flex items-center justify-center ${
@@ -93,7 +93,7 @@ export const BusLogo: React.FC<BusLogoProps> = ({
       </div>
 
       {/* Brand Typography in exact reference style */}
-      <div className="text-left">
+      <div className="text-left shrink-0">
         <div
           className={`font-black tracking-tight italic uppercase leading-none flex items-center gap-1 ${titleSizes}`}
         >
@@ -102,16 +102,16 @@ export const BusLogo: React.FC<BusLogoProps> = ({
         </div>
 
         {showTagline && (
-          <div className="flex items-center gap-1.5 mt-1">
-            <span className="w-3.5 h-[1.5px] bg-[#f97316] inline-block shrink-0" />
+          <div className="flex items-center gap-1 mt-1">
+            <span className="w-2.5 h-[1.5px] bg-[#f97316] inline-block shrink-0" />
             <span
               className={`font-extrabold uppercase tracking-wider whitespace-nowrap leading-none ${taglineSizes} ${
                 isLight ? 'text-slate-300' : 'text-slate-600'
               }`}
             >
-              Holiday Tours &amp; Tourist Buses
+              Holiday Tours &amp; Buses
             </span>
-            <span className={`w-3.5 h-[1.5px] ${isLight ? 'bg-slate-500' : 'bg-[#0f2444]'} inline-block shrink-0`} />
+            <span className={`w-2.5 h-[1.5px] ${isLight ? 'bg-slate-500' : 'bg-[#0f2444]'} inline-block shrink-0`} />
           </div>
         )}
       </div>
