@@ -25,6 +25,8 @@ declare global {
   }
 }
 
+const DEFAULT_GOOGLE_CLIENT_ID = '1081442493959-lqi8vkld67qi5ghv3g53tuvej64s8m4a.apps.googleusercontent.com';
+
 export const GoogleLoginModal: React.FC<GoogleLoginModalProps> = ({
   isOpen,
   onClose,
@@ -39,7 +41,7 @@ export const GoogleLoginModal: React.FC<GoogleLoginModalProps> = ({
     return (
       (import.meta.env.VITE_GOOGLE_CLIENT_ID as string) ||
       localStorage.getItem('saved_google_client_id') ||
-      ''
+      DEFAULT_GOOGLE_CLIENT_ID
     );
   });
   const [showManualClientInput, setShowManualClientInput] = useState(false);
@@ -101,30 +103,43 @@ export const GoogleLoginModal: React.FC<GoogleLoginModalProps> = ({
     }
   };
 
-  // Initialize Google Identity Services button
+  // Initialize Google Identity Services button with retry polling
   useEffect(() => {
     if (!isOpen) return;
 
-    if (window.google?.accounts?.id && clientId.trim() && googleBtnRef.current) {
-      try {
-        window.google.accounts.id.initialize({
-          client_id: clientId.trim(),
-          callback: handleCredentialResponse,
-          auto_select: false,
-        });
+    const renderGoogleButton = () => {
+      if (window.google?.accounts?.id && clientId.trim() && googleBtnRef.current) {
+        try {
+          window.google.accounts.id.initialize({
+            client_id: clientId.trim(),
+            callback: handleCredentialResponse,
+            auto_select: false,
+          });
 
-        googleBtnRef.current.innerHTML = '';
-        window.google.accounts.id.renderButton(googleBtnRef.current, {
-          theme: 'outline',
-          size: 'large',
-          width: 280,
-          text: 'continue_with',
-          shape: 'pill',
-          logo_alignment: 'left',
-        });
-      } catch (err) {
-        console.warn('Google Identity button initialization:', err);
+          googleBtnRef.current.innerHTML = '';
+          window.google.accounts.id.renderButton(googleBtnRef.current, {
+            theme: 'outline',
+            size: 'large',
+            width: 280,
+            text: 'continue_with',
+            shape: 'pill',
+            logo_alignment: 'left',
+          });
+          return true;
+        } catch (err) {
+          console.warn('Google Identity button initialization:', err);
+        }
       }
+      return false;
+    };
+
+    if (!renderGoogleButton()) {
+      const timer = setInterval(() => {
+        if (renderGoogleButton()) {
+          clearInterval(timer);
+        }
+      }, 250);
+      return () => clearInterval(timer);
     }
   }, [isOpen, clientId]);
 
