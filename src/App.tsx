@@ -5,8 +5,6 @@ import {
   createBooking,
   fetchBookings,
   createInquiry,
-  checkBackendHealth,
-  API_BASE_URL,
 } from './api';
 
 export default function App() {
@@ -14,10 +12,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'tours' | 'inquiry' | 'agent'>('tours');
-
-  // Backend Health
-  const [backendStatus, setBackendStatus] = useState<'checking' | 'healthy' | 'offline'>('checking');
+  const [activeTab, setActiveTab] = useState<'tours' | 'inquiry' | 'bookings'>('tours');
 
   // Booking Modal
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
@@ -37,9 +32,9 @@ export default function App() {
   // Details Modal
   const [detailsPackage, setDetailsPackage] = useState<Package | null>(null);
 
-  // Agent Portal Bookings
+  // Bookings List
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [adminLoading, setAdminLoading] = useState(false);
+  const [bookingsLoading, setBookingsLoading] = useState(false);
 
   // Inquiry Form
   const [inquiryForm, setInquiryForm] = useState({
@@ -75,27 +70,24 @@ export default function App() {
   };
 
   useEffect(() => {
-    checkBackendHealth().then((res) => {
-      setBackendStatus(res.status === 'healthy' ? 'healthy' : 'offline');
-    });
     loadPackages();
   }, [selectedCategory]);
 
-  const loadAgentBookings = async () => {
+  const loadAllBookings = async () => {
     try {
-      setAdminLoading(true);
+      setBookingsLoading(true);
       const data = await fetchBookings();
       setBookings(data);
     } catch (err) {
       console.error('Failed to fetch bookings:', err);
     } finally {
-      setAdminLoading(false);
+      setBookingsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (activeTab === 'agent') {
-      loadAgentBookings();
+    if (activeTab === 'bookings') {
+      loadAllBookings();
     }
   }, [activeTab]);
 
@@ -156,7 +148,7 @@ export default function App() {
       await createInquiry({
         name: inquiryForm.name,
         email: inquiryForm.email,
-        subject: inquiryForm.subject || 'General Inquiry',
+        subject: inquiryForm.subject || 'Custom Tour Inquiry',
         message: inquiryForm.message,
       });
       setInquirySuccess(true);
@@ -175,7 +167,7 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* iOS Frosted Navigation Bar */}
+      {/* iOS Clean Navigation Bar */}
       <header className="ios-navbar">
         <div className="ios-nav-container">
           <div
@@ -204,31 +196,21 @@ export default function App() {
               Inquiry
             </button>
             <button
-              className={`ios-segment-btn ${activeTab === 'agent' ? 'active' : ''}`}
-              onClick={() => setActiveTab('agent')}
+              className={`ios-segment-btn ${activeTab === 'bookings' ? 'active' : ''}`}
+              onClick={() => setActiveTab('bookings')}
             >
-              Agent D1
+              Reservations
             </button>
           </div>
 
           <div className="ios-nav-actions">
-            <div className="ios-status-pill" title={`Connected to ${API_BASE_URL}`}>
-              <span
-                className="ios-status-dot"
-                style={{
-                  backgroundColor: backendStatus === 'healthy' ? '#34c759' : '#ff9500',
-                }}
-              />
-              <span>{backendStatus === 'healthy' ? 'D1 Live' : 'Offline'}</span>
-            </div>
-
             <button
               className="ios-btn-black"
               onClick={() => {
                 if (packages.length > 0) handleOpenBooking(packages[0]);
               }}
             >
-              Reserve
+              Reserve Now
             </button>
           </div>
         </div>
@@ -238,14 +220,14 @@ export default function App() {
       <main className="ios-main-container" style={{ flex: 1 }}>
         {activeTab === 'tours' && (
           <div>
-            {/* iOS Simple Clean Hero */}
+            {/* Clean Hero */}
             <div className="ios-hero-clean">
               <div className="ios-hero-badge">Curated Itineraries</div>
               <h1 className="ios-hero-heading">
                 Simple, thoughtful travel planning.
               </h1>
               <p className="ios-hero-subheading">
-                Browse handpicked destinations, review itineraries, and confirm reservations instantly via Cloudflare D1 SQL.
+                Browse handpicked destinations, review itineraries, and reserve your private journey with complete peace of mind.
               </p>
 
               {/* iOS Clean Search */}
@@ -298,7 +280,7 @@ export default function App() {
             {/* Cards Grid */}
             {loading ? (
               <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--ios-text-secondary)' }}>
-                Loading packages from Cloudflare D1...
+                Loading available tours...
               </div>
             ) : packages.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--ios-text-secondary)' }}>
@@ -396,10 +378,10 @@ export default function App() {
                     ✓
                   </div>
                   <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-                    Inquiry Sent
+                    Inquiry Received
                   </h3>
                   <p style={{ color: 'var(--ios-text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-                    Your request was recorded in Cloudflare D1. We will reach out shortly.
+                    Your request has been received. Our travel concierge will be in touch within 24 hours.
                   </p>
                   <button
                     className="ios-btn-secondary"
@@ -479,7 +461,7 @@ export default function App() {
                     className="ios-btn-black"
                     style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}
                   >
-                    {inquirySubmitting ? 'Sending...' : 'Send Inquiry'}
+                    {inquirySubmitting ? 'Submitting...' : 'Send Inquiry'}
                   </button>
                 </form>
               )}
@@ -487,20 +469,20 @@ export default function App() {
           </div>
         )}
 
-        {/* Agent Portal Tab */}
-        {activeTab === 'agent' && (
+        {/* Reservations Tab */}
+        {activeTab === 'bookings' && (
           <div style={{ paddingTop: '1.5rem' }}>
             <div className="ios-section-header" style={{ marginTop: 0 }}>
               <div>
-                <div className="ios-hero-badge">Cloudflare D1 Table</div>
-                <h2 className="ios-section-title">Confirmed Reservations</h2>
+                <div className="ios-hero-badge">Confirmed Itineraries</div>
+                <h2 className="ios-section-title">Guest Reservations</h2>
               </div>
               <button
                 className="ios-btn-secondary"
-                onClick={loadAgentBookings}
-                disabled={adminLoading}
+                onClick={loadAllBookings}
+                disabled={bookingsLoading}
               >
-                {adminLoading ? 'Refreshing...' : 'Refresh Records'}
+                {bookingsLoading ? 'Refreshing...' : 'Refresh Records'}
               </button>
             </div>
 
@@ -518,16 +500,16 @@ export default function App() {
                   </tr>
                 </thead>
                 <tbody>
-                  {adminLoading ? (
+                  {bookingsLoading ? (
                     <tr>
                       <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--ios-text-secondary)' }}>
-                        Fetching records from Cloudflare D1...
+                        Loading reservation records...
                       </td>
                     </tr>
                   ) : bookings.length === 0 ? (
                     <tr>
                       <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--ios-text-secondary)' }}>
-                        No bookings found in database.
+                        No reservations found.
                       </td>
                     </tr>
                   ) : (
@@ -602,7 +584,7 @@ export default function App() {
                     Reservation Confirmed
                   </h3>
                   <p style={{ color: 'var(--ios-text-secondary)', fontSize: '0.88rem', marginBottom: '1.25rem' }}>
-                    Booking reference #{bookingSuccess.id} has been saved to Cloudflare D1. Total: <strong>${bookingSuccess.total.toLocaleString()}</strong>.
+                    Booking reference #{bookingSuccess.id} has been confirmed. Total: <strong>${bookingSuccess.total.toLocaleString()}</strong>. Our concierge will contact you with your full travel itinerary.
                   </p>
                   <button
                     className="ios-btn-black"
@@ -762,7 +744,7 @@ export default function App() {
                     className="ios-btn-black"
                     style={{ width: '100%', padding: '0.75rem' }}
                   >
-                    {bookingSubmitting ? 'Saving to D1...' : 'Confirm Reservation'}
+                    {bookingSubmitting ? 'Confirming...' : 'Confirm Reservation'}
                   </button>
                 </form>
               )}
@@ -837,16 +819,16 @@ export default function App() {
         </div>
       )}
 
-      {/* iOS Clean Footer */}
+      {/* iOS Clean Production Footer */}
       <footer className="ios-footer">
         <div className="ios-footer-content">
           <div>
-            &copy; {new Date().getFullYear()} Travel Agencie. Powered by Cloudflare Workers &amp; D1.
+            &copy; {new Date().getFullYear()} Travel Agencie. All rights reserved.
           </div>
           <div className="ios-footer-links">
             <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('tours'); }}>Tours</a>
             <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('inquiry'); }}>Inquiry</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('agent'); }}>Agent Portal</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('bookings'); }}>Reservations</a>
           </div>
         </div>
       </footer>
