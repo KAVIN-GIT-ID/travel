@@ -78,58 +78,58 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 bg-gray-900/60 flex items-center justify-center p-4 overflow-y-auto"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl max-w-lg w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200"
+        className="bg-white rounded-lg max-w-lg w-full max-h-[92vh] overflow-y-auto shadow-xl border border-gray-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b border-gray-200 flex items-center justify-between">
           <div>
             <div className="text-xs font-bold text-blue-600 uppercase tracking-wider">
               {bookingData.booking_type === 'route_rental' ? 'Outstation Vehicle Booking' : 'Holiday Tour Reservation'}
             </div>
-            <h3 className="text-lg font-bold text-slate-900">
+            <h3 className="text-lg font-bold text-gray-900">
               Confirm Your Travel Details
             </h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-sm transition"
+            className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center font-bold text-sm transition cursor-pointer"
           >
             ✕
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-5 sm:p-6">
           {success ? (
             <div className="text-center py-6">
-              <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold mb-4">
+              <div className="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto text-xl font-bold mb-3">
                 ✓
               </div>
-              <h4 className="text-xl font-bold text-slate-900">
+              <h4 className="text-xl font-bold text-gray-900">
                 Reservation Confirmed!
               </h4>
-              <p className="text-xs sm:text-sm text-slate-600 mt-2">
-                Booking reference <strong className="text-slate-900">#{success.id}</strong> has been created.
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                Booking reference <strong className="text-gray-900">#{success.id}</strong> has been logged in our reservation system.
               </p>
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 my-5 text-sm text-slate-700">
-                <div className="flex justify-between font-semibold">
-                  <span>Total Payable:</span>
-                  <span className="text-blue-600 font-extrabold">{formatINR(success.total)}</span>
+              <div className="bg-gray-50 border border-gray-200 rounded-md p-4 my-5 text-sm text-gray-700 text-left">
+                <div className="flex justify-between font-semibold text-gray-900">
+                  <span>Total Estimated Fare:</span>
+                  <span className="text-blue-600 font-bold">{formatINR(success.total)}</span>
                 </div>
-                <div className="text-xs text-slate-500 mt-1">
-                  Our route manager will contact you with driver and vehicle assignment details.
+                <div className="text-xs text-gray-500 mt-1.5">
+                  Our route manager will contact you with assigned driver details and vehicle number.
                 </div>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition shadow-sm"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-md transition shadow-sm cursor-pointer"
               >
                 Close Window
               </button>
@@ -137,42 +137,42 @@ export const BookingModal: React.FC<BookingModalProps> = ({
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Selected Summary Card */}
-              <div className="flex items-center gap-3.5 bg-slate-50 border border-slate-200 rounded-xl p-3.5">
+              <div className="flex items-center gap-3.5 bg-gray-50 border border-gray-200 rounded-md p-3.5">
                 {bookingData.image_url && (
                   <img
                     src={bookingData.image_url}
                     alt="Preview"
-                    className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+                    className="w-14 h-14 rounded object-cover flex-shrink-0"
                   />
                 )}
                 <div className="min-w-0 flex-1">
-                  <div className="text-xs font-bold text-slate-900 truncate">
+                  <div className="text-xs font-bold text-gray-900 truncate">
                     {bookingData.vehicle_name || bookingData.package_title}
                   </div>
                   {bookingData.booking_type === 'route_rental' ? (
-                    <div className="text-xs text-slate-500 mt-0.5 truncate">
+                    <div className="text-xs text-gray-500 mt-0.5 truncate">
                       {bookingData.pickup_location} → {bookingData.dropoff_location} ({bookingData.distance_km} km)
                     </div>
                   ) : (
-                    <div className="text-xs text-slate-500 mt-0.5">
+                    <div className="text-xs text-gray-500 mt-0.5">
                       Curated South India Tour Package
                     </div>
                   )}
-                  <div className="text-xs font-extrabold text-blue-600 mt-1">
+                  <div className="text-xs font-bold text-blue-600 mt-1">
                     Total: {formatINR(bookingData.total_price)}
                   </div>
                 </div>
               </div>
 
               {error && (
-                <div className="bg-rose-50 text-rose-700 text-xs p-3 rounded-lg border border-rose-200">
+                <div className="bg-rose-50 text-rose-700 text-xs p-3 rounded-md border border-rose-200">
                   {error}
                 </div>
               )}
 
               {/* Form Inputs */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                   Primary Traveler Name *
                 </label>
                 <input
@@ -181,14 +181,14 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   placeholder="e.g. Anand Ranganathan"
                   value={form.customer_name}
                   onChange={(e) => setForm({ ...form, customer_name: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:outline-none transition"
+                  className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Phone / Mobile *
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
+                    Mobile Number *
                   </label>
                   <input
                     type="tel"
@@ -196,12 +196,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     placeholder="+91 98401 XXXXX"
                     value={form.customer_phone}
                     onChange={(e) => setForm({ ...form, customer_phone: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:outline-none transition"
+                    className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                     Email Address *
                   </label>
                   <input
@@ -210,14 +210,14 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     placeholder="anand@example.com"
                     value={form.customer_email}
                     onChange={(e) => setForm({ ...form, customer_email: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:outline-none transition"
+                    className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                     Travel Date *
                   </label>
                   <input
@@ -225,12 +225,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     required
                     value={form.travel_date}
                     onChange={(e) => setForm({ ...form, travel_date: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:bg-white focus:border-blue-500 focus:outline-none transition"
+                    className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                     Passenger Count *
                   </label>
                   <input
@@ -240,21 +240,21 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     required
                     value={form.travelers_count}
                     onChange={(e) => setForm({ ...form, travelers_count: Math.max(1, parseInt(e.target.value) || 1) })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:bg-white focus:border-blue-500 focus:outline-none transition"
+                    className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                   Pickup Landmark &amp; Notes
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="Exact pickup address, flight arrival time, luggage details..."
+                  placeholder="Exact pickup landmark, flight arrival time, or luggage requirements..."
                   value={form.special_requests}
                   onChange={(e) => setForm({ ...form, special_requests: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 focus:outline-none transition"
+                  className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
                 />
               </div>
 
@@ -262,7 +262,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold py-3 rounded-xl transition shadow-sm text-sm"
+                  className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2.5 rounded-md transition shadow-sm text-sm cursor-pointer"
                 >
                   {submitting ? 'Confirming Reservation...' : `Confirm Booking • ${formatINR(bookingData.total_price)}`}
                 </button>

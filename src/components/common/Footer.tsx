@@ -12,11 +12,16 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Col 1 */}
           <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
-                SI
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-md bg-blue-600 text-white flex items-center justify-center shadow-sm">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
               </div>
-              <span className="text-white font-bold text-base">South India Travels</span>
+              <div>
+                <span className="text-white font-bold text-base uppercase tracking-tight block">South India Travels</span>
+                <span className="text-[10px] text-slate-400">Intercity Bus &amp; Car Rentals</span>
+              </div>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
               Leading intercity bus &amp; outstation car travels provider operating across Tamil Nadu, Kerala, and Karnataka. Commercial permits, GPS-tracked fleet, and transparent per-kilometer fares.

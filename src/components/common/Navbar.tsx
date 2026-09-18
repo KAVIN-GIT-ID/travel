@@ -15,11 +15,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navItems: { id: NavTab; label: string; badge?: string }[] = [
-    { id: 'route-calc', label: 'Route & Fare Calc', badge: 'Interactive Map' },
-    { id: 'tours', label: 'Holiday Tours' },
+  const navItems: { id: NavTab; label: string }[] = [
+    { id: 'route-calc', label: 'Route & Fare Calculator' },
+    { id: 'tours', label: 'Tour Packages' },
     { id: 'fleet', label: 'Bus & Car Fleet' },
-    { id: 'inquiry', label: 'Custom Travel' },
+    { id: 'inquiry', label: 'Group Travel' },
     { id: 'admin', label: 'Admin Portal' },
   ];
 
@@ -29,76 +29,96 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-200 transition-all">
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
+      {/* Top Utility Bar - Real World Travel Standard */}
+      <div className="bg-slate-900 text-slate-300 text-xs py-1.5 px-4 hidden sm:block">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              <span>24x7 Helpline: <strong className="text-white">+91 98401 23456</strong></span>
+            </span>
+            <span className="text-slate-600">|</span>
+            <span>All-India Tourist Permit (AITP) Certified</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-emerald-400 font-medium">● Tamil Nadu • Kerala • Karnataka Services</span>
+            <span className="text-slate-600">|</span>
+            <span>Govt. Regd: TN-2024-TRV</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Navigation Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Brand Logo */}
+          {/* Brand / Logo */}
           <div
-            className="flex items-center gap-3 cursor-pointer group"
+            className="flex items-center gap-3 cursor-pointer select-none"
             onClick={() => handleTabClick('route-calc')}
           >
-            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg shadow-sm group-hover:bg-blue-700 transition">
-              SI
+            <div className="w-9 h-9 rounded-md bg-blue-600 text-white flex items-center justify-center shadow-sm">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
             </div>
             <div>
-              <div className="font-bold text-slate-900 text-base tracking-tight leading-none">
+              <div className="font-bold text-gray-900 text-base sm:text-lg tracking-tight uppercase">
                 South India Travels
               </div>
-              <div className="text-xs text-slate-500 mt-1 flex items-center gap-1.5 font-medium">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                TN • Kerala • Karnataka
+              <div className="text-[11px] text-gray-500 font-medium -mt-0.5">
+                Outstation Cabs &amp; Tourist Buses
               </div>
             </div>
           </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200">
+          {/* Desktop Navigation Links - Normal Text Links with Clean Active Line */}
+          <nav className="hidden lg:flex items-center gap-1 h-full">
             {navItems.map((item) => {
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
                   onClick={() => handleTabClick(item.id)}
-                  className={`px-3.5 py-1.5 text-sm font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
+                  className={`h-full px-3.5 flex items-center text-sm font-medium transition-colors border-b-2 ${
                     isActive
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                      ? 'border-blue-600 text-blue-600 font-semibold'
+                      : 'border-transparent text-gray-700 hover:text-blue-600 hover:border-gray-300'
                   }`}
                 >
-                  <span>{item.label}</span>
-                  {item.badge && (
-                    <span className={`text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded-md font-bold ${
-                      isActive ? 'bg-blue-50 text-blue-600' : 'bg-slate-200 text-slate-600'
-                    }`}>
-                      {item.badge}
-                    </span>
-                  )}
+                  {item.label}
                 </button>
               );
             })}
           </nav>
 
-          {/* Desktop Right CTA */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* Desktop Right Action */}
+          <div className="hidden lg:flex items-center gap-4">
+            <div className="text-right hidden xl:block">
+              <div className="text-[11px] text-gray-500 uppercase tracking-wide">Instant Booking</div>
+              <div className="text-xs font-semibold text-gray-800">No Advance Required</div>
+            </div>
             <button
               onClick={onBookClick}
-              className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-sm transition-all"
+              className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-4 py-2 rounded-md text-sm font-medium shadow-sm transition"
             >
-              Book Travel
+              Book Now
             </button>
           </div>
 
-          {/* Mobile Hamburger Button */}
-          <div className="flex md:hidden items-center gap-2">
+          {/* Mobile Actions & Menu Toggle */}
+          <div className="flex lg:hidden items-center gap-2">
             <button
               onClick={onBookClick}
-              className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold"
+              className="bg-blue-600 text-white px-3 py-1.5 rounded-md text-xs font-medium"
             >
-              Book
+              Book Now
             </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 transition"
+              className="p-2 rounded-md text-gray-700 hover:bg-gray-100 transition"
               aria-label="Toggle Menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -115,27 +135,27 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-2 pb-4 space-y-1 shadow-lg">
+        <div className="lg:hidden border-t border-gray-200 bg-white px-4 py-3 space-y-1 shadow-md">
           {navItems.map((item) => (
             <button
               key={item.id}
               onClick={() => handleTabClick(item.id)}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center justify-between ${
+              className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition ${
                 activeTab === item.id
-                  ? 'bg-blue-50 text-blue-600'
-                  : 'text-slate-700 hover:bg-slate-50'
+                  ? 'bg-blue-50 text-blue-600 font-semibold'
+                  : 'text-gray-700 hover:bg-gray-50'
               }`}
             >
-              <span>{item.label}</span>
-              {item.badge && (
-                <span className="text-[10px] bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded">
-                  {item.badge}
-                </span>
-              )}
+              {item.label}
             </button>
           ))}
+          <div className="pt-2 mt-2 border-t border-gray-100 text-xs text-gray-500 flex justify-between items-center">
+            <span>Helpline: +91 98401 23456</span>
+            <span className="text-emerald-600 font-medium">TN • KL • KA</span>
+          </div>
         </div>
       )}
     </header>
   );
 };
+

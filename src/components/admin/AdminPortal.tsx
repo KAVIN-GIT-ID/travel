@@ -148,23 +148,23 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
   if (!isUnlocked) {
     return (
-      <div className="max-w-md mx-auto my-12 bg-white rounded-2xl border border-slate-200 p-8 text-center shadow-sm">
-        <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mx-auto text-xl font-bold mb-3">
+      <div className="max-w-md mx-auto my-12 bg-white rounded-lg border border-gray-200 p-6 sm:p-8 text-center shadow-sm">
+        <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-md flex items-center justify-center mx-auto text-lg font-bold mb-3">
           🔒
         </div>
-        <h3 className="text-xl font-bold text-slate-900">Staff Admin Login</h3>
-        <p className="text-xs text-slate-500 mt-1">
+        <h3 className="text-xl font-bold text-gray-900">Staff Admin Login</h3>
+        <p className="text-xs text-gray-600 mt-1">
           Enter staff passcode to access bookings and fleet inventory management.
         </p>
 
         <form onSubmit={handlePinSubmit} className="mt-6 space-y-4 text-left">
           {pinError && (
-            <div className="bg-rose-50 text-rose-700 text-xs p-3 rounded-lg border border-rose-200">
+            <div className="bg-rose-50 text-rose-700 text-xs p-3 rounded-md border border-rose-200">
               {pinError}
             </div>
           )}
           <div>
-            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
               Admin Passcode
             </label>
             <input
@@ -172,12 +172,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               placeholder="Enter passcode (admin123)"
               value={pin}
               onChange={(e) => setPin(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:bg-white focus:border-blue-500 focus:outline-none transition"
+              className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition shadow-sm text-sm"
+            className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 rounded-md transition shadow-sm text-sm cursor-pointer"
           >
             Unlock Portal
           </button>
@@ -189,23 +189,23 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   return (
     <div className="space-y-6">
       {/* Admin Subnav */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="text-xs font-bold text-blue-600 uppercase tracking-wider">
+          <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-0.5">
             Operations &amp; Fleet Management
-          </div>
-          <h2 className="text-xl font-bold text-slate-900">
+          </span>
+          <h2 className="text-xl font-bold text-gray-900">
             South India Travels Admin
           </h2>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+          <div className="inline-flex rounded-md shadow-2xs border border-gray-300 bg-white overflow-hidden divide-x divide-gray-200">
             <button
               type="button"
               onClick={() => setCurrentTab('bookings')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                currentTab === 'bookings' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600'
+              className={`px-3 py-1.5 text-xs font-medium transition cursor-pointer ${
+                currentTab === 'bookings' ? 'bg-blue-600 text-white font-semibold' : 'text-gray-700 hover:bg-gray-50'
               }`}
             >
               Bookings ({bookings.length})
@@ -213,17 +213,17 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             <button
               type="button"
               onClick={() => setCurrentTab('add-package')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                currentTab === 'add-package' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600'
+              className={`px-3 py-1.5 text-xs font-medium transition cursor-pointer ${
+                currentTab === 'add-package' ? 'bg-blue-600 text-white font-semibold' : 'text-gray-700 hover:bg-gray-50'
               }`}
             >
-              + Add Trip
+              + Add Tour
             </button>
             <button
               type="button"
               onClick={() => setCurrentTab('add-vehicle')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition ${
-                currentTab === 'add-vehicle' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600'
+              className={`px-3 py-1.5 text-xs font-medium transition cursor-pointer ${
+                currentTab === 'add-vehicle' ? 'bg-blue-600 text-white font-semibold' : 'text-gray-700 hover:bg-gray-50'
               }`}
             >
               + Add Vehicle
@@ -233,7 +233,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           <button
             type="button"
             onClick={() => setIsUnlocked(false)}
-            className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-xl transition"
+            className="border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 text-xs font-medium px-3 py-1.5 rounded-md transition shadow-2xs cursor-pointer"
           >
             Lock
           </button>
@@ -242,12 +242,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
       {/* TAB 1: Bookings Management */}
       {currentTab === 'bookings' && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between">
-            <h3 className="font-bold text-slate-900 text-base">Customer Reservations</h3>
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+          <div className="p-4 sm:p-5 border-b border-gray-200 flex items-center justify-between">
+            <h3 className="font-bold text-gray-900 text-base">Customer Reservations</h3>
             <button
               onClick={onRefreshData}
-              className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-semibold transition"
+              className="text-xs bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-md font-medium transition shadow-2xs cursor-pointer"
             >
               Refresh Data
             </button>
@@ -255,63 +255,63 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs sm:text-sm">
-              <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider text-[11px] font-bold border-b border-slate-200">
+              <thead className="bg-gray-50 text-gray-600 uppercase tracking-wider text-[11px] font-bold border-b border-gray-200">
                 <tr>
-                  <th className="py-3.5 px-4">Ref</th>
-                  <th className="py-3.5 px-4">Type</th>
-                  <th className="py-3.5 px-4">Customer</th>
-                  <th className="py-3.5 px-4">Vehicle / Package</th>
-                  <th className="py-3.5 px-4">Route</th>
-                  <th className="py-3.5 px-4">Date</th>
-                  <th className="py-3.5 px-4">Fare</th>
-                  <th className="py-3.5 px-4">Status</th>
+                  <th className="py-3 px-4">Ref</th>
+                  <th className="py-3 px-4">Type</th>
+                  <th className="py-3 px-4">Customer</th>
+                  <th className="py-3 px-4">Vehicle / Package</th>
+                  <th className="py-3 px-4">Route</th>
+                  <th className="py-3 px-4">Date</th>
+                  <th className="py-3 px-4">Fare</th>
+                  <th className="py-3 px-4">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-gray-200">
                 {bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-slate-400">
-                      No reservations found.
+                    <td colSpan={8} className="py-12 text-center text-gray-400">
+                      No reservations found in database.
                     </td>
                   </tr>
                 ) : (
                   bookings.map((b) => (
-                    <tr key={b.id} className="hover:bg-slate-50/70 transition">
-                      <td className="py-3.5 px-4 font-mono font-bold text-slate-600">#{b.id}</td>
-                      <td className="py-3.5 px-4">
-                        <span className="text-[11px] px-2 py-0.5 rounded font-semibold bg-slate-100 text-slate-700">
+                    <tr key={b.id} className="hover:bg-gray-50 transition">
+                      <td className="py-3 px-4 font-mono font-bold text-gray-700">#{b.id}</td>
+                      <td className="py-3 px-4">
+                        <span className="text-[11px] px-2 py-0.5 rounded font-medium bg-gray-100 text-gray-800">
                           {b.booking_type === 'route_rental' ? 'Route Rental' : 'Tour Package'}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4">
-                        <div className="font-bold text-slate-900">{b.customer_name}</div>
-                        <div className="text-xs text-slate-500">{b.customer_phone || b.customer_email}</div>
+                      <td className="py-3 px-4">
+                        <div className="font-bold text-gray-900">{b.customer_name}</div>
+                        <div className="text-xs text-gray-500">{b.customer_phone || b.customer_email}</div>
                       </td>
-                      <td className="py-3.5 px-4">
-                        <div className="font-medium text-slate-800">
+                      <td className="py-3 px-4">
+                        <div className="font-medium text-gray-800">
                           {b.vehicle_name || b.package_title || 'Custom Travel'}
                         </div>
-                        <div className="text-xs text-slate-400">{b.travelers_count} passenger(s)</div>
+                        <div className="text-xs text-gray-400">{b.travelers_count} passenger(s)</div>
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-3 px-4">
                         {b.booking_type === 'route_rental' ? (
                           <div>
-                            <div className="text-xs font-semibold text-slate-800">{b.pickup_location} ➔ {b.dropoff_location}</div>
+                            <div className="text-xs font-medium text-gray-900">{b.pickup_location} ➔ {b.dropoff_location}</div>
                             <div className="text-[11px] text-blue-600 font-bold">{b.distance_km} km</div>
                           </div>
                         ) : (
-                          <span className="text-slate-500 text-xs">Standard Itinerary</span>
+                          <span className="text-gray-500 text-xs">Standard Itinerary</span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 font-medium text-slate-700">{b.travel_date}</td>
-                      <td className="py-3.5 px-4 font-extrabold text-slate-900">
+                      <td className="py-3 px-4 font-medium text-gray-700">{b.travel_date}</td>
+                      <td className="py-3 px-4 font-extrabold text-gray-900">
                         {formatINR(b.total_price)}
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-3 px-4">
                         <select
                           value={b.status || 'Confirmed'}
                           onChange={(e) => handleUpdateStatus(b.id, e.target.value as BookingStatus)}
-                          className="text-xs bg-slate-100 border border-slate-200 rounded-lg px-2 py-1 font-semibold text-slate-800 outline-none cursor-pointer"
+                          className="text-xs bg-white border border-gray-300 rounded px-2 py-1 font-medium text-gray-800 outline-none cursor-pointer"
                         >
                           <option value="Confirmed">Confirmed</option>
                           <option value="In Progress">In Progress</option>
@@ -331,13 +331,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       {/* TAB 2: Add New Tour Package */}
       {currentTab === 'add-package' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <h3 className="font-bold text-slate-900 text-base mb-4">
+          <div className="lg:col-span-2 bg-white rounded-lg border border-gray-200 p-5 sm:p-6 shadow-sm">
+            <h3 className="font-bold text-gray-900 text-base mb-4">
               Create New South India Tour Package
             </h3>
 
             {pkgMessage && (
-              <div className="bg-emerald-50 text-emerald-700 text-xs p-3 rounded-lg border border-emerald-200 mb-4">
+              <div className="bg-emerald-50 text-emerald-700 text-xs p-3 rounded-md border border-emerald-200 mb-4">
                 {pkgMessage}
               </div>
             )}
@@ -345,7 +345,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             <form onSubmit={handleCreatePackage} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                     Trip Title *
                   </label>
                   <input
@@ -354,11 +354,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     placeholder="e.g. Rameshwaram &amp; Dhanushkodi Island"
                     value={pkgForm.title}
                     onChange={(e) => setPkgForm({ ...pkgForm, title: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm"
+                    className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                     Destination Spot *
                   </label>
                   <input
@@ -367,20 +367,20 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     placeholder="e.g. Rameshwaram &amp; Madurai"
                     value={pkgForm.destination}
                     onChange={(e) => setPkgForm({ ...pkgForm, destination: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm"
+                    className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                     State *
                   </label>
                   <select
                     value={pkgForm.state}
                     onChange={(e) => setPkgForm({ ...pkgForm, state: e.target.value as SouthIndiaState })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-medium"
+                    className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm font-medium text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
                   >
                     <option value="Tamil Nadu">Tamil Nadu</option>
                     <option value="Kerala">Kerala</option>
@@ -388,13 +388,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                     Category
                   </label>
                   <select
                     value={pkgForm.category}
                     onChange={(e) => setPkgForm({ ...pkgForm, category: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-medium"
+                    className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm font-medium text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
                   >
                     <option value="Hill Station">Hill Station</option>
                     <option value="Backwaters">Backwaters</option>
@@ -407,7 +407,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                     Price Per Person (₹) *
                   </label>
                   <input
@@ -415,11 +415,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     required
                     value={pkgForm.price}
                     onChange={(e) => setPkgForm({ ...pkgForm, price: Number(e.target.value) })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm"
+                    className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                     Duration (Days) *
                   </label>
                   <input
@@ -428,13 +428,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     required
                     value={pkgForm.duration_days}
                     onChange={(e) => setPkgForm({ ...pkgForm, duration_days: Number(e.target.value) })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm"
+                    className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                   Image URL
                 </label>
                 <input
@@ -442,12 +442,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   placeholder="https://images.unsplash.com/..."
                   value={pkgForm.image_url}
                   onChange={(e) => setPkgForm({ ...pkgForm, image_url: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm"
+                  className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                   Highlights (comma separated)
                 </label>
                 <input
@@ -455,26 +455,26 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   placeholder="Pamban Sea Bridge, Ramanathaswamy Temple, Sunset Point"
                   value={pkgForm.highlights}
                   onChange={(e) => setPkgForm({ ...pkgForm, highlights: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm"
+                  className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                   Overview Description
                 </label>
                 <textarea
                   rows={3}
                   value={pkgForm.description}
                   onChange={(e) => setPkgForm({ ...pkgForm, description: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm"
+                  className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={pkgSaving}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl transition shadow-sm text-sm"
+                className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold px-5 py-2 rounded-md transition shadow-sm text-sm cursor-pointer"
               >
                 {pkgSaving ? 'Saving...' : 'Publish Tour to D1'}
               </button>
@@ -482,20 +482,20 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           </div>
 
           {/* Existing Packages List */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <h4 className="font-bold text-slate-900 text-sm mb-3">
+          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
+            <h4 className="font-bold text-gray-900 text-sm mb-3">
               Existing Trips ({packages.length})
             </h4>
-            <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
+            <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
               {packages.map((p) => (
-                <div key={p.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+                <div key={p.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md border border-gray-200 text-xs">
                   <div>
-                    <div className="font-bold text-slate-900">{p.title}</div>
-                    <div className="text-slate-500">{p.state} • {formatINR(p.price)}</div>
+                    <div className="font-bold text-gray-900">{p.title}</div>
+                    <div className="text-gray-500">{p.state} • {formatINR(p.price)}</div>
                   </div>
                   <button
                     onClick={() => handleDeletePackage(p.id)}
-                    className="text-rose-600 hover:text-rose-800 font-semibold"
+                    className="text-rose-600 hover:text-rose-800 font-semibold cursor-pointer"
                   >
                     Delete
                   </button>
@@ -509,13 +509,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       {/* TAB 3: Add Vehicle */}
       {currentTab === 'add-vehicle' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <h3 className="font-bold text-slate-900 text-base mb-4">
+          <div className="lg:col-span-2 bg-white rounded-lg border border-gray-200 p-5 sm:p-6 shadow-sm">
+            <h3 className="font-bold text-gray-900 text-base mb-4">
               Add Vehicle to Fleet (Bus / Car)
             </h3>
 
             {vehMessage && (
-              <div className="bg-emerald-50 text-emerald-700 text-xs p-3 rounded-lg border border-emerald-200 mb-4">
+              <div className="bg-emerald-50 text-emerald-700 text-xs p-3 rounded-md border border-emerald-200 mb-4">
                 {vehMessage}
               </div>
             )}
@@ -523,7 +523,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             <form onSubmit={handleCreateVehicle} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                     Vehicle Model Name *
                   </label>
                   <input
@@ -532,17 +532,17 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     placeholder="e.g. Toyota Innova Hycross / Volvo B11R"
                     value={vehForm.name}
                     onChange={(e) => setVehForm({ ...vehForm, name: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm"
+                    className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                     Vehicle Type *
                   </label>
                   <select
                     value={vehForm.type}
                     onChange={(e) => setVehForm({ ...vehForm, type: e.target.value as 'Car' | 'Bus' })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-medium"
+                    className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm font-medium text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
                   >
                     <option value="Car">Car</option>
                     <option value="Bus">Bus</option>
@@ -552,7 +552,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                     Per KM Billing Rate (₹) *
                   </label>
                   <input
@@ -561,11 +561,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     required
                     value={vehForm.per_km_rate}
                     onChange={(e) => setVehForm({ ...vehForm, per_km_rate: Number(e.target.value) })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm"
+                    className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                     Base Fare (₹) *
                   </label>
                   <input
@@ -573,14 +573,14 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     required
                     value={vehForm.base_fare}
                     onChange={(e) => setVehForm({ ...vehForm, base_fare: Number(e.target.value) })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm"
+                    className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                     Passenger Capacity *
                   </label>
                   <input
@@ -589,24 +589,24 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     required
                     value={vehForm.capacity}
                     onChange={(e) => setVehForm({ ...vehForm, capacity: Number(e.target.value) })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm"
+                    className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                     AC Specification
                   </label>
                   <input
                     type="text"
                     value={vehForm.ac_type}
                     onChange={(e) => setVehForm({ ...vehForm, ac_type: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm"
+                    className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                   Image URL
                 </label>
                 <input
@@ -614,26 +614,26 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   placeholder="https://images.unsplash.com/..."
                   value={vehForm.image_url}
                   onChange={(e) => setVehForm({ ...vehForm, image_url: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm"
+                  className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
                   Vehicle Description
                 </label>
                 <textarea
                   rows={2}
                   value={vehForm.description}
                   onChange={(e) => setVehForm({ ...vehForm, description: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm"
+                  className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={vehSaving}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl transition shadow-sm text-sm"
+                className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold px-5 py-2 rounded-md transition shadow-sm text-sm cursor-pointer"
               >
                 {vehSaving ? 'Saving...' : 'Add Vehicle to D1 Fleet'}
               </button>
@@ -641,20 +641,20 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           </div>
 
           {/* Active Fleet List */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <h4 className="font-bold text-slate-900 text-sm mb-3">
+          <div className="bg-white rounded-lg border border-gray-200 p-5 shadow-sm">
+            <h4 className="font-bold text-gray-900 text-sm mb-3">
               Active Fleet ({vehicles.length})
             </h4>
-            <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
+            <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
               {vehicles.map((v) => (
-                <div key={v.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+                <div key={v.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md border border-gray-200 text-xs">
                   <div>
-                    <div className="font-bold text-slate-900">{v.name}</div>
-                    <div className="text-slate-500">{v.type} • ₹{v.per_km_rate}/km • {v.capacity} seats</div>
+                    <div className="font-bold text-gray-900">{v.name}</div>
+                    <div className="text-gray-500">{v.type} • ₹{v.per_km_rate}/km • {v.capacity} seats</div>
                   </div>
                   <button
                     onClick={() => handleDeleteVehicle(v.id)}
-                    className="text-rose-600 hover:text-rose-800 font-semibold"
+                    className="text-rose-600 hover:text-rose-800 font-semibold cursor-pointer"
                   >
                     Delete
                   </button>

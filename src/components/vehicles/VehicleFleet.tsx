@@ -20,33 +20,33 @@ export const VehicleFleet: React.FC<VehicleFleetProps> = ({
   return (
     <div className="space-y-8">
       {/* Header Banner */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5 sm:p-6">
         <div className="max-w-3xl">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wider mb-2">
-            🚌 Outstation Cars &amp; Tourist Buses
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Interstate Fleet Across Tamil Nadu, Kerala &amp; Karnataka
+          <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">
+            Commercial Fleet
+          </span>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+            Outstation Cars &amp; Tourist Buses in South India
           </h2>
-          <p className="text-sm sm:text-base text-slate-500 mt-2 leading-relaxed">
-            All vehicles are commercially licensed with valid All-India Tourist Permits (AITP), GPS tracking, verified chauffeurs, and comprehensive passenger insurance.
+          <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+            All vehicles are commercially licensed with valid All-India Tourist Permits (AITP), GPS tracking, verified chauffeurs, and comprehensive passenger insurance across Tamil Nadu, Kerala, and Karnataka.
           </p>
         </div>
 
-        {/* Filter Pills */}
-        <div className="mt-6 flex flex-wrap gap-2 pt-6 border-t border-slate-100">
+        {/* Filter Buttons */}
+        <div className="mt-5 flex flex-wrap gap-2 pt-5 border-t border-gray-200">
           {(['All', 'Car', 'Bus'] as const).map((type) => (
             <button
               key={type}
               type="button"
               onClick={() => setFilterType(type)}
-              className={`px-5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition ${
+              className={`px-3.5 py-1.5 rounded-md text-xs sm:text-sm font-medium transition cursor-pointer ${
                 filterType === type
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  ? 'bg-blue-600 text-white font-semibold'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
               }`}
             >
-              {type === 'All' ? 'All Vehicles' : type === 'Car' ? 'Cars & Prime SUVs' : 'Buses & Luxury Coaches'}
+              {type === 'All' ? 'All Vehicles' : type === 'Car' ? 'Cars & Prime SUVs' : 'Buses & Coaches'}
             </button>
           ))}
         </div>
@@ -57,61 +57,61 @@ export const VehicleFleet: React.FC<VehicleFleetProps> = ({
         {filtered.map((vehicle) => (
           <div
             key={vehicle.id}
-            className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col group"
+            className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:border-gray-300 transition flex flex-col"
           >
-            <div className="relative h-48 bg-slate-100 overflow-hidden">
+            <div className="relative h-48 bg-gray-100 overflow-hidden">
               <img
                 src={vehicle.image_url}
                 alt={vehicle.name}
-                className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                className="w-full h-full object-cover"
                 loading="lazy"
               />
-              <span className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur text-white text-[11px] font-bold px-2.5 py-1 rounded-md">
+              <span className="absolute top-2.5 left-2.5 bg-gray-900/85 text-white text-[11px] font-medium px-2 py-0.5 rounded">
                 {vehicle.type} • {vehicle.category}
               </span>
-              <span className="absolute top-3 right-3 bg-blue-600 text-white font-extrabold text-xs px-2.5 py-1 rounded-md shadow-sm">
+              <span className="absolute top-2.5 right-2.5 bg-blue-600 text-white font-bold text-xs px-2.5 py-1 rounded shadow-sm">
                 ₹{vehicle.per_km_rate}/km
               </span>
             </div>
 
-            <div className="p-5 flex flex-col flex-1">
-              <h3 className="font-bold text-base text-slate-900">
+            <div className="p-4 sm:p-5 flex flex-col flex-1">
+              <h3 className="font-bold text-base text-gray-900">
                 {vehicle.name}
               </h3>
 
-              <div className="flex flex-wrap gap-2 text-xs text-slate-500 mt-2">
-                <span className="bg-slate-100 px-2.5 py-1 rounded-md">👥 {vehicle.capacity} Seats</span>
-                <span className="bg-slate-100 px-2.5 py-1 rounded-md">❄️ {vehicle.ac_type}</span>
-                <span className="bg-slate-100 px-2.5 py-1 rounded-md">🧳 {vehicle.luggage_capacity} Luggage</span>
+              <div className="flex flex-wrap gap-2 text-xs text-gray-600 mt-2">
+                <span className="bg-gray-100 px-2 py-0.5 rounded">👥 {vehicle.capacity} Seats</span>
+                <span className="bg-gray-100 px-2 py-0.5 rounded">❄️ {vehicle.ac_type}</span>
+                <span className="bg-gray-100 px-2 py-0.5 rounded">🧳 {vehicle.luggage_capacity} Luggage</span>
               </div>
 
-              <p className="text-xs text-slate-600 mt-3 line-clamp-3 leading-relaxed">
+              <p className="text-xs text-gray-600 mt-2.5 line-clamp-3 leading-relaxed">
                 {vehicle.description}
               </p>
 
-              <div className="mt-4 bg-slate-50 border border-slate-100 rounded-xl p-3 text-xs space-y-1">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Billing Rate:</span>
-                  <strong className="text-slate-900">₹{vehicle.per_km_rate} / km</strong>
+              <div className="mt-4 bg-gray-50 border border-gray-200 rounded-md p-3 text-xs space-y-1">
+                <div className="flex justify-between text-gray-600">
+                  <span>Billing Rate:</span>
+                  <strong className="text-gray-900">₹{vehicle.per_km_rate} / km</strong>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Base Fare (Driver / Pickup):</span>
-                  <span className="font-medium text-slate-800">{formatINR(vehicle.base_fare)}</span>
+                <div className="flex justify-between text-gray-600">
+                  <span>Driver &amp; Base Allowance:</span>
+                  <span className="font-medium text-gray-900">{formatINR(vehicle.base_fare)}</span>
                 </div>
               </div>
 
-              <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
+              <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
                 <div>
-                  <div className="text-[10px] text-slate-400 uppercase font-semibold">Per KM Rate</div>
-                  <div className="text-lg font-extrabold text-slate-900">
-                    ₹{vehicle.per_km_rate} <span className="text-xs font-normal text-slate-500">/ km</span>
+                  <div className="text-[10px] text-gray-500 uppercase font-semibold">Per KM Rate</div>
+                  <div className="text-lg font-extrabold text-gray-900">
+                    ₹{vehicle.per_km_rate} <span className="text-xs font-normal text-gray-500">/ km</span>
                   </div>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => onRentVehicle(vehicle)}
-                  className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm transition"
+                  className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium text-xs px-4 py-2 rounded-md shadow-sm transition cursor-pointer"
                 >
                   Book Vehicle
                 </button>

@@ -112,17 +112,17 @@ export const RouteCalculator: React.FC<RouteCalculatorProps> = ({
   return (
     <div className="space-y-8">
       {/* Route Planner Box */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-7">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-200">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wider mb-2">
-              <span>🗺️ Intercity Route Planner</span>
-            </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-              South India Distance &amp; Vehicle Fare Calculator
+            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">
+              Intercity Route Planner
+            </span>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+              South India Distance &amp; Fare Calculator
             </h2>
-            <p className="text-sm text-slate-500 mt-1">
-              Select pickup &amp; drop destinations across Tamil Nadu, Kerala, and Karnataka to compute instant per-KM fares.
+            <p className="text-sm text-gray-600 mt-1">
+              Select pickup and destination locations across Tamil Nadu, Kerala, and Karnataka for instant distance and per-KM fare computation.
             </p>
           </div>
 
@@ -130,22 +130,25 @@ export const RouteCalculator: React.FC<RouteCalculatorProps> = ({
             type="button"
             onClick={handleCurrentLocation}
             disabled={isLocating}
-            className="inline-flex items-center gap-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-4 py-2.5 rounded-xl text-sm font-semibold transition active:scale-95 self-start sm:self-auto"
+            className="inline-flex items-center gap-2 px-3.5 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition disabled:opacity-50 self-start sm:self-auto cursor-pointer"
           >
-            <span className="w-2 h-2 rounded-full bg-emerald-600 animate-ping" />
-            <span>{isLocating ? 'Locating...' : 'Use My Current Location'}</span>
+            <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>{isLocating ? 'Detecting Location...' : 'Use Current Location'}</span>
           </button>
         </div>
 
         {locationStatus && (
-          <div className="mt-3 text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg inline-block">
+          <div className="mt-4 text-xs font-medium text-blue-800 bg-blue-50 border border-blue-200 px-3 py-2 rounded-md inline-block">
             {locationStatus}
           </div>
         )}
 
         {/* Popular Quick Route Chips */}
         <div className="mt-5">
-          <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+          <div className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
             Popular South India Routes:
           </div>
           <div className="flex flex-wrap gap-2">
@@ -154,7 +157,7 @@ export const RouteCalculator: React.FC<RouteCalculatorProps> = ({
                 key={route.title}
                 type="button"
                 onClick={() => handlePresetSelect(route.fromId, route.toId)}
-                className="text-xs font-semibold bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 transition"
+                className="text-xs font-medium bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 text-gray-700 px-3 py-1.5 rounded-md border border-gray-300 transition shadow-2xs cursor-pointer"
               >
                 {route.title}
               </button>
@@ -165,13 +168,12 @@ export const RouteCalculator: React.FC<RouteCalculatorProps> = ({
         {/* Origin & Destination Inputs */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-[1fr,auto,1fr] gap-4 items-center">
           {/* Pickup Input */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 focus-within:border-blue-500 focus-within:bg-white transition">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-              Pickup City / Hub (Point A)
+          <div className="bg-white border border-gray-300 rounded-md p-3 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition">
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+              From: Pickup City / Transit Hub
             </label>
             <select
-              className="w-full bg-transparent text-sm font-semibold text-slate-900 outline-none cursor-pointer"
+              className="w-full bg-white text-sm font-semibold text-gray-900 outline-none cursor-pointer py-1"
               value={pickupPoint.id}
               onChange={(e) => {
                 const found = SOUTH_INDIA_LOCATIONS.find((l) => l.id === e.target.value);
@@ -180,7 +182,7 @@ export const RouteCalculator: React.FC<RouteCalculatorProps> = ({
             >
               {SOUTH_INDIA_LOCATIONS.map((loc) => (
                 <option key={loc.id} value={loc.id}>
-                  {loc.name} — {loc.state}
+                  {loc.name} ({loc.state})
                 </option>
               ))}
             </select>
@@ -192,20 +194,19 @@ export const RouteCalculator: React.FC<RouteCalculatorProps> = ({
               type="button"
               onClick={handleSwap}
               title="Swap Locations"
-              className="w-10 h-10 rounded-full border border-slate-200 bg-white hover:bg-slate-100 active:scale-90 flex items-center justify-center text-slate-600 shadow-sm transition"
+              className="w-9 h-9 rounded-full border border-gray-300 bg-white hover:bg-gray-100 flex items-center justify-center text-gray-700 shadow-sm transition cursor-pointer"
             >
               ⇄
             </button>
           </div>
 
           {/* Dropoff Input */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 focus-within:border-blue-500 focus-within:bg-white transition">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-600" />
-              Destination City / Tourist Spot (Point B)
+          <div className="bg-white border border-gray-300 rounded-md p-3 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition">
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">
+              To: Destination / Tourist Spot
             </label>
             <select
-              className="w-full bg-transparent text-sm font-semibold text-slate-900 outline-none cursor-pointer"
+              className="w-full bg-white text-sm font-semibold text-gray-900 outline-none cursor-pointer py-1"
               value={dropoffPoint.id}
               onChange={(e) => {
                 const found = SOUTH_INDIA_LOCATIONS.find((l) => l.id === e.target.value);
@@ -214,7 +215,7 @@ export const RouteCalculator: React.FC<RouteCalculatorProps> = ({
             >
               {SOUTH_INDIA_LOCATIONS.map((loc) => (
                 <option key={loc.id} value={loc.id}>
-                  {loc.name} — {loc.state}
+                  {loc.name} ({loc.state})
                 </option>
               ))}
             </select>
@@ -222,29 +223,29 @@ export const RouteCalculator: React.FC<RouteCalculatorProps> = ({
         </div>
 
         {/* Calculated Distance & Metrics Summary Banner */}
-        <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 bg-blue-50/70 border border-blue-100 rounded-xl p-4 text-slate-800">
-          <div>
-            <div className="text-xs font-medium text-slate-500">Calculated Distance</div>
-            <div className="text-lg sm:text-xl font-extrabold text-blue-700 mt-0.5">
+        <div className="mt-6 bg-gray-50 border border-gray-200 rounded-md p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-gray-200">
+          <div className="pt-2 sm:pt-0 sm:px-2 first:px-0 first:pt-0">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Road Distance</div>
+            <div className="text-xl font-bold text-blue-700 mt-1">
               {distanceKm} km
             </div>
           </div>
-          <div>
-            <div className="text-xs font-medium text-slate-500">Est. Driving Time</div>
-            <div className="text-lg sm:text-xl font-bold text-slate-900 mt-0.5">
+          <div className="pt-2 sm:pt-0 sm:px-3">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Est. Travel Time</div>
+            <div className="text-xl font-bold text-gray-900 mt-1">
               ~{durationEstimate}
             </div>
           </div>
-          <div>
-            <div className="text-xs font-medium text-slate-500">State Permitting</div>
-            <div className="text-xs sm:text-sm font-bold text-emerald-700 mt-1">
+          <div className="pt-2 sm:pt-0 sm:px-3">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Permit Coverage</div>
+            <div className="text-sm font-semibold text-emerald-700 mt-1">
               TN • KL • KA Commercial Permit
             </div>
           </div>
-          <div>
-            <div className="text-xs font-medium text-slate-500">Tolls &amp; Driver Beta</div>
-            <div className="text-xs sm:text-sm font-bold text-slate-800 mt-1">
-              All Inclusive Quote
+          <div className="pt-2 sm:pt-0 sm:px-3">
+            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Driver &amp; Tolls</div>
+            <div className="text-sm font-semibold text-gray-800 mt-1">
+              Driver Allowance Included
             </div>
           </div>
         </div>
@@ -263,28 +264,28 @@ export const RouteCalculator: React.FC<RouteCalculatorProps> = ({
       <div className="space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="text-xl font-bold text-slate-900">
-              Select Vehicle &amp; Calculate Fare for {distanceKm} km
+            <h3 className="text-xl font-bold text-gray-900">
+              Select Vehicle &amp; Calculate Fare ({distanceKm} km)
             </h3>
-            <p className="text-xs sm:text-sm text-slate-500">
-              Rates calculated on verified commercial ₹/km billing with no hidden fees.
+            <p className="text-xs sm:text-sm text-gray-600">
+              Standard commercial per-KM rates with driver allowance included.
             </p>
           </div>
 
-          {/* Vehicle Type Tabs */}
-          <div className="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200 self-start sm:self-auto">
+          {/* Vehicle Type Standard Button Group */}
+          <div className="inline-flex rounded-md shadow-2xs border border-gray-300 bg-white overflow-hidden divide-x divide-gray-200 self-start sm:self-auto">
             {(['All', 'Car', 'Bus'] as const).map((filter) => (
               <button
                 key={filter}
                 type="button"
                 onClick={() => setVehicleFilter(filter)}
-                className={`px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition ${
+                className={`px-3.5 py-1.5 text-xs sm:text-sm font-medium transition cursor-pointer ${
                   vehicleFilter === filter
-                    ? 'bg-white text-blue-600 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-blue-600 text-white font-semibold'
+                    : 'text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                {filter === 'All' ? 'All Fleet' : filter === 'Car' ? 'Cars & SUVs' : 'Buses & Coaches'}
+                {filter === 'All' ? 'All Vehicles' : filter === 'Car' ? 'Cars & SUVs' : 'Buses & Coaches'}
               </button>
             ))}
           </div>
@@ -297,66 +298,66 @@ export const RouteCalculator: React.FC<RouteCalculatorProps> = ({
             return (
               <div
                 key={vehicle.id}
-                className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col group"
+                className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:border-gray-300 transition flex flex-col"
               >
                 {/* Vehicle Image */}
-                <div className="relative h-44 bg-slate-100 overflow-hidden">
+                <div className="relative h-44 bg-gray-100 overflow-hidden">
                   <img
                     src={vehicle.image_url}
                     alt={vehicle.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                    className="w-full h-full object-cover"
                     loading="lazy"
                   />
-                  <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur text-white text-[11px] font-bold px-2.5 py-1 rounded-md">
+                  <div className="absolute top-2.5 left-2.5 bg-gray-900/85 text-white text-[11px] font-medium px-2 py-0.5 rounded">
                     {vehicle.type} • {vehicle.category}
                   </div>
-                  <div className="absolute top-3 right-3 bg-white/95 backdrop-blur text-blue-700 font-extrabold text-xs px-2.5 py-1 rounded-md shadow-sm border border-slate-100">
+                  <div className="absolute top-2.5 right-2.5 bg-blue-600 text-white font-bold text-xs px-2.5 py-1 rounded shadow-sm">
                     ₹{vehicle.per_km_rate}/km
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className="p-5 flex flex-col flex-1">
-                  <h4 className="font-bold text-base text-slate-900">
+                <div className="p-4 sm:p-5 flex flex-col flex-1">
+                  <h4 className="font-bold text-base text-gray-900">
                     {vehicle.name}
                   </h4>
-                  <div className="text-xs text-slate-500 mt-1 flex items-center gap-3">
+                  <div className="text-xs text-gray-600 mt-1 flex items-center gap-3">
                     <span>👥 {vehicle.capacity} Seats</span>
                     <span>❄️ {vehicle.ac_type}</span>
                     <span>🧳 {vehicle.luggage_capacity} Bags</span>
                   </div>
 
-                  <p className="text-xs text-slate-600 mt-3 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-gray-600 mt-2.5 line-clamp-2 leading-relaxed">
                     {vehicle.description}
                   </p>
 
                   {/* Pricing Breakdown Card */}
-                  <div className="mt-4 bg-slate-50 border border-slate-100 rounded-xl p-3 space-y-1.5 text-xs">
-                    <div className="flex justify-between text-slate-600">
+                  <div className="mt-4 bg-gray-50 border border-gray-200 rounded-md p-3 space-y-1.5 text-xs">
+                    <div className="flex justify-between text-gray-600">
                       <span>Rate ({distanceKm} km × ₹{vehicle.per_km_rate}):</span>
-                      <span className="font-semibold text-slate-900">
+                      <span className="font-semibold text-gray-900">
                         {formatINR(distanceKm * vehicle.per_km_rate)}
                       </span>
                     </div>
-                    <div className="flex justify-between text-slate-600">
-                      <span>Base / Driver Allowance:</span>
-                      <span className="font-semibold text-slate-900">
+                    <div className="flex justify-between text-gray-600">
+                      <span>Driver / Base Allowance:</span>
+                      <span className="font-semibold text-gray-900">
                         {formatINR(vehicle.base_fare)}
                       </span>
                     </div>
-                    <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-sm font-bold text-slate-900">
-                      <span>Estimated Total:</span>
-                      <span className="text-blue-600 text-base">
+                    <div className="pt-2 border-t border-gray-200 flex justify-between items-center text-sm font-bold text-gray-900">
+                      <span>Total Estimated Fare:</span>
+                      <span className="text-blue-600 text-base font-extrabold">
                         {formatINR(totalFare)}
                       </span>
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
+                  <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
                     <div>
-                      <div className="text-[10px] text-slate-400 uppercase font-semibold">Total Fare</div>
-                      <div className="text-lg font-extrabold text-slate-900">
+                      <div className="text-[10px] text-gray-500 uppercase font-semibold">Total Fare</div>
+                      <div className="text-lg font-extrabold text-gray-900">
                         {formatINR(totalFare)}
                       </div>
                     </div>
@@ -372,7 +373,7 @@ export const RouteCalculator: React.FC<RouteCalculatorProps> = ({
                           totalFare,
                         })
                       }
-                      className="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm transition"
+                      className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium text-xs px-4 py-2 rounded-md shadow-sm transition cursor-pointer"
                     >
                       Book This Vehicle
                     </button>
