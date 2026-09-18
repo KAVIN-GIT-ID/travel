@@ -6,6 +6,8 @@ import type {
   InquiryRequest,
 } from '../types';
 
+import { FALLBACK_SOUTH_INDIA_PACKAGES } from '../data/fallbackPackages';
+
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'https://travel-agencie.apkavin483.workers.dev';
 
@@ -35,14 +37,30 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
 // Packages Service
 export const packageService = {
   async getAll(state?: string, category?: string, search?: string): Promise<Package[]> {
-    const params = new URLSearchParams();
-    if (state && state !== 'All') params.append('state', state);
-    if (category && category !== 'All') params.append('category', category);
-    if (search && search.trim()) params.append('search', search.trim());
+    try {
+      const params = new URLSearchParams();
+      if (state && state !== 'All') params.append('state', state);
+      if (category && category !== 'All') params.append('category', category);
+      if (search && search.trim()) params.append('search', search.trim());
 
-    const query = params.toString() ? `?${params.toString()}` : '';
-    const res = await request<{ packages: Package[] }>(`/api/packages${query}`);
-    return res.packages || [];
+      const query = params.toString() ? `?${params.toString()}` : '';
+      const res = await request<{ packages: Package[] }>(`/api/packages${query}`);
+      if (res.packages && res.packages.length > 0) {
+        return res.packages;
+      }
+      throw new Error('Empty packages returned from API');
+    } catch (err) {
+      console.warn('Using authentic South India fallback packages:', err);
+      return FALLBACK_SOUTH_INDIA_PACKAGES.filter((p) => {
+        if (state && state !== 'All' && p.state !== state) return false;
+        if (category && category !== 'All' && p.category !== category) return false;
+        if (search && search.trim()) {
+          const q = search.toLowerCase();
+          return p.title.toLowerCase().includes(q) || p.destination.toLowerCase().includes(q) || p.state.toLowerCase().includes(q);
+        }
+        return true;
+      });
+    }
   },
 
   async create(payload: Partial<Package>): Promise<{ success: boolean; package_id: number }> {
