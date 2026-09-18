@@ -61,6 +61,11 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
             <h4 className="text-white font-semibold mb-3 text-xs uppercase tracking-wider">Quick Navigation</h4>
             <ul className="space-y-2 text-xs">
               <li>
+                <button onClick={() => onSelectTab('home')} className="hover:text-white transition">
+                  Home
+                </button>
+              </li>
+              <li>
                 <button onClick={() => onSelectTab('route-calc')} className="hover:text-white transition">
                   Route &amp; Distance Fare Calculator
                 </button>

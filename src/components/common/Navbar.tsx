@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export type NavTab = 'route-calc' | 'tours' | 'fleet' | 'inquiry' | 'admin';
+export type NavTab = 'home' | 'route-calc' | 'tours' | 'fleet' | 'inquiry' | 'admin';
 
 interface NavbarProps {
   activeTab: NavTab;
@@ -16,7 +16,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems: { id: NavTab; label: string }[] = [
-    { id: 'route-calc', label: 'Route & Fare Calculator' },
+    { id: 'home', label: 'Home' },
+    { id: 'route-calc', label: 'Route & Fare Map' },
     { id: 'tours', label: 'Tour Packages' },
     { id: 'fleet', label: 'Bus & Car Fleet' },
     { id: 'inquiry', label: 'Group Travel' },
@@ -57,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Brand / Logo */}
           <div
             className="flex items-center gap-3 cursor-pointer select-none"
-            onClick={() => handleTabClick('route-calc')}
+            onClick={() => handleTabClick('home')}
           >
             <div className="w-9 h-9 rounded-md bg-blue-600 text-white flex items-center justify-center shadow-sm">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

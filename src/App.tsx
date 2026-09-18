@@ -3,6 +3,7 @@ import type { Package, Vehicle, Booking, BookingRequest } from './types';
 import { packageService, vehicleService, bookingService } from './services/api';
 import { Navbar, type NavTab } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
+import { HomePage } from './components/home/HomePage';
 import { RouteCalculator } from './components/route/RouteCalculator';
 import { TourList } from './components/tours/TourList';
 import { VehicleFleet } from './components/vehicles/VehicleFleet';
@@ -11,7 +12,8 @@ import { AdminPortal } from './components/admin/AdminPortal';
 import { BookingModal } from './components/booking/BookingModal';
 
 const TAB_ROUTES: Record<NavTab, string> = {
-  'route-calc': '/',
+  'home': '/',
+  'route-calc': '/route',
   'tours': '/tours',
   'fleet': '/fleet',
   'inquiry': '/group-travel',
@@ -21,10 +23,11 @@ const TAB_ROUTES: Record<NavTab, string> = {
 const getTabFromPath = (path: string): NavTab => {
   const cleanPath = path.toLowerCase().replace(/\/+$/, '') || '/';
   if (cleanPath === '/admin' || cleanPath === '/login') return 'admin';
+  if (cleanPath === '/route' || cleanPath === '/map' || cleanPath === '/route-calc') return 'route-calc';
   if (cleanPath === '/tours' || cleanPath === '/packages') return 'tours';
   if (cleanPath === '/fleet' || cleanPath === '/vehicles') return 'fleet';
   if (cleanPath === '/group-travel' || cleanPath === '/custom' || cleanPath === '/inquiry') return 'inquiry';
-  return 'route-calc';
+  return 'home';
 };
 
 export default function App() {
@@ -175,6 +178,16 @@ export default function App() {
 
       {/* Main Responsive Viewport */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+        {activeTab === 'home' && (
+          <HomePage
+            packages={packages}
+            vehicles={vehicles}
+            onNavigate={handleSelectTab}
+            onBookPackage={handleOpenTourBooking}
+            onRentVehicle={handleOpenVehicleRental}
+          />
+        )}
+
         {activeTab === 'route-calc' && (
           <RouteCalculator
             vehicles={vehicles}
