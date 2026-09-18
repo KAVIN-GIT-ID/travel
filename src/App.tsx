@@ -1,22 +1,43 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import type { Package, Booking } from './api';
+import React, { useState, useEffect } from 'react';
+import type { Package, Booking, Vehicle } from './api';
 import {
   fetchPackages,
+  fetchVehicles,
   createBooking,
   fetchBookings,
   createInquiry,
 } from './api';
+import { RouteCalculator } from './components/RouteCalculator';
+import { AdminPortal } from './components/AdminPortal';
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState<'tours' | 'route-calc' | 'fleet' | 'inquiry' | 'admin'>('route-calc');
+
+  // Data
   const [packages, setPackages] = useState<Package[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState('All');
+
+  // Filters for Curated Tours
+  const [selectedState, setSelectedState] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'tours' | 'inquiry' | 'bookings'>('tours');
 
   // Booking Modal
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
-  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
+  const [modalBookingData, setModalBookingData] = useState<{
+    booking_type: 'package' | 'route_rental';
+    package_id?: number;
+    package_title?: string;
+    vehicle_id?: number;
+    vehicle_name?: string;
+    pickup_location?: string;
+    dropoff_location?: string;
+    distance_km?: number;
+    total_price: number;
+    image_url?: string;
+  } | null>(null);
+
   const [bookingForm, setBookingForm] = useState({
     customer_name: '',
     customer_email: '',
@@ -32,72 +53,93 @@ export default function App() {
   // Details Modal
   const [detailsPackage, setDetailsPackage] = useState<Package | null>(null);
 
-  // Bookings List
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [bookingsLoading, setBookingsLoading] = useState(false);
-
   // Inquiry Form
   const [inquiryForm, setInquiryForm] = useState({
     name: '',
     email: '',
-    subject: '',
+    subject: 'South India Custom Trip',
     message: '',
   });
   const [inquirySubmitting, setInquirySubmitting] = useState(false);
   const [inquirySuccess, setInquirySuccess] = useState(false);
   const [inquiryError, setInquiryError] = useState('');
 
-  const categories = [
-    'All',
-    'Cultural',
-    'Luxury',
-    'Beach & Culture',
-    'Adventure',
-    'Wildlife',
-    'Romantic',
-  ];
-
-  const loadPackages = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
-      const data = await fetchPackages(selectedCategory, searchQuery);
-      setPackages(data);
+      const [pkgs, vhcls, bks] = await Promise.all([
+        fetchPackages(selectedState, undefined, searchQuery),
+        fetchVehicles(),
+        fetchBookings(),
+      ]);
+      setPackages(pkgs);
+      setVehicles(vhcls);
+      setBookings(bks);
     } catch (err) {
-      console.error('Failed to load packages:', err);
+      console.error('Failed to load data:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadPackages();
-  }, [selectedCategory]);
-
-  const loadAllBookings = async () => {
-    try {
-      setBookingsLoading(true);
-      const data = await fetchBookings();
-      setBookings(data);
-    } catch (err) {
-      console.error('Failed to fetch bookings:', err);
-    } finally {
-      setBookingsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (activeTab === 'bookings') {
-      loadAllBookings();
-    }
-  }, [activeTab]);
+    loadData();
+  }, [selectedState]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    loadPackages();
+    loadData();
   };
 
-  const handleOpenBooking = (pkg: Package) => {
-    setSelectedPackage(pkg);
+  // Open modal from Tour Package
+  const handleOpenPackageBooking = (pkg: Package) => {
+    setModalBookingData({
+      booking_type: 'package',
+      package_id: pkg.id,
+      package_title: pkg.title,
+      total_price: pkg.price * bookingForm.travelers_count,
+      image_url: pkg.image_url,
+    });
+    setBookingSuccess(null);
+    setBookingError('');
+    setBookingModalOpen(true);
+  };
+
+  // Open modal from Route Distance Calculator
+  const handleOpenRouteBooking = (data: {
+    pickup: string;
+    dropoff: string;
+    distanceKm: number;
+    vehicle: Vehicle;
+    totalFare: number;
+  }) => {
+    setModalBookingData({
+      booking_type: 'route_rental',
+      vehicle_id: data.vehicle.id,
+      vehicle_name: `${data.vehicle.name} (${data.vehicle.type})`,
+      pickup_location: data.pickup,
+      dropoff_location: data.dropoff,
+      distance_km: data.distanceKm,
+      total_price: data.totalFare,
+      image_url: data.vehicle.image_url,
+    });
+    setBookingSuccess(null);
+    setBookingError('');
+    setBookingModalOpen(true);
+  };
+
+  // Open modal from Fleet View
+  const handleOpenFleetBooking = (v: Vehicle) => {
+    setModalBookingData({
+      booking_type: 'route_rental',
+      vehicle_id: v.id,
+      vehicle_name: `${v.name} (${v.type})`,
+      pickup_location: 'Bengaluru / Chennai / Kochi',
+      dropoff_location: 'South India Destination',
+      distance_km: 150,
+      total_price: 150 * v.per_km_rate + v.base_fare,
+      image_url: v.image_url,
+    });
     setBookingSuccess(null);
     setBookingError('');
     setBookingModalOpen(true);
@@ -105,19 +147,26 @@ export default function App() {
 
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedPackage) return;
+    if (!modalBookingData) return;
     setBookingSubmitting(true);
     setBookingError('');
     try {
       const res = await createBooking({
-        package_id: selectedPackage.id,
-        package_title: selectedPackage.title,
+        booking_type: modalBookingData.booking_type,
+        package_id: modalBookingData.package_id,
+        package_title: modalBookingData.package_title,
+        vehicle_id: modalBookingData.vehicle_id,
+        vehicle_name: modalBookingData.vehicle_name,
+        pickup_location: modalBookingData.pickup_location,
+        dropoff_location: modalBookingData.dropoff_location,
+        distance_km: modalBookingData.distance_km,
         customer_name: bookingForm.customer_name,
         customer_email: bookingForm.customer_email,
         customer_phone: bookingForm.customer_phone,
         travel_date: bookingForm.travel_date,
         travelers_count: bookingForm.travelers_count,
         special_requests: bookingForm.special_requests,
+        total_price: modalBookingData.total_price,
       });
 
       setBookingSuccess({
@@ -133,8 +182,12 @@ export default function App() {
         travelers_count: 2,
         special_requests: '',
       });
+
+      // Refresh bookings list
+      const updated = await fetchBookings();
+      setBookings(updated);
     } catch (err: any) {
-      setBookingError(err.message || 'Failed to complete booking');
+      setBookingError(err.message || 'Failed to submit reservation');
     } finally {
       setBookingSubmitting(false);
     }
@@ -148,22 +201,17 @@ export default function App() {
       await createInquiry({
         name: inquiryForm.name,
         email: inquiryForm.email,
-        subject: inquiryForm.subject || 'Custom Tour Inquiry',
+        subject: inquiryForm.subject || 'South India Trip Inquiry',
         message: inquiryForm.message,
       });
       setInquirySuccess(true);
-      setInquiryForm({ name: '', email: '', subject: '', message: '' });
+      setInquiryForm({ name: '', email: '', subject: 'South India Custom Trip', message: '' });
     } catch (err: any) {
       setInquiryError(err.message || 'Failed to submit inquiry');
     } finally {
       setInquirySubmitting(false);
     }
   };
-
-  const computedTotal = useMemo(() => {
-    if (!selectedPackage) return 0;
-    return selectedPackage.price * (bookingForm.travelers_count || 1);
-  }, [selectedPackage, bookingForm.travelers_count]);
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -173,21 +221,37 @@ export default function App() {
           <div
             className="ios-logo-group"
             onClick={() => {
-              setActiveTab('tours');
-              setSelectedCategory('All');
+              setActiveTab('route-calc');
             }}
           >
             <div className="ios-logo-circle">TA</div>
-            <span className="ios-logo-title">Travel Agencie</span>
+            <div>
+              <span className="ios-logo-title">Travel Agencie</span>
+              <span style={{ fontSize: '0.68rem', background: '#f5f5f7', padding: '2px 6px', borderRadius: 4, marginLeft: 6, fontWeight: 600, color: 'var(--ios-blue)' }}>
+                South India
+              </span>
+            </div>
           </div>
 
-          {/* iOS Segmented Control */}
+          {/* iOS Segmented Navigation */}
           <div className="ios-segmented-control">
+            <button
+              className={`ios-segment-btn ${activeTab === 'route-calc' ? 'active' : ''}`}
+              onClick={() => setActiveTab('route-calc')}
+            >
+              Route &amp; Fare Calc
+            </button>
             <button
               className={`ios-segment-btn ${activeTab === 'tours' ? 'active' : ''}`}
               onClick={() => setActiveTab('tours')}
             >
-              Curated Tours
+              Curated Trips
+            </button>
+            <button
+              className={`ios-segment-btn ${activeTab === 'fleet' ? 'active' : ''}`}
+              onClick={() => setActiveTab('fleet')}
+            >
+              Bus &amp; Car Fleet
             </button>
             <button
               className={`ios-segment-btn ${activeTab === 'inquiry' ? 'active' : ''}`}
@@ -196,10 +260,10 @@ export default function App() {
               Inquiry
             </button>
             <button
-              className={`ios-segment-btn ${activeTab === 'bookings' ? 'active' : ''}`}
-              onClick={() => setActiveTab('bookings')}
+              className={`ios-segment-btn ${activeTab === 'admin' ? 'active' : ''}`}
+              onClick={() => setActiveTab('admin')}
             >
-              Reservations
+              Admin Portal
             </button>
           </div>
 
@@ -207,84 +271,79 @@ export default function App() {
             <button
               className="ios-btn-black"
               onClick={() => {
-                if (packages.length > 0) handleOpenBooking(packages[0]);
+                if (vehicles.length > 0) handleOpenFleetBooking(vehicles[0]);
               }}
             >
-              Reserve Now
+              Book Travel
             </button>
           </div>
         </div>
       </header>
 
-      {/* Main Container */}
+      {/* Main Content Area */}
       <main className="ios-main-container" style={{ flex: 1 }}>
+        {/* TAB 1: Route & Distance Calculator (Map + GPS + Per-KM Fare) */}
+        {activeTab === 'route-calc' && (
+          <RouteCalculator
+            vehicles={vehicles}
+            onBookRoute={handleOpenRouteBooking}
+          />
+        )}
+
+        {/* TAB 2: Curated South India Trips (Tamil Nadu, Kerala, Karnataka) */}
         {activeTab === 'tours' && (
           <div>
-            {/* Clean Hero */}
             <div className="ios-hero-clean">
-              <div className="ios-hero-badge">Curated Itineraries</div>
+              <div className="ios-hero-badge">Tamil Nadu • Kerala • Karnataka</div>
               <h1 className="ios-hero-heading">
-                Simple, thoughtful travel planning.
+                Explore South India's finest sanctuaries.
               </h1>
               <p className="ios-hero-subheading">
-                Browse handpicked destinations, review itineraries, and reserve your private journey with complete peace of mind.
+                Handcrafted holiday tours through the Western Ghats, Nilgiri hill stations, coastal backwaters, and heritage ruins.
               </p>
 
-              {/* iOS Clean Search */}
-              <form onSubmit={handleSearch} className="ios-search-bar">
+              {/* State Filter Pills */}
+              <div className="ios-filter-scroll" style={{ marginBottom: '1.25rem' }}>
+                {['All', 'Tamil Nadu', 'Kerala', 'Karnataka'].map((st) => (
+                  <button
+                    key={st}
+                    className={`ios-filter-pill ${selectedState === st ? 'active' : ''}`}
+                    onClick={() => setSelectedState(st)}
+                  >
+                    {st === 'All' ? 'All South India' : st}
+                  </button>
+                ))}
+              </div>
+
+              {/* Search Box */}
+              <form onSubmit={handleSearch} className="ios-search-bar" style={{ maxWidth: 540 }}>
                 <input
                   type="text"
                   className="ios-search-input"
-                  placeholder="Search Bali, Kyoto, Amalfi, Alps..."
+                  placeholder="Search Ooty, Munnar, Coorg, Hampi..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <select
-                  className="ios-category-dropdown"
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                >
-                  {categories.map((c) => (
-                    <option key={c} value={c}>
-                      {c === 'All' ? 'All Categories' : c}
-                    </option>
-                  ))}
-                </select>
                 <button type="submit" className="ios-btn-primary">
                   Search
                 </button>
               </form>
-
-              {/* iOS Category Filter Pills */}
-              <div className="ios-filter-scroll">
-                {categories.map((c) => (
-                  <button
-                    key={c}
-                    className={`ios-filter-pill ${selectedCategory === c ? 'active' : ''}`}
-                    onClick={() => setSelectedCategory(c)}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
             </div>
 
-            {/* Section Header */}
             <div className="ios-section-header">
-              <h2 className="ios-section-title">Available Expeditions</h2>
+              <h2 className="ios-section-title">Curated Holiday Packages</h2>
               <span className="ios-section-meta">
                 {packages.length} {packages.length === 1 ? 'package' : 'packages'}
               </span>
             </div>
 
-            {/* Cards Grid */}
             {loading ? (
               <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--ios-text-secondary)' }}>
-                Loading available tours...
+                Loading South India itineraries...
               </div>
             ) : packages.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--ios-text-secondary)' }}>
-                No destinations found.
+                No packages found.
               </div>
             ) : (
               <div className="ios-grid">
@@ -292,12 +351,12 @@ export default function App() {
                   <div key={pkg.id} className="ios-card">
                     <div className="ios-card-media">
                       <img src={pkg.image_url} alt={pkg.title} className="ios-card-img" loading="lazy" />
-                      <span className="ios-card-tag">{pkg.category}</span>
+                      <span className="ios-card-tag">{pkg.state}</span>
                     </div>
 
                     <div className="ios-card-content">
                       <div className="ios-card-location">
-                        {pkg.destination}, {pkg.country} • {pkg.duration_days} Days
+                        {pkg.destination} • {pkg.duration_days} Days / {pkg.duration_days - 1} Nights
                       </div>
                       <h3 className="ios-card-name">{pkg.title}</h3>
                       <p className="ios-card-summary">{pkg.description}</p>
@@ -312,20 +371,22 @@ export default function App() {
 
                       <div className="ios-card-footer">
                         <div className="ios-card-price">
-                          ${pkg.price.toLocaleString()}
+                          ₹{pkg.price.toLocaleString()}
                           <span>/ person</span>
                         </div>
 
                         <div className="ios-card-actions">
                           <button
+                            type="button"
                             className="ios-btn-secondary"
                             onClick={() => setDetailsPackage(pkg)}
                           >
-                            Details
+                            Itinerary
                           </button>
                           <button
+                            type="button"
                             className="ios-btn-primary"
-                            onClick={() => handleOpenBooking(pkg)}
+                            onClick={() => handleOpenPackageBooking(pkg)}
                           >
                             Reserve
                           </button>
@@ -339,15 +400,75 @@ export default function App() {
           </div>
         )}
 
-        {/* Custom Inquiry Tab */}
+        {/* TAB 3: Bus & Car Fleet Showcase */}
+        {activeTab === 'fleet' && (
+          <div>
+            <div className="ios-hero-clean">
+              <div className="ios-hero-badge">Interstate Vehicle Rentals</div>
+              <h1 className="ios-hero-heading">
+                Comfortable Bus &amp; Car travels.
+              </h1>
+              <p className="ios-hero-subheading">
+                Transparent per-kilometer rates across Tamil Nadu, Kerala, and Karnataka. Commercial interstate permits, verified professional drivers, and sanitized AC vehicles.
+              </p>
+            </div>
+
+            <div className="ios-grid">
+              {vehicles.map((v) => (
+                <div key={v.id} className="ios-card">
+                  <div className="ios-card-media" style={{ height: 180 }}>
+                    <img src={v.image_url} alt={v.name} className="ios-card-img" />
+                    <span className="ios-card-tag">{v.type} • {v.category}</span>
+                  </div>
+
+                  <div className="ios-card-content">
+                    <h3 className="ios-card-name" style={{ fontSize: '1.15rem' }}>{v.name}</h3>
+                    <div style={{ fontSize: '0.82rem', color: 'var(--ios-text-secondary)', marginBottom: '0.75rem' }}>
+                      {v.capacity} Passengers • {v.ac_type} • {v.luggage_capacity} Luggage Bags
+                    </div>
+                    <p className="ios-card-summary">{v.description}</p>
+
+                    <div style={{ background: '#f5f5f7', padding: '0.75rem', borderRadius: 10, marginBottom: '1rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                        <span>Rate:</span>
+                        <strong style={{ color: 'var(--ios-blue)', fontSize: '1.05rem' }}>₹{v.per_km_rate} / km</strong>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--ios-text-secondary)', marginTop: 4 }}>
+                        <span>Base Fare:</span>
+                        <span>₹{v.base_fare}</span>
+                      </div>
+                    </div>
+
+                    <div className="ios-card-footer">
+                      <div className="ios-card-price">
+                        ₹{v.per_km_rate}
+                        <span>/ km</span>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="ios-btn-black"
+                        onClick={() => handleOpenFleetBooking(v)}
+                      >
+                        Rent Vehicle
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: Custom Inquiry */}
         {activeTab === 'inquiry' && (
           <div style={{ maxWidth: 580, margin: '0 auto', paddingTop: '1.5rem' }}>
-            <div className="ios-hero-badge">Direct Concierge</div>
+            <div className="ios-hero-badge">South India Custom Travels</div>
             <h2 className="ios-hero-heading" style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
-              Custom Itinerary Request
+              Tailored Itinerary &amp; Bulk Bus Booking
             </h2>
             <p className="ios-hero-subheading" style={{ marginBottom: '2rem' }}>
-              Have a specific destination or schedule in mind? Tell us what you need and our travel curators will assemble a proposal.
+              Planning a college industrial visit, family wedding, or pilgrimage across Tamil Nadu, Kerala, or Karnataka? Share your travel details.
             </p>
 
             <div
@@ -381,7 +502,7 @@ export default function App() {
                     Inquiry Received
                   </h3>
                   <p style={{ color: 'var(--ios-text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-                    Your request has been received. Our travel concierge will be in touch within 24 hours.
+                    Your travel details have been received. A South India route coordinator will contact you shortly.
                   </p>
                   <button
                     className="ios-btn-secondary"
@@ -409,23 +530,23 @@ export default function App() {
 
                   <div className="ios-form-row">
                     <div className="ios-form-group">
-                      <label className="ios-form-label">Full Name</label>
+                      <label className="ios-form-label">Contact Person Name</label>
                       <input
                         type="text"
                         required
                         className="ios-form-input"
-                        placeholder="Sarah Jenkins"
+                        placeholder="e.g. Vignesh Kumar"
                         value={inquiryForm.name}
                         onChange={(e) => setInquiryForm({ ...inquiryForm, name: e.target.value })}
                       />
                     </div>
                     <div className="ios-form-group">
-                      <label className="ios-form-label">Email</label>
+                      <label className="ios-form-label">Email Address</label>
                       <input
                         type="email"
                         required
                         className="ios-form-input"
-                        placeholder="sarah@example.com"
+                        placeholder="vignesh@example.com"
                         value={inquiryForm.email}
                         onChange={(e) => setInquiryForm({ ...inquiryForm, email: e.target.value })}
                       />
@@ -433,23 +554,23 @@ export default function App() {
                   </div>
 
                   <div className="ios-form-group">
-                    <label className="ios-form-label">Destination of Interest</label>
+                    <label className="ios-form-label">Destination / Route Requirement</label>
                     <input
                       type="text"
                       className="ios-form-input"
-                      placeholder="e.g. Iceland Northern Lights or Amalfi Coast"
+                      placeholder="e.g. 3-Day Ooty & Coonoor Tour with 21-Seater Mini Bus"
                       value={inquiryForm.subject}
                       onChange={(e) => setInquiryForm({ ...inquiryForm, subject: e.target.value })}
                     />
                   </div>
 
                   <div className="ios-form-group">
-                    <label className="ios-form-label">Trip Notes &amp; Estimated Dates</label>
+                    <label className="ios-form-label">Trip Notes, Pickup City &amp; Dates</label>
                     <textarea
                       rows={4}
                       required
                       className="ios-form-input"
-                      placeholder="Party size, preferred time of year, pace, special requests..."
+                      placeholder="Passenger count, preferred dates, vehicle preference, special requests..."
                       value={inquiryForm.message}
                       onChange={(e) => setInquiryForm({ ...inquiryForm, message: e.target.value })}
                     />
@@ -469,89 +590,28 @@ export default function App() {
           </div>
         )}
 
-        {/* Reservations Tab */}
-        {activeTab === 'bookings' && (
-          <div style={{ paddingTop: '1.5rem' }}>
-            <div className="ios-section-header" style={{ marginTop: 0 }}>
-              <div>
-                <div className="ios-hero-badge">Confirmed Itineraries</div>
-                <h2 className="ios-section-title">Guest Reservations</h2>
-              </div>
-              <button
-                className="ios-btn-secondary"
-                onClick={loadAllBookings}
-                disabled={bookingsLoading}
-              >
-                {bookingsLoading ? 'Refreshing...' : 'Refresh Records'}
-              </button>
-            </div>
-
-            <div className="ios-table-container">
-              <table className="ios-table">
-                <thead>
-                  <tr>
-                    <th>Ref</th>
-                    <th>Customer</th>
-                    <th>Package</th>
-                    <th>Travel Date</th>
-                    <th>Guests</th>
-                    <th>Total</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bookingsLoading ? (
-                    <tr>
-                      <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--ios-text-secondary)' }}>
-                        Loading reservation records...
-                      </td>
-                    </tr>
-                  ) : bookings.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--ios-text-secondary)' }}>
-                        No reservations found.
-                      </td>
-                    </tr>
-                  ) : (
-                    bookings.map((b) => (
-                      <tr key={b.id}>
-                        <td style={{ fontFamily: 'ui-monospace, monospace', color: 'var(--ios-text-secondary)' }}>
-                          #{b.id}
-                        </td>
-                        <td>
-                          <div style={{ fontWeight: 600 }}>{b.customer_name}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--ios-text-tertiary)' }}>
-                            {b.customer_email}
-                          </div>
-                        </td>
-                        <td>{b.package_title}</td>
-                        <td>{b.travel_date}</td>
-                        <td>{b.travelers_count}</td>
-                        <td style={{ fontWeight: 600 }}>
-                          ${b.total_price ? b.total_price.toLocaleString() : '—'}
-                        </td>
-                        <td>
-                          <span className="ios-badge-confirmed">
-                            ● {b.status || 'Confirmed'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+        {/* TAB 5: Role-Protected Admin Portal */}
+        {activeTab === 'admin' && (
+          <AdminPortal
+            bookings={bookings}
+            packages={packages}
+            vehicles={vehicles}
+            onRefreshData={loadData}
+          />
         )}
       </main>
 
-      {/* iOS Booking Sheet / Modal */}
-      {bookingModalOpen && selectedPackage && (
+      {/* Booking Reservation Modal */}
+      {bookingModalOpen && modalBookingData && (
         <div className="ios-modal-backdrop" onClick={() => setBookingModalOpen(false)}>
           <div className="ios-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="ios-modal-grabber" />
             <div className="ios-modal-header">
-              <h3 className="ios-modal-title">Confirm Reservation</h3>
+              <h3 className="ios-modal-title">
+                {modalBookingData.booking_type === 'route_rental'
+                  ? 'Confirm Vehicle Booking'
+                  : 'Reserve Tour Package'}
+              </h3>
               <button
                 className="ios-modal-close-btn"
                 onClick={() => setBookingModalOpen(false)}
@@ -584,7 +644,7 @@ export default function App() {
                     Reservation Confirmed
                   </h3>
                   <p style={{ color: 'var(--ios-text-secondary)', fontSize: '0.88rem', marginBottom: '1.25rem' }}>
-                    Booking reference #{bookingSuccess.id} has been confirmed. Total: <strong>${bookingSuccess.total.toLocaleString()}</strong>. Our concierge will contact you with your full travel itinerary.
+                    Booking reference #{bookingSuccess.id} has been recorded. Estimated Total: <strong>₹{bookingSuccess.total.toLocaleString()}</strong>. Our route manager will contact you with driver and vehicle dispatch details.
                   </p>
                   <button
                     className="ios-btn-black"
@@ -595,7 +655,7 @@ export default function App() {
                 </div>
               ) : (
                 <form onSubmit={handleBookingSubmit}>
-                  {/* Selected Package Capsule */}
+                  {/* Summary Box */}
                   <div
                     style={{
                       display: 'flex',
@@ -607,17 +667,28 @@ export default function App() {
                       marginBottom: '1.25rem',
                     }}
                   >
-                    <img
-                      src={selectedPackage.image_url}
-                      alt={selectedPackage.title}
-                      style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'cover' }}
-                    />
+                    {modalBookingData.image_url && (
+                      <img
+                        src={modalBookingData.image_url}
+                        alt="Booking preview"
+                        style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover' }}
+                      />
+                    )}
                     <div>
-                      <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                        {selectedPackage.title}
+                      <div style={{ fontWeight: 600, fontSize: '0.92rem' }}>
+                        {modalBookingData.vehicle_name || modalBookingData.package_title}
                       </div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--ios-text-secondary)' }}>
-                        {selectedPackage.destination} • ${selectedPackage.price.toLocaleString()} per person
+                      {modalBookingData.booking_type === 'route_rental' ? (
+                        <div style={{ fontSize: '0.78rem', color: 'var(--ios-text-secondary)' }}>
+                          {modalBookingData.pickup_location} → {modalBookingData.dropoff_location} ({modalBookingData.distance_km} km)
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: '0.78rem', color: 'var(--ios-text-secondary)' }}>
+                          South India Tour Package
+                        </div>
+                      )}
+                      <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--ios-blue)', marginTop: 2 }}>
+                        Fare: ₹{modalBookingData.total_price.toLocaleString()}
                       </div>
                     </div>
                   </div>
@@ -638,12 +709,12 @@ export default function App() {
                   )}
 
                   <div className="ios-form-group">
-                    <label className="ios-form-label">Guest Name</label>
+                    <label className="ios-form-label">Full Name *</label>
                     <input
                       type="text"
                       required
                       className="ios-form-input"
-                      placeholder="David Miller"
+                      placeholder="e.g. Ramesh Chandran"
                       value={bookingForm.customer_name}
                       onChange={(e) =>
                         setBookingForm({ ...bookingForm, customer_name: e.target.value })
@@ -653,27 +724,28 @@ export default function App() {
 
                   <div className="ios-form-row">
                     <div className="ios-form-group">
-                      <label className="ios-form-label">Email</label>
+                      <label className="ios-form-label">Phone Number *</label>
                       <input
-                        type="email"
+                        type="tel"
                         required
                         className="ios-form-input"
-                        placeholder="david@example.com"
-                        value={bookingForm.customer_email}
+                        placeholder="+91 98401 XXXXX"
+                        value={bookingForm.customer_phone}
                         onChange={(e) =>
-                          setBookingForm({ ...bookingForm, customer_email: e.target.value })
+                          setBookingForm({ ...bookingForm, customer_phone: e.target.value })
                         }
                       />
                     </div>
                     <div className="ios-form-group">
-                      <label className="ios-form-label">Phone</label>
+                      <label className="ios-form-label">Email Address *</label>
                       <input
-                        type="tel"
+                        type="email"
+                        required
                         className="ios-form-input"
-                        placeholder="+1 555-0199"
-                        value={bookingForm.customer_phone}
+                        placeholder="ramesh@example.com"
+                        value={bookingForm.customer_email}
                         onChange={(e) =>
-                          setBookingForm({ ...bookingForm, customer_phone: e.target.value })
+                          setBookingForm({ ...bookingForm, customer_email: e.target.value })
                         }
                       />
                     </div>
@@ -681,7 +753,7 @@ export default function App() {
 
                   <div className="ios-form-row">
                     <div className="ios-form-group">
-                      <label className="ios-form-label">Travel Date</label>
+                      <label className="ios-form-label">Travel Date *</label>
                       <input
                         type="date"
                         required
@@ -693,11 +765,11 @@ export default function App() {
                       />
                     </div>
                     <div className="ios-form-group">
-                      <label className="ios-form-label">Travelers</label>
+                      <label className="ios-form-label">Passenger Count *</label>
                       <input
                         type="number"
                         min="1"
-                        max="16"
+                        max="50"
                         required
                         className="ios-form-input"
                         value={bookingForm.travelers_count}
@@ -712,11 +784,11 @@ export default function App() {
                   </div>
 
                   <div className="ios-form-group">
-                    <label className="ios-form-label">Special Requests</label>
+                    <label className="ios-form-label">Pickup Address / Special Notes</label>
                     <textarea
                       rows={2}
                       className="ios-form-input"
-                      placeholder="Room preferences, dietary requirements..."
+                      placeholder="Specific pickup landmark, timing, luggage assistance..."
                       value={bookingForm.special_requests}
                       onChange={(e) =>
                         setBookingForm({ ...bookingForm, special_requests: e.target.value })
@@ -727,14 +799,14 @@ export default function App() {
                   <div className="ios-price-summary-card">
                     <div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--ios-text-secondary)' }}>
-                        Estimated Total ({bookingForm.travelers_count} guests)
+                        Total Fare
                       </div>
                       <div style={{ fontSize: '0.72rem', color: 'var(--ios-text-tertiary)' }}>
-                        Taxes &amp; transfers included
+                        All interstate permits, fuel &amp; driver allowance included
                       </div>
                     </div>
-                    <div style={{ fontSize: '1.35rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
-                      ${computedTotal.toLocaleString()}
+                    <div style={{ fontSize: '1.35rem', fontWeight: 700 }}>
+                      ₹{modalBookingData.total_price.toLocaleString()}
                     </div>
                   </div>
 
@@ -753,7 +825,7 @@ export default function App() {
         </div>
       )}
 
-      {/* Details Modal */}
+      {/* Package Details Modal */}
       {detailsPackage && (
         <div className="ios-modal-backdrop" onClick={() => setDetailsPackage(null)}>
           <div className="ios-modal-card" onClick={(e) => e.stopPropagation()}>
@@ -776,7 +848,7 @@ export default function App() {
               />
 
               <div style={{ fontSize: '0.82rem', color: 'var(--ios-text-secondary)', marginBottom: '0.75rem' }}>
-                {detailsPackage.destination}, {detailsPackage.country} • {detailsPackage.duration_days} Days • Rating: {detailsPackage.rating} / 5
+                {detailsPackage.destination} ({detailsPackage.state}) • {detailsPackage.duration_days} Days
               </div>
 
               <p style={{ fontSize: '0.9rem', color: 'var(--ios-text-primary)', lineHeight: 1.5, marginBottom: '1.25rem' }}>
@@ -784,7 +856,7 @@ export default function App() {
               </p>
 
               <div style={{ fontWeight: 600, fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-                Highlights
+                Key Highlights
               </div>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1.5rem' }}>
                 {detailsPackage.highlights.split(',').map((h, idx) => (
@@ -797,7 +869,7 @@ export default function App() {
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.75rem', borderTop: '1px solid var(--ios-border-light)' }}>
                 <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-                  ${detailsPackage.price.toLocaleString()}
+                  ₹{detailsPackage.price.toLocaleString()}
                   <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--ios-text-tertiary)', marginLeft: 4 }}>
                     / person
                   </span>
@@ -808,7 +880,7 @@ export default function App() {
                   onClick={() => {
                     const p = detailsPackage;
                     setDetailsPackage(null);
-                    handleOpenBooking(p);
+                    handleOpenPackageBooking(p);
                   }}
                 >
                   Book This Tour
@@ -823,12 +895,13 @@ export default function App() {
       <footer className="ios-footer">
         <div className="ios-footer-content">
           <div>
-            &copy; {new Date().getFullYear()} Travel Agencie. All rights reserved.
+            &copy; {new Date().getFullYear()} Travel Agencie — South India Bus &amp; Car Travels (Tamil Nadu • Kerala • Karnataka).
           </div>
           <div className="ios-footer-links">
-            <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('tours'); }}>Tours</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('inquiry'); }}>Inquiry</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('bookings'); }}>Reservations</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('route-calc'); }}>Route Calculator</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('tours'); }}>Curated Trips</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('fleet'); }}>Fleet</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('admin'); }}>Admin</a>
           </div>
         </div>
       </footer>

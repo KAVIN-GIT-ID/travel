@@ -4,7 +4,7 @@ export interface Env {
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
@@ -42,40 +42,117 @@ export default {
         }
 
         return jsonResponse({
-          service: "travel-agencie",
+          service: "travel-agencie-south-india",
           status: "healthy",
           timestamp: new Date().toISOString(),
           database: dbStatus,
-          routes: [
-            "GET /api/packages",
-            "GET /api/packages/:id",
-            "POST /api/bookings",
-            "GET /api/bookings",
-            "POST /api/inquiries",
-            "GET /api/inquiries",
-          ],
+          focus: "Tamil Nadu, Kerala, Karnataka",
         });
       }
 
+      // ================= VEHICLES API =================
+      // GET /api/vehicles
+      if (request.method === "GET" && url.pathname === "/api/vehicles") {
+        const type = url.searchParams.get("type"); // 'Car' or 'Bus'
+        let query = "SELECT * FROM vehicles";
+        const params: any[] = [];
+        if (type && type !== "All") {
+          query += " WHERE type = ?";
+          params.push(type);
+        }
+        query += " ORDER BY per_km_rate ASC";
+
+        const stmt = env.DB.prepare(query);
+        const { results } = params.length > 0 ? await stmt.bind(...params).all() : await stmt.all();
+        return jsonResponse({ vehicles: results });
+      }
+
+      // POST /api/vehicles (Admin add vehicle)
+      if (request.method === "POST" && url.pathname === "/api/vehicles") {
+        const body: any = await request.json();
+        const {
+          name,
+          type,
+          category,
+          per_km_rate,
+          base_fare = 500,
+          capacity,
+          ac_type = "Full AC",
+          luggage_capacity = 4,
+          image_url,
+          description = "",
+        } = body;
+
+        if (!name || !type || !per_km_rate || !capacity) {
+          return jsonResponse({ error: "Name, type, per_km_rate, and capacity are required." }, 400);
+        }
+
+        const fallbackImg =
+          type === "Bus"
+            ? "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&q=80"
+            : "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80";
+
+        const result = await env.DB.prepare(
+          `INSERT INTO vehicles (name, type, category, per_km_rate, base_fare, capacity, ac_type, luggage_capacity, image_url, description)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        )
+          .bind(
+            name,
+            type,
+            category || (type === "Bus" ? "Mini Bus" : "Sedan"),
+            Number(per_km_rate),
+            Number(base_fare),
+            Number(capacity),
+            ac_type,
+            Number(luggage_capacity),
+            image_url || fallbackImg,
+            description
+          )
+          .run();
+
+        return jsonResponse(
+          {
+            success: true,
+            vehicle_id: result.meta?.last_row_id,
+            message: "Vehicle added successfully to fleet!",
+          },
+          201
+        );
+      }
+
+      // DELETE /api/vehicles/:id
+      if (request.method === "DELETE" && url.pathname.startsWith("/api/vehicles/")) {
+        const id = url.pathname.split("/")[3];
+        await env.DB.prepare("DELETE FROM vehicles WHERE id = ?").bind(id).run();
+        return jsonResponse({ success: true, message: "Vehicle removed" });
+      }
+
+      // ================= PACKAGES API (South India) =================
       // GET /api/packages
       if (request.method === "GET" && url.pathname === "/api/packages") {
-        const search = url.searchParams.get("search");
+        const state = url.searchParams.get("state");
         const category = url.searchParams.get("category");
+        const search = url.searchParams.get("search");
 
         let query = "SELECT * FROM packages WHERE 1=1";
         const params: any[] = [];
 
+        if (state && state !== "All") {
+          query += " AND state = ?";
+          params.push(state);
+        }
+
         if (category && category !== "All") {
-          query += " AND (category LIKE ?)";
-          params.push(`%${category}%`);
+          query += " AND category = ?";
+          params.push(category);
         }
 
         if (search) {
-          query += " AND (title LIKE ? OR destination LIKE ? OR country LIKE ?)";
+          query += " AND (title LIKE ? OR destination LIKE ? OR state LIKE ?)";
           params.push(`%${search}%`, `%${search}%`, `%${search}%`);
         }
 
-        query += " ORDER BY featured DESC, rating DESC";
+        query += " ORDER BY featured DESC, price ASC";
 
         const stmt = env.DB.prepare(query);
         const { results } = params.length > 0 ? await stmt.bind(...params).all() : await stmt.all();
@@ -83,70 +160,138 @@ export default {
         return jsonResponse({ packages: results });
       }
 
-      // GET /api/packages/:id
-      if (request.method === "GET" && url.pathname.startsWith("/api/packages/")) {
-        const id = url.pathname.split("/")[3];
-        const pkg = await env.DB.prepare("SELECT * FROM packages WHERE id = ?").bind(id).first();
-        if (!pkg) {
-          return jsonResponse({ error: "Package not found" }, 404);
+      // POST /api/packages (Admin add South India trip)
+      if (request.method === "POST" && url.pathname === "/api/packages") {
+        const body: any = await request.json();
+        const {
+          title,
+          destination,
+          state,
+          category = "Hill Station",
+          price,
+          duration_days = 3,
+          image_url,
+          description = "",
+          highlights = "",
+          featured = 0,
+        } = body;
+
+        if (!title || !destination || !state || !price) {
+          return jsonResponse({ error: "Title, destination, state, and price are required." }, 400);
         }
-        return jsonResponse({ package: pkg });
+
+        const fallbackImg =
+          "https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=1000&q=80";
+
+        const result = await env.DB.prepare(
+          `INSERT INTO packages (title, destination, country, state, category, price, duration_days, image_url, description, highlights, featured)
+           VALUES (?, ?, 'India', ?, ?, ?, ?, ?, ?, ?, ?)`
+        )
+          .bind(
+            title,
+            destination,
+            state,
+            category,
+            Number(price),
+            Number(duration_days),
+            image_url || fallbackImg,
+            description,
+            highlights,
+            featured ? 1 : 0
+          )
+          .run();
+
+        return jsonResponse(
+          {
+            success: true,
+            package_id: result.meta?.last_row_id,
+            message: "South India trip plan created successfully!",
+          },
+          201
+        );
       }
 
+      // DELETE /api/packages/:id
+      if (request.method === "DELETE" && url.pathname.startsWith("/api/packages/")) {
+        const id = url.pathname.split("/")[3];
+        await env.DB.prepare("DELETE FROM packages WHERE id = ?").bind(id).run();
+        return jsonResponse({ success: true, message: "Package removed" });
+      }
+
+      // ================= BOOKINGS API =================
       // POST /api/bookings
       if (request.method === "POST" && url.pathname === "/api/bookings") {
         const body: any = await request.json();
         const {
+          booking_type = "package", // 'package' or 'route_rental'
           package_id,
           package_title,
+          vehicle_id,
+          vehicle_name,
+          pickup_location,
+          dropoff_location,
+          distance_km,
           customer_name,
           customer_email,
           customer_phone = "",
           travel_date,
           travelers_count = 1,
           special_requests = "",
+          total_price,
         } = body;
 
         if (!customer_name || !customer_email || !travel_date) {
-          return jsonResponse(
-            { error: "Customer name, email, and travel date are required." },
-            400
-          );
+          return jsonResponse({ error: "Name, email, and travel date are required." }, 400);
         }
 
-        let pricePerPerson = 1200;
-        let finalPackageTitle = package_title || "Custom Itinerary";
+        let computedTotal = Number(total_price) || 0;
 
-        if (package_id) {
-          const pkg: any = await env.DB.prepare("SELECT title, price FROM packages WHERE id = ?")
-            .bind(package_id)
+        // If route rental and total_price not sent, compute from vehicle per_km_rate
+        if (booking_type === "route_rental" && vehicle_id && (!computedTotal || computedTotal <= 0)) {
+          const v: any = await env.DB.prepare("SELECT per_km_rate, base_fare FROM vehicles WHERE id = ?")
+            .bind(vehicle_id)
             .first();
-          if (pkg) {
-            pricePerPerson = pkg.price;
-            finalPackageTitle = pkg.title;
+          if (v) {
+            const km = Number(distance_km) || 100;
+            computedTotal = Math.round(km * v.per_km_rate + v.base_fare);
           }
         }
 
-        const count = Number(travelers_count) || 1;
-        const totalPrice = pricePerPerson * count;
+        // If package booking and total_price not sent, compute from package price
+        if (booking_type === "package" && package_id && (!computedTotal || computedTotal <= 0)) {
+          const p: any = await env.DB.prepare("SELECT price FROM packages WHERE id = ?")
+            .bind(package_id)
+            .first();
+          if (p) {
+            computedTotal = p.price * (Number(travelers_count) || 1);
+          }
+        }
+
+        if (computedTotal <= 0) computedTotal = 2500;
 
         const result = await env.DB.prepare(
           `INSERT INTO bookings (
-            package_id, package_title, customer_name, customer_email,
-            customer_phone, travel_date, travelers_count, special_requests,
-            status, total_price
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Confirmed', ?)`
+            package_id, package_title, vehicle_id, vehicle_name, booking_type,
+            pickup_location, dropoff_location, distance_km, customer_name, customer_email,
+            customer_phone, travel_date, travelers_count, special_requests, status, total_price
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Confirmed', ?)`
         )
           .bind(
             package_id || null,
-            finalPackageTitle,
+            package_title || null,
+            vehicle_id || null,
+            vehicle_name || null,
+            booking_type,
+            pickup_location || null,
+            dropoff_location || null,
+            distance_km ? Number(distance_km) : null,
             customer_name,
             customer_email,
             customer_phone,
             travel_date,
-            count,
+            Number(travelers_count) || 1,
             special_requests,
-            totalPrice
+            computedTotal
           )
           .run();
 
@@ -154,8 +299,8 @@ export default {
           {
             success: true,
             booking_id: result.meta?.last_row_id,
-            total_price: totalPrice,
-            message: "Booking confirmed successfully with Travel Agencie!",
+            total_price: computedTotal,
+            message: "Reservation confirmed successfully with Travel Agencie!",
           },
           201
         );
@@ -164,15 +309,28 @@ export default {
       // GET /api/bookings
       if (request.method === "GET" && url.pathname === "/api/bookings") {
         const { results } = await env.DB.prepare(
-          "SELECT * FROM bookings ORDER BY created_at DESC LIMIT 50"
+          "SELECT * FROM bookings ORDER BY created_at DESC LIMIT 100"
         ).all();
         return jsonResponse({ bookings: results });
       }
 
+      // PATCH /api/bookings/:id (Admin update status)
+      if (request.method === "PATCH" && url.pathname.startsWith("/api/bookings/")) {
+        const id = url.pathname.split("/")[3];
+        const body: any = await request.json();
+        const { status } = body;
+
+        if (!status) return jsonResponse({ error: "Status is required." }, 400);
+
+        await env.DB.prepare("UPDATE bookings SET status = ? WHERE id = ?").bind(status, id).run();
+        return jsonResponse({ success: true, message: `Booking status updated to ${status}` });
+      }
+
+      // ================= INQUIRIES API =================
       // POST /api/inquiries
       if (request.method === "POST" && url.pathname === "/api/inquiries") {
         const body: any = await request.json();
-        const { name, email, subject = "General Inquiry", message } = body;
+        const { name, email, subject = "South India Tour Inquiry", message } = body;
 
         if (!name || !email || !message) {
           return jsonResponse({ error: "Name, email, and message are required." }, 400);
