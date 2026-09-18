@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { User } from '../../types';
 import { BusLogo } from './BusLogo';
+import { NavIcon } from './NavIcon';
 
 export type NavTab = 'home' | 'route-calc' | 'tours' | 'fleet' | 'inquiry' | 'admin';
 
@@ -27,43 +28,36 @@ export const Navbar: React.FC<NavbarProps> = ({
     id: NavTab;
     label: string;
     sublabel: string;
-    icon: string;
   }[] = [
     {
       id: 'home',
       label: 'Home',
       sublabel: 'Holiday Trips',
-      icon: '🏠',
     },
     {
       id: 'tours',
       label: 'Tour Packages',
       sublabel: 'Curated Holidays',
-      icon: '🌴',
     },
     {
       id: 'route-calc',
       label: 'Trip Planner',
       sublabel: 'Route & Map',
-      icon: '🗺️',
     },
     {
       id: 'fleet',
       label: 'Tourist Fleet',
       sublabel: 'Cabs & Buses',
-      icon: '🚌',
     },
     {
       id: 'inquiry',
       label: 'Group Tours',
       sublabel: 'Custom Charters',
-      icon: '👥',
     },
     {
       id: 'admin',
       label: 'My Bookings',
       sublabel: currentUser?.role === 'admin' ? 'Admin Access' : 'User Portal',
-      icon: '📑',
     },
   ];
 
@@ -128,7 +122,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                       : 'border-transparent text-gray-600 hover:text-[#008cff] hover:bg-gray-50'
                   }`}
                 >
-                  <span className="text-lg leading-none mb-1">{item.icon}</span>
+                  <div className="mb-1 flex items-center justify-center">
+                    <NavIcon tab={item.id} active={isActive} size="md" />
+                  </div>
                   <span className={`text-xs font-bold leading-tight whitespace-nowrap ${isActive ? 'text-[#008cff]' : 'text-gray-800'}`}>
                     {item.label}
                   </span>
@@ -201,10 +197,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Quick Call Button */}
             <a
               href="tel:+919840123456"
-              className="flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1.5 rounded-lg transition shrink-0"
+              className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1.5 rounded-lg transition shrink-0"
               title="24x7 Helpline"
             >
-              <span>📞</span>
+              <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
               <span className="hidden xs:inline">Call</span>
             </a>
 
@@ -269,7 +267,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : 'text-gray-700 hover:bg-gray-50'
               }`}
             >
-              <span className="text-xl">{item.icon}</span>
+              <NavIcon tab={item.id} active={activeTab === item.id} size="md" />
               <div>
                 <div>{item.label}</div>
                 <div className="text-[11px] text-gray-600 font-normal">{item.sublabel}</div>
@@ -283,18 +281,18 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       )}
 
-      {/* Mobile Bottom Navigation Bar (Native App Grade UX) */}
+      {/* Mobile Bottom Navigation Bar (MNC MakeMyTrip Standard) */}
       <nav
         aria-label="Mobile Bottom Navigation"
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-200 py-1.5 px-2 flex justify-around items-center shadow-lg"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-200 py-1.5 px-1 flex justify-around items-center shadow-lg"
       >
         {[
-          { id: 'home', label: 'Holidays', icon: '🏠' },
-          { id: 'tours', label: 'Packages', icon: '🌴' },
-          { id: 'route-calc', label: 'Plan Tour', icon: '🗺️' },
-          { id: 'fleet', label: 'Fleet', icon: '🚌' },
-          { id: 'inquiry', label: 'Custom', icon: '👥' },
-          { id: 'admin', label: 'Bookings', icon: '📑' },
+          { id: 'home', label: 'Holidays' },
+          { id: 'tours', label: 'Packages' },
+          { id: 'route-calc', label: 'Plan Tour' },
+          { id: 'fleet', label: 'Fleet' },
+          { id: 'inquiry', label: 'Custom' },
+          { id: 'admin', label: 'Bookings' },
         ].map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -302,14 +300,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               key={tab.id}
               type="button"
               onClick={() => handleTabClick(tab.id as NavTab)}
-              className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all active:scale-95 ${
+              className={`flex flex-col items-center justify-center py-1 px-1.5 rounded-lg transition-all active:scale-95 ${
                 isActive ? 'text-[#008cff]' : 'text-gray-500 hover:text-gray-800'
               }`}
             >
-              <span className={`text-lg leading-none transition-transform ${isActive ? 'scale-110' : ''}`}>
-                {tab.icon}
-              </span>
-              <span className={`text-[10px] tracking-tight mt-1 whitespace-nowrap ${isActive ? 'font-black text-[#008cff]' : 'font-medium'}`}>
+              <div className={`transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
+                <NavIcon tab={tab.id as NavTab} active={isActive} size="md" />
+              </div>
+              <span className={`text-[10px] tracking-tight mt-1 whitespace-nowrap ${isActive ? 'font-bold text-[#008cff]' : 'font-medium'}`}>
                 {tab.label}
               </span>
               {isActive && (
