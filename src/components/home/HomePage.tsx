@@ -511,44 +511,47 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
         {/* ------------------------------------------------------------ */}
-        {/* MAIN VISUAL DESTINATIONS CONTENT */}
         {/* ------------------------------------------------------------ */}
-        <div className="space-y-3 pt-1">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+        {/* POPULAR TOURIST DESTINATIONS (HUMAN DESIGN) */}
+        {/* ------------------------------------------------------------ */}
+        <div className="space-y-4 pt-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block">
-                Visual Holiday Explorer
-              </span>
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mt-0.5">
-                Top Tourist Destinations Across South India
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
+                Popular South India Destinations
               </h2>
+              <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+                Explore curated tour routes or click any destination to view itinerary and fare.
+              </p>
             </div>
-            <div className="text-xs text-gray-500 font-medium hidden sm:flex items-center gap-1">
-              <span>Swipe cards to explore</span>
-              <span>➔</span>
+
+            {/* Clean Region Filter Tabs */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+              {[
+                { label: 'All', value: 'All' },
+                { label: 'Tamil Nadu', value: 'Tamil Nadu' },
+                { label: 'Kerala', value: 'Kerala' },
+                { label: 'Karnataka', value: 'Karnataka' },
+                { label: 'Hill Stations', value: 'Hill Station' },
+              ].map((tab) => (
+                <button
+                  key={tab.value}
+                  type="button"
+                  onClick={() => setHeroDestFilter(tab.value)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer whitespace-nowrap ${
+                    heroDestFilter === tab.value
+                      ? 'bg-gray-900 text-white shadow-xs'
+                      : 'bg-gray-100/80 text-gray-600 hover:bg-gray-200/70 hover:text-gray-900'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Category Filter Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-            {['All', 'Tamil Nadu', 'Kerala', 'Karnataka', 'Hill Station', 'Backwaters', 'Heritage', 'Wildlife'].map((f) => (
-              <button
-                key={f}
-                type="button"
-                onClick={() => setHeroDestFilter(f)}
-                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer border ${
-                  heroDestFilter === f
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                    : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-200'
-                }`}
-              >
-                {f === 'All' ? 'All Destinations' : f}
-              </button>
-            ))}
-          </div>
-
-          {/* Rich Visual Cards Horizontal Carousel */}
-          <div className="flex items-stretch gap-3.5 overflow-x-auto pb-3 -mx-1 px-1 no-scrollbar scroll-smooth">
+          {/* Clean Human Responsive Destination Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
             {visibleDestinations.map((dest) => {
               const isSelected = selectedDestId === dest.id;
               const startFare = getDestStartingFare(dest);
@@ -561,56 +564,51 @@ export const HomePage: React.FC<HomePageProps> = ({
                     const el = document.getElementById('generated-itinerary-card');
                     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   }}
-                  className={`shrink-0 w-56 sm:w-64 bg-white text-gray-900 rounded-2xl overflow-hidden border transition-all duration-200 cursor-pointer flex flex-col group ${
+                  className={`group bg-white rounded-xl border transition-all duration-150 cursor-pointer flex flex-col overflow-hidden ${
                     isSelected
-                      ? 'ring-2 ring-blue-600 border-blue-600 shadow-md scale-[1.01]'
-                      : 'border-gray-200 hover:border-gray-300 shadow-xs hover:shadow-md'
+                      ? 'border-blue-600 ring-1 ring-blue-600 shadow-xs'
+                      : 'border-gray-200 hover:border-gray-300 hover:shadow-xs'
                   }`}
                 >
-                  <div className="relative h-32 sm:h-36 bg-gray-100 overflow-hidden">
+                  {/* Clean Natural Photo */}
+                  <div className="relative aspect-4/3 w-full bg-gray-100 overflow-hidden">
                     <img
                       src={dest.imageUrl}
                       alt={dest.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                      className="w-full h-full object-cover group-hover:scale-104 transition duration-300"
                       loading="lazy"
                     />
-                    <span className="absolute top-2.5 left-2.5 bg-gray-900/80 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded">
-                      {dest.state}
-                    </span>
-                    <span className="absolute top-2.5 right-2.5 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-xs">
-                      {dest.defaultDays}D / {dest.defaultDays - 1}N
-                    </span>
-                    <span className="absolute bottom-2.5 left-2.5 bg-black/60 backdrop-blur-xs text-white text-[10px] font-medium px-2 py-0.5 rounded">
-                      {dest.category}
-                    </span>
+                    <div className="absolute top-2 left-2">
+                      <span className="bg-black/60 backdrop-blur-xs text-white text-[10px] font-medium px-2 py-0.5 rounded-md">
+                        {dest.state}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="p-3.5 flex flex-col flex-1 justify-between">
+                  {/* Clean Text Details */}
+                  <div className="p-3 flex flex-col flex-1 justify-between">
                     <div>
                       <h3 className="font-bold text-sm text-gray-900 group-hover:text-blue-600 transition leading-snug">
                         {dest.name}
                       </h3>
-                      <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+                      <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-1">
                         {dest.tagline}
                       </p>
-                      <div className="text-[11px] text-gray-600 mt-1.5 truncate">
-                        • {dest.topSights.slice(0, 2).join(' • ')}
-                      </div>
                     </div>
 
-                    <div className="mt-3 pt-2.5 border-t border-gray-100 flex items-center justify-between">
+                    <div className="mt-2.5 pt-2 border-t border-gray-100 flex items-center justify-between">
                       <div>
-                        <span className="text-[10px] text-gray-400 uppercase font-semibold block">Tour From</span>
-                        <span className="text-sm font-extrabold text-gray-900 price">
+                        <span className="text-[10px] text-gray-400 block">From</span>
+                        <span className="text-xs sm:text-sm font-bold text-gray-900 price">
                           {formatINR(startFare)}
                         </span>
                       </div>
-                      <span className={`text-xs font-bold px-2.5 py-1 rounded transition ${
+                      <span className={`text-[11px] font-medium px-2 py-0.5 rounded transition ${
                         isSelected
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white'
+                          ? 'bg-blue-50 text-blue-700 font-semibold'
+                          : 'text-gray-400 group-hover:text-blue-600'
                       }`}>
-                        {isSelected ? 'Selected ✓' : 'Plan Trip ➔'}
+                        {isSelected ? 'Selected ✓' : `${dest.defaultDays}D / ${dest.defaultDays - 1}N`}
                       </span>
                     </div>
                   </div>
