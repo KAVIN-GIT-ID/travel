@@ -1,25 +1,35 @@
 {
-  "name": "test1",
+  "name": "travel-agencie",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "worker:dev": "wrangler dev",
+    "deploy:worker": "wrangler deploy",
+    "deploy:pages": "npm run build && wrangler pages deploy dist --project-name travel-agencie --commit-dirty=true",
+    "deploy:dev": "npm run deploy:worker && npm run deploy:pages",
+    "deploy": "npm run deploy:dev",
+    "db:migrate:remote": "wrangler d1 execute travel-agencie-db --remote --file=./schema.sql --yes",
+    "db:migrate:local": "wrangler d1 execute travel-agencie-db --local --file=./schema.sql"
   },
   "dependencies": {
+    "lucide-react": "^1.47.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260918.1",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
     "oxlint": "^1.81.0",
     "typescript": "~6.0.2",
-    "vite": "^8.3.0"
+    "vite": "^8.3.0",
+    "wrangler": "^4.134.0"
   }
 }
