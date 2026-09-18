@@ -1,30 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  Compass,
-  Calendar,
-  Users,
-  MapPin,
-  Star,
-  CheckCircle2,
-  X,
-  Search,
-  Clock,
-  Send,
-  Database,
-  Globe2,
-  Layers,
-  Sparkles,
-  PlaneTakeoff,
-  RefreshCw,
-  Phone,
-  Mail,
-  User,
-  ShieldCheck,
-} from 'lucide-react';
-import type {
-  Package,
-  Booking,
-} from './api';
+import type { Package, Booking } from './api';
 import {
   fetchPackages,
   createBooking,
@@ -39,7 +14,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'explore' | 'inquiry' | 'admin'>('explore');
+  const [activeTab, setActiveTab] = useState<'tours' | 'inquiry' | 'agent'>('tours');
 
   // Backend Health
   const [backendStatus, setBackendStatus] = useState<'checking' | 'healthy' | 'offline'>('checking');
@@ -60,68 +35,71 @@ export default function App() {
   const [bookingError, setBookingError] = useState('');
 
   // Details Modal
-  const [detailsModalPackage, setDetailsModalPackage] = useState<Package | null>(null);
+  const [detailsPackage, setDetailsPackage] = useState<Package | null>(null);
 
-  // Agent / Admin Bookings state
-  const [adminBookings, setAdminBookings] = useState<Booking[]>([]);
+  // Agent Portal Bookings
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [adminLoading, setAdminLoading] = useState(false);
 
-  // Inquiry Form state
+  // Inquiry Form
   const [inquiryForm, setInquiryForm] = useState({
     name: '',
     email: '',
-    subject: 'Custom Luxury Itinerary',
+    subject: '',
     message: '',
   });
   const [inquirySubmitting, setInquirySubmitting] = useState(false);
   const [inquirySuccess, setInquirySuccess] = useState(false);
   const [inquiryError, setInquiryError] = useState('');
 
-  // Categories list
-  const categories = ['All', 'Beach & Culture', 'Cultural', 'Luxury', 'Adventure', 'Wildlife', 'Romantic'];
+  const categories = [
+    'All',
+    'Cultural',
+    'Luxury',
+    'Beach & Culture',
+    'Adventure',
+    'Wildlife',
+    'Romantic',
+  ];
 
-  // Load packages
   const loadPackages = async () => {
     try {
       setLoading(true);
       const data = await fetchPackages(selectedCategory, searchQuery);
       setPackages(data);
     } catch (err) {
-      console.error('Error fetching packages:', err);
+      console.error('Failed to load packages:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Check health and load packages on mount
   useEffect(() => {
     checkBackendHealth().then((res) => {
-      if (res.status === 'healthy') setBackendStatus('healthy');
-      else setBackendStatus('offline');
+      setBackendStatus(res.status === 'healthy' ? 'healthy' : 'offline');
     });
     loadPackages();
   }, [selectedCategory]);
 
-  // Load bookings for admin view
-  const loadAdminBookings = async () => {
+  const loadAgentBookings = async () => {
     try {
       setAdminLoading(true);
       const data = await fetchBookings();
-      setAdminBookings(data);
+      setBookings(data);
     } catch (err) {
-      console.error('Failed to load bookings:', err);
+      console.error('Failed to fetch bookings:', err);
     } finally {
       setAdminLoading(false);
     }
   };
 
   useEffect(() => {
-    if (activeTab === 'admin') {
-      loadAdminBookings();
+    if (activeTab === 'agent') {
+      loadAgentBookings();
     }
   }, [activeTab]);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     loadPackages();
   };
@@ -154,7 +132,7 @@ export default function App() {
         id: res.booking_id,
         total: res.total_price,
       });
-      // Reset form fields
+
       setBookingForm({
         customer_name: '',
         customer_email: '',
@@ -164,7 +142,7 @@ export default function App() {
         special_requests: '',
       });
     } catch (err: any) {
-      setBookingError(err.message || 'Booking submission failed');
+      setBookingError(err.message || 'Failed to complete booking');
     } finally {
       setBookingSubmitting(false);
     }
@@ -175,16 +153,16 @@ export default function App() {
     setInquirySubmitting(true);
     setInquiryError('');
     try {
-      await createInquiry(inquiryForm);
-      setInquirySuccess(true);
-      setInquiryForm({
-        name: '',
-        email: '',
-        subject: 'Custom Luxury Itinerary',
-        message: '',
+      await createInquiry({
+        name: inquiryForm.name,
+        email: inquiryForm.email,
+        subject: inquiryForm.subject || 'General Inquiry',
+        message: inquiryForm.message,
       });
+      setInquirySuccess(true);
+      setInquiryForm({ name: '', email: '', subject: '', message: '' });
     } catch (err: any) {
-      setInquiryError(err.message || 'Inquiry submission failed');
+      setInquiryError(err.message || 'Failed to submit inquiry');
     } finally {
       setInquirySubmitting(false);
     }
@@ -196,242 +174,175 @@ export default function App() {
   }, [selectedPackage, bookingForm.travelers_count]);
 
   return (
-    <div className="min-h-screen">
-      {/* Sticky Header */}
-      <header className="header-nav">
-        <div className="nav-container">
-          <div className="brand-logo">
-            <PlaneTakeoff className="text-amber-500" size={26} />
-            <span>Travel Agencie</span>
-            <span className="brand-badge">Cloudflare D1</span>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* iOS Frosted Navigation Bar */}
+      <header className="ios-navbar">
+        <div className="ios-nav-container">
+          <div
+            className="ios-logo-group"
+            onClick={() => {
+              setActiveTab('tours');
+              setSelectedCategory('All');
+            }}
+          >
+            <div className="ios-logo-circle">TA</div>
+            <span className="ios-logo-title">Travel Agencie</span>
           </div>
 
-          <ul className="nav-links">
-            <li
-              className={`nav-item ${activeTab === 'explore' ? 'active' : ''}`}
-              onClick={() => setActiveTab('explore')}
+          {/* iOS Segmented Control */}
+          <div className="ios-segmented-control">
+            <button
+              className={`ios-segment-btn ${activeTab === 'tours' ? 'active' : ''}`}
+              onClick={() => setActiveTab('tours')}
             >
-              Curated Escapes
-            </li>
-            <li
-              className={`nav-item ${activeTab === 'inquiry' ? 'active' : ''}`}
+              Curated Tours
+            </button>
+            <button
+              className={`ios-segment-btn ${activeTab === 'inquiry' ? 'active' : ''}`}
               onClick={() => setActiveTab('inquiry')}
             >
-              Custom Inquiry
-            </li>
-            <li
-              className={`nav-item ${activeTab === 'admin' ? 'active' : ''}`}
-              onClick={() => setActiveTab('admin')}
+              Inquiry
+            </button>
+            <button
+              className={`ios-segment-btn ${activeTab === 'agent' ? 'active' : ''}`}
+              onClick={() => setActiveTab('agent')}
             >
-              Agent D1 Portal
-            </li>
-          </ul>
+              Agent D1
+            </button>
+          </div>
 
-          <div className="nav-actions">
-            <div className="edge-pill" title={`Connected to ${API_BASE_URL}`}>
-              <div
+          <div className="ios-nav-actions">
+            <div className="ios-status-pill" title={`Connected to ${API_BASE_URL}`}>
+              <span
+                className="ios-status-dot"
                 style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  backgroundColor: backendStatus === 'healthy' ? '#10b981' : '#f59e0b',
-                  boxShadow: backendStatus === 'healthy' ? '0 0 8px #10b981' : 'none',
+                  backgroundColor: backendStatus === 'healthy' ? '#34c759' : '#ff9500',
                 }}
               />
-              <span>{backendStatus === 'healthy' ? 'D1 Edge Online' : 'Connecting'}</span>
+              <span>{backendStatus === 'healthy' ? 'D1 Live' : 'Offline'}</span>
             </div>
 
             <button
-              className="btn-primary"
+              className="ios-btn-black"
               onClick={() => {
                 if (packages.length > 0) handleOpenBooking(packages[0]);
               }}
             >
-              Book Now
+              Reserve
             </button>
           </div>
         </div>
       </header>
 
-      {/* Main Content Areas */}
-      {activeTab === 'explore' && (
-        <main>
-          {/* Hero Section */}
-          <section className="hero-wrapper">
-            <div className="hero-tag">
-              <Sparkles size={14} /> Exceptional Global Journeys
-            </div>
-            <h1 className="hero-title">
-              Journeys Crafted for the <br />
-              <span className="hero-highlight">Discerning Explorer</span>
-            </h1>
-            <p className="hero-subtitle">
-              Handpicked luxury itineraries, sacred heritage, and breathtaking sanctuaries.
-              Powered by Cloudflare Workers &amp; Serverless D1 SQL.
-            </p>
+      {/* Main Container */}
+      <main className="ios-main-container" style={{ flex: 1 }}>
+        {activeTab === 'tours' && (
+          <div>
+            {/* iOS Simple Clean Hero */}
+            <div className="ios-hero-clean">
+              <div className="ios-hero-badge">Curated Itineraries</div>
+              <h1 className="ios-hero-heading">
+                Simple, thoughtful travel planning.
+              </h1>
+              <p className="ios-hero-subheading">
+                Browse handpicked destinations, review itineraries, and confirm reservations instantly via Cloudflare D1 SQL.
+              </p>
 
-            {/* Search & Filter Bar */}
-            <div className="search-box-container">
-              <form className="search-form-grid" onSubmit={handleSearchSubmit}>
-                <div className="input-field-group">
-                  <Search size={18} />
-                  <input
-                    type="text"
-                    className="search-input"
-                    placeholder="Search destinations, countries, or tours..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-
-                <div className="input-field-group">
-                  <Compass size={18} />
-                  <select
-                    className="category-select"
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                  >
-                    {categories.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat === 'All' ? 'All Categories' : cat}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <button type="submit" className="btn-primary">
-                  Search Expeditions
+              {/* iOS Clean Search */}
+              <form onSubmit={handleSearch} className="ios-search-bar">
+                <input
+                  type="text"
+                  className="ios-search-input"
+                  placeholder="Search Bali, Kyoto, Amalfi, Alps..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <select
+                  className="ios-category-dropdown"
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                >
+                  {categories.map((c) => (
+                    <option key={c} value={c}>
+                      {c === 'All' ? 'All Categories' : c}
+                    </option>
+                  ))}
+                </select>
+                <button type="submit" className="ios-btn-primary">
+                  Search
                 </button>
               </form>
-            </div>
 
-            {/* Category Filter Pills */}
-            <div className="category-pills-row">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  className={`pill-btn ${selectedCategory === cat ? 'active' : ''}`}
-                  onClick={() => setSelectedCategory(cat)}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-
-            {/* Trust & Guarantee Stats Strip */}
-            <div className="stats-strip">
-              <div className="stat-item">
-                <div className="stat-icon-wrap">
-                  <ShieldCheck size={22} />
-                </div>
-                <div className="stat-content">
-                  <h4>Vetted Luxury Accommodations</h4>
-                  <p>Hand-inspected 5-star villas &amp; ryokans</p>
-                </div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-icon-wrap">
-                  <Clock size={22} />
-                </div>
-                <div className="stat-content">
-                  <h4>24/7 Private Concierge</h4>
-                  <p>Dedicated personal travel specialist</p>
-                </div>
-              </div>
-              <div className="stat-item">
-                <div className="stat-icon-wrap">
-                  <Globe2 size={22} />
-                </div>
-                <div className="stat-content">
-                  <h4>Instant Edge Booking</h4>
-                  <p>Synchronized to Cloudflare D1</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Featured Travel Packages Section */}
-          <section className="section-container">
-            <div className="section-head">
-              <div>
-                <h2 className="section-title">Signature Itineraries</h2>
-                <p className="section-desc">
-                  Curated world expeditions with verified guest ratings &amp; transparent pricing.
-                </p>
-              </div>
-              <div className="text-subtle text-sm">
-                Showing {packages.length} luxury packages
+              {/* iOS Category Filter Pills */}
+              <div className="ios-filter-scroll">
+                {categories.map((c) => (
+                  <button
+                    key={c}
+                    className={`ios-filter-pill ${selectedCategory === c ? 'active' : ''}`}
+                    onClick={() => setSelectedCategory(c)}
+                  >
+                    {c}
+                  </button>
+                ))}
               </div>
             </div>
 
+            {/* Section Header */}
+            <div className="ios-section-header">
+              <h2 className="ios-section-title">Available Expeditions</h2>
+              <span className="ios-section-meta">
+                {packages.length} {packages.length === 1 ? 'package' : 'packages'}
+              </span>
+            </div>
+
+            {/* Cards Grid */}
             {loading ? (
-              <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>
-                <RefreshCw className="animate-spin" size={32} style={{ margin: '0 auto 1rem' }} />
-                <p>Loading curated packages from Cloudflare D1...</p>
+              <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--ios-text-secondary)' }}>
+                Loading packages from Cloudflare D1...
               </div>
             ) : packages.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--text-muted)' }}>
-                <p>No travel packages match your filter criteria.</p>
-                <button
-                  className="btn-pill-subtle"
-                  style={{ marginTop: '1rem' }}
-                  onClick={() => {
-                    setSelectedCategory('All');
-                    setSearchQuery('');
-                  }}
-                >
-                  Reset Filters
-                </button>
+              <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--ios-text-secondary)' }}>
+                No destinations found.
               </div>
             ) : (
-              <div className="packages-grid">
+              <div className="ios-grid">
                 {packages.map((pkg) => (
-                  <article key={pkg.id} className="package-card">
-                    <div className="card-img-box">
-                      <img src={pkg.image_url} alt={pkg.title} className="card-img" loading="lazy" />
-                      <span className="card-badge-category">{pkg.category}</span>
-                      {pkg.featured === 1 && (
-                        <span className="card-badge-featured">
-                          <Sparkles size={12} /> Featured
-                        </span>
-                      )}
+                  <div key={pkg.id} className="ios-card">
+                    <div className="ios-card-media">
+                      <img src={pkg.image_url} alt={pkg.title} className="ios-card-img" loading="lazy" />
+                      <span className="ios-card-tag">{pkg.category}</span>
                     </div>
 
-                    <div className="card-body">
-                      <div className="card-location">
-                        <MapPin size={14} />
-                        <span>{pkg.destination}, {pkg.country}</span>
-                        <span style={{ margin: '0 0.35rem', color: 'var(--text-subtle)' }}>•</span>
-                        <span style={{ color: 'var(--text-muted)' }}>{pkg.duration_days} Days</span>
+                    <div className="ios-card-content">
+                      <div className="ios-card-location">
+                        {pkg.destination}, {pkg.country} • {pkg.duration_days} Days
                       </div>
+                      <h3 className="ios-card-name">{pkg.title}</h3>
+                      <p className="ios-card-summary">{pkg.description}</p>
 
-                      <h3 className="card-title">{pkg.title}</h3>
-                      <p className="card-description">{pkg.description}</p>
-
-                      <div className="card-highlights">
-                        {pkg.highlights.split(',').slice(0, 3).map((item, idx) => (
-                          <span key={idx} className="highlight-tag">
-                            {item.trim()}
+                      <div className="ios-card-pills">
+                        {pkg.highlights.split(',').slice(0, 3).map((h, i) => (
+                          <span key={i} className="ios-mini-pill">
+                            {h.trim()}
                           </span>
                         ))}
                       </div>
 
-                      <div className="card-footer">
-                        <div className="price-box">
-                          <span className="price-sub">Starting From</span>
-                          <span className="price-amount">${pkg.price.toLocaleString()}</span>
+                      <div className="ios-card-footer">
+                        <div className="ios-card-price">
+                          ${pkg.price.toLocaleString()}
+                          <span>/ person</span>
                         </div>
 
-                        <div className="card-actions">
+                        <div className="ios-card-actions">
                           <button
-                            className="btn-card-details"
-                            title="View Itinerary"
-                            onClick={() => setDetailsModalPackage(pkg)}
+                            className="ios-btn-secondary"
+                            onClick={() => setDetailsPackage(pkg)}
                           >
-                            <Compass size={16} />
+                            Details
                           </button>
                           <button
-                            className="btn-card-book"
+                            className="ios-btn-primary"
                             onClick={() => handleOpenBooking(pkg)}
                           >
                             Reserve
@@ -439,224 +350,208 @@ export default function App() {
                         </div>
                       </div>
                     </div>
-                  </article>
+                  </div>
                 ))}
               </div>
             )}
-          </section>
-        </main>
-      )}
-
-      {/* Inquiry Tab */}
-      {activeTab === 'inquiry' && (
-        <section className="section-container" style={{ maxWidth: 760, paddingTop: '4rem' }}>
-          <div className="hero-tag" style={{ display: 'inline-flex' }}>
-            <Mail size={14} /> Bespoke Tailored Travel
           </div>
-          <h2 className="hero-title" style={{ fontSize: '2.5rem', textAlign: 'left', marginBottom: '0.75rem' }}>
-            Request a Custom Expedition
-          </h2>
-          <p className="section-desc" style={{ marginBottom: '2.5rem' }}>
-            Tell our travel curators where you wish to explore. We design custom luxury itineraries
-            tailored specifically to your pace, preferences, and desires.
-          </p>
+        )}
 
-          <div
-            style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 'var(--radius-lg)',
-              padding: '2.25rem',
-            }}
-          >
-            {inquirySuccess ? (
-              <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-                <CheckCircle2 size={54} color="#10b981" style={{ margin: '0 auto 1.25rem' }} />
-                <h3 className="card-title" style={{ color: '#10b981', fontSize: '1.5rem' }}>
-                  Inquiry Received!
-                </h3>
-                <p style={{ color: 'var(--text-muted)', maxWidth: 460, margin: '0 auto 1.5rem' }}>
-                  Your travel inquiry has been saved into Cloudflare D1. A luxury travel specialist
-                  will get back to you with custom proposals within 24 hours.
-                </p>
-                <button
-                  className="btn-primary"
-                  onClick={() => setInquirySuccess(false)}
-                >
-                  Send Another Inquiry
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleInquirySubmit}>
-                {inquiryError && (
+        {/* Custom Inquiry Tab */}
+        {activeTab === 'inquiry' && (
+          <div style={{ maxWidth: 580, margin: '0 auto', paddingTop: '1.5rem' }}>
+            <div className="ios-hero-badge">Direct Concierge</div>
+            <h2 className="ios-hero-heading" style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
+              Custom Itinerary Request
+            </h2>
+            <p className="ios-hero-subheading" style={{ marginBottom: '2rem' }}>
+              Have a specific destination or schedule in mind? Tell us what you need and our travel curators will assemble a proposal.
+            </p>
+
+            <div
+              style={{
+                background: '#ffffff',
+                border: '1px solid var(--ios-border)',
+                borderRadius: 'var(--ios-radius-lg)',
+                padding: '1.75rem',
+              }}
+            >
+              {inquirySuccess ? (
+                <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
                   <div
                     style={{
-                      background: 'rgba(239, 68, 68, 0.15)',
-                      border: '1px solid rgba(239, 68, 68, 0.3)',
-                      color: '#f87171',
-                      padding: '0.75rem 1rem',
-                      borderRadius: 'var(--radius-md)',
-                      marginBottom: '1.25rem',
-                      fontSize: '0.88rem',
+                      width: 48,
+                      height: 48,
+                      borderRadius: '50%',
+                      background: 'var(--ios-green-soft)',
+                      color: 'var(--ios-green-text)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: '0 auto 1rem',
+                      fontWeight: 700,
+                      fontSize: '1.25rem',
                     }}
                   >
-                    {inquiryError}
+                    ✓
                   </div>
-                )}
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+                    Inquiry Sent
+                  </h3>
+                  <p style={{ color: 'var(--ios-text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                    Your request was recorded in Cloudflare D1. We will reach out shortly.
+                  </p>
+                  <button
+                    className="ios-btn-secondary"
+                    onClick={() => setInquirySuccess(false)}
+                  >
+                    Submit Another
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleInquirySubmit}>
+                  {inquiryError && (
+                    <div
+                      style={{
+                        background: '#fef2f2',
+                        color: '#991b1b',
+                        padding: '0.65rem 0.85rem',
+                        borderRadius: 8,
+                        fontSize: '0.85rem',
+                        marginBottom: '1rem',
+                      }}
+                    >
+                      {inquiryError}
+                    </div>
+                  )}
 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Your Full Name *</label>
+                  <div className="ios-form-row">
+                    <div className="ios-form-group">
+                      <label className="ios-form-label">Full Name</label>
+                      <input
+                        type="text"
+                        required
+                        className="ios-form-input"
+                        placeholder="Sarah Jenkins"
+                        value={inquiryForm.name}
+                        onChange={(e) => setInquiryForm({ ...inquiryForm, name: e.target.value })}
+                      />
+                    </div>
+                    <div className="ios-form-group">
+                      <label className="ios-form-label">Email</label>
+                      <input
+                        type="email"
+                        required
+                        className="ios-form-input"
+                        placeholder="sarah@example.com"
+                        value={inquiryForm.email}
+                        onChange={(e) => setInquiryForm({ ...inquiryForm, email: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="ios-form-group">
+                    <label className="ios-form-label">Destination of Interest</label>
                     <input
                       type="text"
-                      required
-                      className="form-control"
-                      placeholder="e.g. Lady Vivienne Montgomery"
-                      value={inquiryForm.name}
-                      onChange={(e) => setInquiryForm({ ...inquiryForm, name: e.target.value })}
+                      className="ios-form-input"
+                      placeholder="e.g. Iceland Northern Lights or Amalfi Coast"
+                      value={inquiryForm.subject}
+                      onChange={(e) => setInquiryForm({ ...inquiryForm, subject: e.target.value })}
                     />
                   </div>
-                  <div className="form-group">
-                    <label className="form-label">Email Address *</label>
-                    <input
-                      type="email"
+
+                  <div className="ios-form-group">
+                    <label className="ios-form-label">Trip Notes &amp; Estimated Dates</label>
+                    <textarea
+                      rows={4}
                       required
-                      className="form-control"
-                      placeholder="vivienne@example.com"
-                      value={inquiryForm.email}
-                      onChange={(e) => setInquiryForm({ ...inquiryForm, email: e.target.value })}
+                      className="ios-form-input"
+                      placeholder="Party size, preferred time of year, pace, special requests..."
+                      value={inquiryForm.message}
+                      onChange={(e) => setInquiryForm({ ...inquiryForm, message: e.target.value })}
                     />
                   </div>
-                </div>
 
-                <div className="form-group">
-                  <label className="form-label">Destination of Interest</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="e.g. Swiss Alps & Lake Como Grand Tour"
-                    value={inquiryForm.subject}
-                    onChange={(e) => setInquiryForm({ ...inquiryForm, subject: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Trip Details, Dates &amp; Requirements *</label>
-                  <textarea
-                    rows={4}
-                    required
-                    className="form-control"
-                    placeholder="Describe your ideal trip, estimated dates, party size, and any special experiences you desire..."
-                    value={inquiryForm.message}
-                    onChange={(e) => setInquiryForm({ ...inquiryForm, message: e.target.value })}
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={inquirySubmitting}
-                  className="btn-primary"
-                  style={{ width: '100%', padding: '0.85rem' }}
-                >
-                  <Send size={16} />
-                  {inquirySubmitting ? 'Transmitting to Cloudflare D1...' : 'Submit Travel Inquiry'}
-                </button>
-              </form>
-            )}
+                  <button
+                    type="submit"
+                    disabled={inquirySubmitting}
+                    className="ios-btn-black"
+                    style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}
+                  >
+                    {inquirySubmitting ? 'Sending...' : 'Send Inquiry'}
+                  </button>
+                </form>
+              )}
+            </div>
           </div>
-        </section>
-      )}
+        )}
 
-      {/* Agent D1 Portal Tab */}
-      {activeTab === 'admin' && (
-        <section className="section-container" style={{ paddingTop: '3.5rem' }}>
-          <div className="section-head">
-            <div>
-              <div className="hero-tag" style={{ display: 'inline-flex' }}>
-                <Database size={14} /> Cloudflare D1 Live Records
+        {/* Agent Portal Tab */}
+        {activeTab === 'agent' && (
+          <div style={{ paddingTop: '1.5rem' }}>
+            <div className="ios-section-header" style={{ marginTop: 0 }}>
+              <div>
+                <div className="ios-hero-badge">Cloudflare D1 Table</div>
+                <h2 className="ios-section-title">Confirmed Reservations</h2>
               </div>
-              <h2 className="section-title">Agent Booking Management</h2>
-              <p className="section-desc">
-                Live bookings table synchronized directly from Cloudflare D1 (<code>travel-agencie-db</code>).
-              </p>
+              <button
+                className="ios-btn-secondary"
+                onClick={loadAgentBookings}
+                disabled={adminLoading}
+              >
+                {adminLoading ? 'Refreshing...' : 'Refresh Records'}
+              </button>
             </div>
 
-            <button
-              className="btn-pill-subtle"
-              onClick={loadAdminBookings}
-              disabled={adminLoading}
-            >
-              <RefreshCw size={14} className={adminLoading ? 'animate-spin' : ''} />
-              <span>Refresh Records</span>
-            </button>
-          </div>
-
-          <div
-            style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 'var(--radius-lg)',
-              overflow: 'hidden',
-            }}
-          >
-            <div className="table-responsive">
-              <table className="custom-table">
+            <div className="ios-table-container">
+              <table className="ios-table">
                 <thead>
                   <tr>
-                    <th>Ref #</th>
-                    <th>Guest</th>
+                    <th>Ref</th>
+                    <th>Customer</th>
                     <th>Package</th>
                     <th>Travel Date</th>
-                    <th>Party</th>
+                    <th>Guests</th>
                     <th>Total</th>
                     <th>Status</th>
-                    <th>Created</th>
                   </tr>
                 </thead>
                 <tbody>
                   {adminLoading ? (
                     <tr>
-                      <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                        <RefreshCw className="animate-spin" size={24} style={{ margin: '0 auto 0.75rem' }} />
-                        Querying Cloudflare D1 database...
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--ios-text-secondary)' }}>
+                        Fetching records from Cloudflare D1...
                       </td>
                     </tr>
-                  ) : adminBookings.length === 0 ? (
+                  ) : bookings.length === 0 ? (
                     <tr>
-                      <td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                        No bookings found in D1 database.
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--ios-text-secondary)' }}>
+                        No bookings found in database.
                       </td>
                     </tr>
                   ) : (
-                    adminBookings.map((b) => (
+                    bookings.map((b) => (
                       <tr key={b.id}>
-                        <td style={{ fontFamily: 'monospace', color: 'var(--accent-gold)' }}>
-                          #BK-{String(b.id).padStart(4, '0')}
+                        <td style={{ fontFamily: 'ui-monospace, monospace', color: 'var(--ios-text-secondary)' }}>
+                          #{b.id}
                         </td>
                         <td>
                           <div style={{ fontWeight: 600 }}>{b.customer_name}</div>
-                          <div style={{ fontSize: '0.78rem', color: 'var(--text-subtle)' }}>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--ios-text-tertiary)' }}>
                             {b.customer_email}
                           </div>
                         </td>
                         <td>{b.package_title}</td>
-                        <td>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                            <Calendar size={13} color="var(--accent-blue)" />
-                            {b.travel_date}
-                          </div>
-                        </td>
-                        <td>{b.travelers_count} guests</td>
-                        <td style={{ fontWeight: 700, color: 'var(--accent-gold-light)' }}>
+                        <td>{b.travel_date}</td>
+                        <td>{b.travelers_count}</td>
+                        <td style={{ fontWeight: 600 }}>
                           ${b.total_price ? b.total_price.toLocaleString() : '—'}
                         </td>
                         <td>
-                          <span className="badge-status confirmed">
-                            <CheckCircle2 size={12} /> {b.status || 'Confirmed'}
+                          <span className="ios-badge-confirmed">
+                            ● {b.status || 'Confirmed'}
                           </span>
-                        </td>
-                        <td style={{ fontSize: '0.78rem', color: 'var(--text-subtle)' }}>
-                          {b.created_at ? new Date(b.created_at).toLocaleDateString() : 'Just now'}
                         </td>
                       </tr>
                     ))
@@ -665,71 +560,82 @@ export default function App() {
               </table>
             </div>
           </div>
-        </section>
-      )}
+        )}
+      </main>
 
-      {/* Booking Modal */}
+      {/* iOS Booking Sheet / Modal */}
       {bookingModalOpen && selectedPackage && (
-        <div className="modal-overlay" onClick={() => setBookingModalOpen(false)}>
-          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3 className="modal-title">Reserve Itinerary</h3>
+        <div className="ios-modal-backdrop" onClick={() => setBookingModalOpen(false)}>
+          <div className="ios-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="ios-modal-grabber" />
+            <div className="ios-modal-header">
+              <h3 className="ios-modal-title">Confirm Reservation</h3>
               <button
-                className="btn-close-modal"
+                className="ios-modal-close-btn"
                 onClick={() => setBookingModalOpen(false)}
               >
-                <X size={20} />
+                ✕
               </button>
             </div>
 
-            <div className="modal-content">
+            <div className="ios-modal-body">
               {bookingSuccess ? (
                 <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
-                  <CheckCircle2 size={58} color="#10b981" style={{ margin: '0 auto 1rem' }} />
-                  <h3 className="card-title" style={{ color: '#10b981', fontSize: '1.4rem' }}>
-                    Booking Confirmed!
+                  <div
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: '50%',
+                      background: 'var(--ios-green-soft)',
+                      color: 'var(--ios-green-text)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: '0 auto 1rem',
+                      fontWeight: 700,
+                      fontSize: '1.4rem',
+                    }}
+                  >
+                    ✓
+                  </div>
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.35rem' }}>
+                    Reservation Confirmed
                   </h3>
-                  <p style={{ color: 'var(--text-muted)', marginBottom: '1.25rem', fontSize: '0.92rem' }}>
-                    Reference ID: <strong style={{ color: 'var(--accent-gold)' }}>#BK-{String(bookingSuccess.id).padStart(4, '0')}</strong>
-                  </p>
-                  <p style={{ color: 'var(--text-subtle)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-                    Your reservation has been securely committed to Cloudflare D1. Total amount due upon concierge consultation: <strong>${bookingSuccess.total.toLocaleString()}</strong>.
+                  <p style={{ color: 'var(--ios-text-secondary)', fontSize: '0.88rem', marginBottom: '1.25rem' }}>
+                    Booking reference #{bookingSuccess.id} has been saved to Cloudflare D1. Total: <strong>${bookingSuccess.total.toLocaleString()}</strong>.
                   </p>
                   <button
-                    className="btn-primary"
+                    className="ios-btn-black"
                     onClick={() => setBookingModalOpen(false)}
                   >
-                    Done
+                    Close
                   </button>
                 </div>
               ) : (
                 <form onSubmit={handleBookingSubmit}>
-                  {/* Selected Package Header */}
+                  {/* Selected Package Capsule */}
                   <div
                     style={{
                       display: 'flex',
-                      gap: '1rem',
                       alignItems: 'center',
-                      background: 'rgba(255, 255, 255, 0.04)',
-                      padding: '0.85rem',
-                      borderRadius: 'var(--radius-md)',
+                      gap: '0.75rem',
+                      background: '#f5f5f7',
+                      borderRadius: 12,
+                      padding: '0.75rem',
                       marginBottom: '1.25rem',
                     }}
                   >
                     <img
                       src={selectedPackage.image_url}
                       alt={selectedPackage.title}
-                      style={{ width: 64, height: 64, borderRadius: 8, objectFit: 'cover' }}
+                      style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'cover' }}
                     />
                     <div>
-                      <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>
                         {selectedPackage.title}
                       </div>
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                        {selectedPackage.destination}, {selectedPackage.country} • {selectedPackage.duration_days} Days
-                      </div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--accent-gold)', fontWeight: 700 }}>
-                        ${selectedPackage.price.toLocaleString()} / person
+                      <div style={{ fontSize: '0.78rem', color: 'var(--ios-text-secondary)' }}>
+                        {selectedPackage.destination} • ${selectedPackage.price.toLocaleString()} per person
                       </div>
                     </div>
                   </div>
@@ -737,116 +643,98 @@ export default function App() {
                   {bookingError && (
                     <div
                       style={{
-                        background: 'rgba(239, 68, 68, 0.15)',
-                        border: '1px solid rgba(239, 68, 68, 0.3)',
-                        color: '#f87171',
-                        padding: '0.75rem 1rem',
-                        borderRadius: 'var(--radius-md)',
-                        marginBottom: '1.25rem',
+                        background: '#fef2f2',
+                        color: '#991b1b',
+                        padding: '0.65rem 0.85rem',
+                        borderRadius: 8,
                         fontSize: '0.85rem',
+                        marginBottom: '1rem',
                       }}
                     >
                       {bookingError}
                     </div>
                   )}
 
-                  <div className="form-group">
-                    <label className="form-label">Primary Guest Full Name *</label>
-                    <div className="input-field-group">
-                      <User size={16} />
+                  <div className="ios-form-group">
+                    <label className="ios-form-label">Guest Name</label>
+                    <input
+                      type="text"
+                      required
+                      className="ios-form-input"
+                      placeholder="David Miller"
+                      value={bookingForm.customer_name}
+                      onChange={(e) =>
+                        setBookingForm({ ...bookingForm, customer_name: e.target.value })
+                      }
+                    />
+                  </div>
+
+                  <div className="ios-form-row">
+                    <div className="ios-form-group">
+                      <label className="ios-form-label">Email</label>
                       <input
-                        type="text"
+                        type="email"
                         required
-                        className="search-input"
-                        placeholder="e.g. Eleanor Vance"
-                        value={bookingForm.customer_name}
+                        className="ios-form-input"
+                        placeholder="david@example.com"
+                        value={bookingForm.customer_email}
                         onChange={(e) =>
-                          setBookingForm({ ...bookingForm, customer_name: e.target.value })
+                          setBookingForm({ ...bookingForm, customer_email: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="ios-form-group">
+                      <label className="ios-form-label">Phone</label>
+                      <input
+                        type="tel"
+                        className="ios-form-input"
+                        placeholder="+1 555-0199"
+                        value={bookingForm.customer_phone}
+                        onChange={(e) =>
+                          setBookingForm({ ...bookingForm, customer_phone: e.target.value })
                         }
                       />
                     </div>
                   </div>
 
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label className="form-label">Email Address *</label>
-                      <div className="input-field-group">
-                        <Mail size={16} />
-                        <input
-                          type="email"
-                          required
-                          className="search-input"
-                          placeholder="eleanor@example.com"
-                          value={bookingForm.customer_email}
-                          onChange={(e) =>
-                            setBookingForm({ ...bookingForm, customer_email: e.target.value })
-                          }
-                        />
-                      </div>
+                  <div className="ios-form-row">
+                    <div className="ios-form-group">
+                      <label className="ios-form-label">Travel Date</label>
+                      <input
+                        type="date"
+                        required
+                        className="ios-form-input"
+                        value={bookingForm.travel_date}
+                        onChange={(e) =>
+                          setBookingForm({ ...bookingForm, travel_date: e.target.value })
+                        }
+                      />
                     </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Phone Number</label>
-                      <div className="input-field-group">
-                        <Phone size={16} />
-                        <input
-                          type="tel"
-                          className="search-input"
-                          placeholder="+1 (555) 019-2831"
-                          value={bookingForm.customer_phone}
-                          onChange={(e) =>
-                            setBookingForm({ ...bookingForm, customer_phone: e.target.value })
-                          }
-                        />
-                      </div>
+                    <div className="ios-form-group">
+                      <label className="ios-form-label">Travelers</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="16"
+                        required
+                        className="ios-form-input"
+                        value={bookingForm.travelers_count}
+                        onChange={(e) =>
+                          setBookingForm({
+                            ...bookingForm,
+                            travelers_count: Math.max(1, parseInt(e.target.value) || 1),
+                          })
+                        }
+                      />
                     </div>
                   </div>
 
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label className="form-label">Preferred Start Date *</label>
-                      <div className="input-field-group">
-                        <Calendar size={16} />
-                        <input
-                          type="date"
-                          required
-                          className="search-input"
-                          value={bookingForm.travel_date}
-                          onChange={(e) =>
-                            setBookingForm({ ...bookingForm, travel_date: e.target.value })
-                          }
-                        />
-                      </div>
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Number of Guests *</label>
-                      <div className="input-field-group">
-                        <Users size={16} />
-                        <input
-                          type="number"
-                          min="1"
-                          max="20"
-                          required
-                          className="search-input"
-                          value={bookingForm.travelers_count}
-                          onChange={(e) =>
-                            setBookingForm({
-                              ...bookingForm,
-                              travelers_count: Math.max(1, parseInt(e.target.value) || 1),
-                            })
-                          }
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Special Requests / Dietary Needs</label>
+                  <div className="ios-form-group">
+                    <label className="ios-form-label">Special Requests</label>
                     <textarea
                       rows={2}
-                      className="form-control"
-                      placeholder="Vegetarian preference, airport transfer, honeymoon suite..."
+                      className="ios-form-input"
+                      placeholder="Room preferences, dietary requirements..."
                       value={bookingForm.special_requests}
                       onChange={(e) =>
                         setBookingForm({ ...bookingForm, special_requests: e.target.value })
@@ -854,16 +742,16 @@ export default function App() {
                     />
                   </div>
 
-                  <div className="booking-summary-box">
+                  <div className="ios-price-summary-card">
                     <div>
-                      <div style={{ fontSize: '0.82rem', color: 'var(--text-subtle)' }}>
-                        Estimated Total ({bookingForm.travelers_count} {bookingForm.travelers_count === 1 ? 'Guest' : 'Guests'})
+                      <div style={{ fontSize: '0.8rem', color: 'var(--ios-text-secondary)' }}>
+                        Estimated Total ({bookingForm.travelers_count} guests)
                       </div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        Includes taxes, luxury stays &amp; private guide
+                      <div style={{ fontSize: '0.72rem', color: 'var(--ios-text-tertiary)' }}>
+                        Taxes &amp; transfers included
                       </div>
                     </div>
-                    <div className="booking-summary-total">
+                    <div style={{ fontSize: '1.35rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
                       ${computedTotal.toLocaleString()}
                     </div>
                   </div>
@@ -871,10 +759,10 @@ export default function App() {
                   <button
                     type="submit"
                     disabled={bookingSubmitting}
-                    className="btn-primary"
-                    style={{ width: '100%', padding: '0.85rem' }}
+                    className="ios-btn-black"
+                    style={{ width: '100%', padding: '0.75rem' }}
                   >
-                    {bookingSubmitting ? 'Saving to Cloudflare D1...' : 'Confirm Reservation'}
+                    {bookingSubmitting ? 'Saving to D1...' : 'Confirm Reservation'}
                   </button>
                 </form>
               )}
@@ -883,69 +771,65 @@ export default function App() {
         </div>
       )}
 
-      {/* Package Details Modal */}
-      {detailsModalPackage && (
-        <div className="modal-overlay" onClick={() => setDetailsModalPackage(null)}>
-          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3 className="modal-title">{detailsModalPackage.title}</h3>
+      {/* Details Modal */}
+      {detailsPackage && (
+        <div className="ios-modal-backdrop" onClick={() => setDetailsPackage(null)}>
+          <div className="ios-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="ios-modal-grabber" />
+            <div className="ios-modal-header">
+              <h3 className="ios-modal-title">{detailsPackage.title}</h3>
               <button
-                className="btn-close-modal"
-                onClick={() => setDetailsModalPackage(null)}
+                className="ios-modal-close-btn"
+                onClick={() => setDetailsPackage(null)}
               >
-                <X size={20} />
+                ✕
               </button>
             </div>
 
-            <div className="modal-content">
+            <div className="ios-modal-body">
               <img
-                src={detailsModalPackage.image_url}
-                alt={detailsModalPackage.title}
-                style={{ width: '100%', height: 240, objectFit: 'cover', borderRadius: 'var(--radius-md)', marginBottom: '1.25rem' }}
+                src={detailsPackage.image_url}
+                alt={detailsPackage.title}
+                style={{ width: '100%', height: 200, objectFit: 'cover', borderRadius: 12, marginBottom: '1rem' }}
               />
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <span className="card-badge-category" style={{ position: 'static' }}>
-                  {detailsModalPackage.category}
-                </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--accent-gold)', fontSize: '0.85rem', fontWeight: 600 }}>
-                  <Star size={14} fill="var(--accent-gold)" />
-                  {detailsModalPackage.rating} ({detailsModalPackage.reviews_count} reviews)
-                </span>
+              <div style={{ fontSize: '0.82rem', color: 'var(--ios-text-secondary)', marginBottom: '0.75rem' }}>
+                {detailsPackage.destination}, {detailsPackage.country} • {detailsPackage.duration_days} Days • Rating: {detailsPackage.rating} / 5
               </div>
 
-              <h4 style={{ color: '#fff', marginBottom: '0.5rem', fontSize: '1rem' }}>Expedition Overview</h4>
-              <p style={{ color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '1.5rem', fontSize: '0.92rem' }}>
-                {detailsModalPackage.description}
+              <p style={{ fontSize: '0.9rem', color: 'var(--ios-text-primary)', lineHeight: 1.5, marginBottom: '1.25rem' }}>
+                {detailsPackage.description}
               </p>
 
-              <h4 style={{ color: '#fff', marginBottom: '0.75rem', fontSize: '1rem' }}>Curated Highlights</h4>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '2rem' }}>
-                {detailsModalPackage.highlights.split(',').map((h, i) => (
-                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', fontSize: '0.88rem' }}>
-                    <CheckCircle2 size={16} color="var(--accent-gold)" />
-                    <span>{h.trim()}</span>
+              <div style={{ fontWeight: 600, fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+                Highlights
+              </div>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1.5rem' }}>
+                {detailsPackage.highlights.split(',').map((h, idx) => (
+                  <li key={idx} style={{ fontSize: '0.85rem', color: 'var(--ios-text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <span style={{ color: 'var(--ios-blue)' }}>•</span>
+                    {h.trim()}
                   </li>
                 ))}
               </ul>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '1rem', borderTop: '1px solid var(--border-subtle)' }}>
-                <div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-subtle)' }}>Price Per Person</div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--accent-gold-light)', fontFamily: 'var(--font-serif)' }}>
-                    ${detailsModalPackage.price.toLocaleString()}
-                  </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.75rem', borderTop: '1px solid var(--ios-border-light)' }}>
+                <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>
+                  ${detailsPackage.price.toLocaleString()}
+                  <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--ios-text-tertiary)', marginLeft: 4 }}>
+                    / person
+                  </span>
                 </div>
 
                 <button
-                  className="btn-primary"
+                  className="ios-btn-black"
                   onClick={() => {
-                    const pkg = detailsModalPackage;
-                    setDetailsModalPackage(null);
-                    handleOpenBooking(pkg);
+                    const p = detailsPackage;
+                    setDetailsPackage(null);
+                    handleOpenBooking(p);
                   }}
                 >
-                  Book This Journey
+                  Book This Tour
                 </button>
               </div>
             </div>
@@ -953,69 +837,16 @@ export default function App() {
         </div>
       )}
 
-      {/* Footer */}
-      <footer className="footer-wrap">
-        <div className="footer-grid">
-          <div className="footer-col">
-            <div className="brand-logo" style={{ marginBottom: '1rem' }}>
-              <PlaneTakeoff size={24} />
-              <span>Travel Agencie</span>
-            </div>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.6, maxWidth: 320 }}>
-              Crafting extraordinary luxury expeditions with state-of-the-art serverless architecture.
-            </p>
-            <div className="edge-badges-row">
-              <span className="edge-pill">
-                <Database size={12} /> Cloudflare D1 SQL
-              </span>
-              <span className="edge-pill">
-                <Layers size={12} /> Cloudflare Workers
-              </span>
-              <span className="edge-pill">
-                <Globe2 size={12} /> Cloudflare Pages
-              </span>
-            </div>
+      {/* iOS Clean Footer */}
+      <footer className="ios-footer">
+        <div className="ios-footer-content">
+          <div>
+            &copy; {new Date().getFullYear()} Travel Agencie. Powered by Cloudflare Workers &amp; D1.
           </div>
-
-          <div className="footer-col">
-            <h5>Destinations</h5>
-            <ul>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); setSelectedCategory('Cultural'); }}>Kyoto &amp; Tokyo</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); setSelectedCategory('Luxury'); }}>Amalfi Coast</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); setSelectedCategory('Beach & Culture'); }}>Bali Sacred Temples</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); setSelectedCategory('Adventure'); }}>Swiss Alps</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); setSelectedCategory('Wildlife'); }}>Serengeti Safari</a></li>
-            </ul>
-          </div>
-
-          <div className="footer-col">
-            <h5>Navigation</h5>
-            <ul>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('explore'); }}>Featured Tours</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('inquiry'); }}>Custom Inquiries</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('admin'); }}>Agent Portal</a></li>
-            </ul>
-          </div>
-
-          <div className="footer-col">
-            <h5>Cloudflare Edge Stack</h5>
-            <p style={{ color: 'var(--text-subtle)', fontSize: '0.82rem', marginBottom: '0.75rem' }}>
-              Worker: <code>travel-agencie</code><br />
-              Database: <code>travel-agencie-db</code><br />
-              Pages: <code>travel-agencie.pages.dev</code>
-            </p>
-            <div style={{ fontSize: '0.78rem', color: 'var(--accent-gold)' }}>
-              100% Free Cloudflare Edge Architecture
-            </div>
-          </div>
-        </div>
-
-        <div className="footer-bottom">
-          <div>&copy; {new Date().getFullYear()} Travel Agencie. All rights reserved.</div>
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
-            <span>Privacy Policy</span>
-            <span>Terms of Service</span>
-            <span>Edge Status: Healthy</span>
+          <div className="ios-footer-links">
+            <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('tours'); }}>Tours</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('inquiry'); }}>Inquiry</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('agent'); }}>Agent Portal</a>
           </div>
         </div>
       </footer>
