@@ -37,7 +37,7 @@ export const TourList: React.FC<TourListProps> = ({
       {/* Header Banner */}
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5 sm:p-6">
         <div className="max-w-3xl">
-          <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">
+          <span className="eyebrow block mb-1">
             Holiday Packages
           </span>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
@@ -138,8 +138,8 @@ export const TourList: React.FC<TourListProps> = ({
 
                 <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] text-gray-500 uppercase font-semibold block">Price Per Person</span>
-                    <span className="text-lg font-extrabold text-gray-900">
+                    <span className="eyebrow block text-[10px]">Price Per Person</span>
+                    <span className="text-lg font-extrabold text-gray-900 price">
                       {formatINR(pkg.price)}
                     </span>
                   </div>

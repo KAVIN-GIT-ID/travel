@@ -1,4 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+
+:root {
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --ink: #0f172a;
+  --body: #334155;
+  --surface: #f8fafc;
+  --accent-safe: #0284c7;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--body);
+  background: var(--surface);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  color: var(--ink);
+  font-variation-settings: 'SOFT' 20, 'WONK' 1;
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: clamp(2.25rem, 5vw, 3.75rem); line-height: 1.05; font-weight: 700; }
+h2 { font-size: clamp(1.75rem, 3.5vw, 2.625rem); line-height: 1.15; font-weight: 600; }
+
+.price, .dates { font-variant-numeric: tabular-nums; }
+
+.eyebrow {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-safe);
+}
+
+.font-display {
+  font-family: var(--font-display);
+  font-variation-settings: 'SOFT' 20, 'WONK' 1;
+  letter-spacing: -0.02em;
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
 
 /* Leaflet map container resets */
 .leaflet-container {

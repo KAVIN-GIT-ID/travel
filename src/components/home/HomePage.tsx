@@ -373,9 +373,9 @@ export const HomePage: React.FC<HomePageProps> = ({
       <div className="relative bg-[#051329] text-white rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden border border-slate-800">
         <div className="relative z-10 px-3.5 py-6 sm:px-10 sm:pt-10 sm:pb-14 max-w-6xl mx-auto">
           {/* Header Subtitle Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-3 text-xs font-medium text-slate-300">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3 text-xs font-medium text-slate-300">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-blue-400 font-bold uppercase tracking-wider text-[11px] sm:text-xs">
+              <span className="eyebrow text-blue-400">
                 South India Holiday Specialist
               </span>
               <span className="text-slate-600 hidden sm:inline">|</span>
@@ -631,10 +631,10 @@ export const HomePage: React.FC<HomePageProps> = ({
             {/* Total Tour Fare & Booking CTA */}
             <div className="bg-slate-50 border border-slate-200 p-3.5 sm:p-4 rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-5 w-full lg:w-auto justify-between lg:justify-start">
               <div>
-                <span className="text-[10px] text-gray-500 uppercase font-bold block">
+                <span className="eyebrow block">
                   Complete Tour Package From
                 </span>
-                <div className="text-2xl sm:text-3xl font-black text-gray-900 leading-none mt-0.5">
+                <div className="text-2xl sm:text-3xl font-black text-gray-900 leading-none mt-0.5 price">
                   {formatINR(estimatedTourFare)}
                 </div>
                 <span className="text-[11px] text-emerald-700 font-semibold block mt-1">
@@ -787,7 +787,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-5 sm:mb-6">
           <div>
-            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block">
+            <span className="eyebrow block mb-1">
               Curated Holidays
             </span>
             <h2 className="text-xl sm:text-2xl font-black text-gray-900">
@@ -878,10 +878,10 @@ export const HomePage: React.FC<HomePageProps> = ({
 
                 <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] text-gray-400 uppercase font-semibold block">
+                    <span className="eyebrow block">
                       Tour Package From
                     </span>
-                    <span className="text-xl font-black text-gray-900">
+                    <span className="text-xl font-black text-gray-900 price">
                       {formatINR(pkg.price)}
                     </span>
                   </div>
@@ -908,7 +908,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       <div>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block">
+            <span className="eyebrow block mb-1">
               Multi-Day Road Trips
             </span>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
@@ -1010,8 +1010,8 @@ export const HomePage: React.FC<HomePageProps> = ({
 
               <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] text-gray-400 block uppercase">Estimated Package</span>
-                  <span className="font-black text-base text-gray-900">
+                  <span className="eyebrow block">Estimated Package</span>
+                  <span className="font-black text-base text-gray-900 price">
                     {formatINR(c.fare)}
                   </span>
                 </div>
@@ -1030,7 +1030,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       <div>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block">
+            <span className="eyebrow block mb-1">
               Dedicated Tourist Vehicles
             </span>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
@@ -1104,7 +1104,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* ============================================================ */}
       <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-xs">
         <div className="text-center max-w-2xl mx-auto mb-8">
-          <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">
+          <span className="eyebrow block mb-1">
             Why Tour With Us
           </span>
           <h2 className="text-2xl font-black text-gray-900 tracking-tight">
@@ -1171,7 +1171,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* ============================================================ */}
       <div className="bg-[#051329] text-white rounded-2xl p-6 sm:p-8 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6">
         <div>
-          <span className="text-xs font-bold text-blue-400 uppercase tracking-wider block mb-1">
+          <span className="eyebrow text-blue-400 block mb-1">
             Group, College &amp; Family Tour Charters
           </span>
           <h3 className="text-xl sm:text-2xl font-extrabold text-white">

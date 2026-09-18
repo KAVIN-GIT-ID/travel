@@ -22,7 +22,7 @@ export const VehicleFleet: React.FC<VehicleFleetProps> = ({
       {/* Header Banner */}
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5 sm:p-6">
         <div className="max-w-3xl">
-          <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">
+          <span className="eyebrow block mb-1">
             Commercial Fleet
           </span>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
@@ -102,9 +102,9 @@ export const VehicleFleet: React.FC<VehicleFleetProps> = ({
 
               <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
                 <div>
-                  <div className="text-[10px] text-gray-500 uppercase font-semibold">Per KM Rate</div>
-                  <div className="text-lg font-extrabold text-gray-900">
-                    ₹{vehicle.per_km_rate} <span className="text-xs font-normal text-gray-500">/ km</span>
+                  <div className="eyebrow text-[10px]">Per KM Rate</div>
+                  <div className="text-lg font-extrabold text-gray-900 price">
+                    ₹{vehicle.per_km_rate} <span className="text-xs font-normal text-gray-500 font-body">/ km</span>
                   </div>
                 </div>
 

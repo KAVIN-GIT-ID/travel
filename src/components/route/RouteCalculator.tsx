@@ -115,7 +115,7 @@ export const RouteCalculator: React.FC<RouteCalculatorProps> = ({
       <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-5 border-b border-gray-200">
           <div>
-            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">
+            <span className="eyebrow block mb-1">
               Tourist Circuit &amp; Route Planner
             </span>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
@@ -347,7 +347,7 @@ export const RouteCalculator: React.FC<RouteCalculatorProps> = ({
                     </div>
                     <div className="pt-2 border-t border-gray-200 flex justify-between items-center text-sm font-bold text-gray-900">
                       <span>Total Estimated Fare:</span>
-                      <span className="text-blue-600 text-base font-extrabold">
+                      <span className="text-blue-600 text-base font-extrabold price">
                         {formatINR(totalFare)}
                       </span>
                     </div>
@@ -356,8 +356,8 @@ export const RouteCalculator: React.FC<RouteCalculatorProps> = ({
                   {/* Actions */}
                   <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
                     <div>
-                      <div className="text-[10px] text-gray-500 uppercase font-semibold">Total Fare</div>
-                      <div className="text-lg font-extrabold text-gray-900">
+                      <div className="eyebrow text-[10px]">Total Fare</div>
+                      <div className="text-lg font-extrabold text-gray-900 price">
                         {formatINR(totalFare)}
                       </div>
                     </div>
