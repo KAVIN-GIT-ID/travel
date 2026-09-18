@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import type { Booking, Package, Vehicle, SouthIndiaState, BookingStatus } from '../../types';
+import React, { useState, useEffect } from 'react';
+import type { Booking, Package, Vehicle, SouthIndiaState, BookingStatus, User } from '../../types';
 import { formatINR } from '../../utils/distance';
-import { packageService, vehicleService, bookingService } from '../../services/api';
+import { packageService, vehicleService, bookingService, authService } from '../../services/api';
 
 interface AdminPortalProps {
+  currentUser: User | null;
+  onOpenLogin: () => void;
   bookings: Booking[];
   packages: Package[];
   vehicles: Vehicle[];
@@ -11,15 +13,49 @@ interface AdminPortalProps {
 }
 
 export const AdminPortal: React.FC<AdminPortalProps> = ({
+  currentUser,
+  onOpenLogin,
   bookings,
   packages,
   vehicles,
   onRefreshData,
 }) => {
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [pin, setPin] = useState('');
-  const [pinError, setPinError] = useState('');
-  const [currentTab, setCurrentTab] = useState<'bookings' | 'add-package' | 'add-vehicle'>('bookings');
+  const [currentTab, setCurrentTab] = useState<'bookings' | 'add-package' | 'add-vehicle' | 'users'>('bookings');
+  const [usersList, setUsersList] = useState<User[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [userRoleMessage, setUserRoleMessage] = useState('');
+
+  // Load registered users for admin management
+  const loadUsers = async () => {
+    try {
+      setLoadingUsers(true);
+      const list = await authService.getAllUsers();
+      setUsersList(list);
+    } catch (err) {
+      console.error('Failed to load users:', err);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  useEffect(() => {
+    if (currentUser?.role === 'admin') {
+      loadUsers();
+    }
+  }, [currentUser]);
+
+  const handleRoleToggle = async (userId: number, currentRole: 'user' | 'admin') => {
+    const nextRole = currentRole === 'admin' ? 'user' : 'admin';
+    try {
+      setUserRoleMessage('');
+      await authService.updateUserRole(userId, nextRole);
+      setUserRoleMessage(`Role updated successfully in database!`);
+      loadUsers();
+      setTimeout(() => setUserRoleMessage(''), 4000);
+    } catch (err: any) {
+      alert('Error updating user role: ' + err.message);
+    }
+  };
 
   // New Package State
   const [pkgForm, setPkgForm] = useState({
@@ -52,16 +88,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   });
   const [vehSaving, setVehSaving] = useState(false);
   const [vehMessage, setVehMessage] = useState('');
-
-  const handlePinSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (pin === 'admin123' || pin === '1234') {
-      setIsUnlocked(true);
-      setPinError('');
-    } else {
-      setPinError('Invalid passcode. Default PIN: admin123');
-    }
-  };
 
   const handleUpdateStatus = async (id: number, status: BookingStatus) => {
     try {
@@ -146,55 +172,83 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     }
   };
 
-  if (!isUnlocked) {
+  // 1. Not Logged In Screen
+  if (!currentUser) {
     return (
-      <div className="max-w-md mx-auto my-12 bg-white rounded-lg border border-gray-200 p-6 sm:p-8 text-center shadow-sm">
-        <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-md flex items-center justify-center mx-auto text-lg font-bold mb-3">
-          🔒
+      <div className="max-w-md mx-auto my-12 bg-white rounded-2xl border border-gray-200 p-8 text-center shadow-lg">
+        <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold mb-4">
+          🔐
         </div>
-        <h3 className="text-xl font-bold text-gray-900">Staff Admin Login</h3>
-        <p className="text-xs text-gray-600 mt-1">
-          Enter staff passcode to access bookings and fleet inventory management.
+        <h3 className="text-2xl font-black text-gray-900 tracking-tight">Staff &amp; Admin Portal</h3>
+        <p className="text-xs text-gray-600 mt-2 leading-relaxed">
+          This portal manages bookings, fleet pricing, and tour packages. Please sign in with your Google account.
         </p>
-
-        <form onSubmit={handlePinSubmit} className="mt-6 space-y-4 text-left">
-          {pinError && (
-            <div className="bg-rose-50 text-rose-700 text-xs p-3 rounded-md border border-rose-200">
-              {pinError}
-            </div>
-          )}
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">
-              Admin Passcode
-            </label>
-            <input
-              type="password"
-              placeholder="Enter passcode (admin123)"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
-            />
-          </div>
+        <div className="mt-6">
           <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2 rounded-md transition shadow-sm text-sm cursor-pointer"
+            onClick={onOpenLogin}
+            className="w-full bg-[#008cff] hover:bg-[#0077e6] active:bg-[#0055ff] text-white font-bold py-3 px-4 rounded-xl transition shadow-md flex items-center justify-center gap-2 text-sm cursor-pointer"
           >
-            Unlock Portal
+            <span>Sign In with Google</span>
           </button>
-        </form>
+        </div>
+        <p className="text-[11px] text-gray-400 mt-4">
+          Admin access is strictly verified from the Cloudflare D1 database (no hardcoded passwords).
+        </p>
       </div>
     );
   }
 
+  // 2. Normal User Account Screen (Access Denied)
+  if (currentUser.role !== 'admin') {
+    return (
+      <div className="max-w-lg mx-auto my-12 bg-white rounded-2xl border border-amber-200 p-8 text-center shadow-lg">
+        <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold mb-4">
+          🛡️
+        </div>
+        <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full">
+          Admin Permission Required
+        </span>
+        <h3 className="text-xl font-extrabold text-gray-900 mt-3">
+          Restricted Access: Normal User
+        </h3>
+        <p className="text-xs text-gray-600 mt-2 leading-relaxed">
+          You are currently signed in as <strong>{currentUser.name}</strong> ({currentUser.email}) with role <code className="bg-gray-100 px-1.5 py-0.5 rounded font-mono text-gray-800">user</code>.
+        </p>
+
+        <div className="mt-5 p-4 bg-slate-50 border border-slate-200 rounded-xl text-left text-xs space-y-2">
+          <div className="font-bold text-gray-800 flex items-center gap-1.5">
+            <span>⚙️</span>
+            <span>How to Grant Admin Role in Database (D1):</span>
+          </div>
+          <p className="text-gray-600 text-[11px] leading-relaxed">
+            Roles are stored dynamically in the <code className="text-blue-600 font-bold">users</code> table in Cloudflare D1. Run this command in terminal to promote this account:
+          </p>
+          <pre className="bg-slate-900 text-emerald-400 p-2.5 rounded-lg text-[11px] font-mono overflow-x-auto select-all">
+npx wrangler d1 execute travel-agencie-db --remote --command "UPDATE users SET role = 'admin' WHERE email = '{currentUser.email}';"
+          </pre>
+          <p className="text-[10px] text-gray-400">
+            Once executed, refresh the page or re-login to instantly access the Admin Portal.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Authenticated Admin View
   return (
     <div className="space-y-6">
       {/* Admin Subnav */}
       <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-0.5">
-            Operations &amp; Fleet Management
-          </span>
-          <h2 className="text-xl font-bold text-gray-900">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block">
+              Operations &amp; Fleet Management
+            </span>
+            <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
+              DB Admin Verified: {currentUser.name}
+            </span>
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mt-0.5">
             South India Travels Admin
           </h2>
         </div>
@@ -228,15 +282,19 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             >
               + Add Vehicle
             </button>
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentTab('users');
+                loadUsers();
+              }}
+              className={`px-3 py-1.5 text-xs font-medium transition cursor-pointer ${
+                currentTab === 'users' ? 'bg-blue-600 text-white font-semibold' : 'text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Users &amp; DB Roles ({usersList.length})
+            </button>
           </div>
-
-          <button
-            type="button"
-            onClick={() => setIsUnlocked(false)}
-            className="border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 text-xs font-medium px-3 py-1.5 rounded-md transition shadow-2xs cursor-pointer"
-          >
-            Lock
-          </button>
         </div>
       </div>
 
@@ -664,6 +722,125 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           </div>
         </div>
       )}
+
+      {/* TAB 4: Users & Database Roles */}
+      {currentTab === 'users' && (
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden p-6 space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-4">
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">
+                Registered Google Users &amp; Database Roles
+              </h3>
+              <p className="text-xs text-gray-600 mt-0.5">
+                Roles are stored dynamically in Cloudflare D1 (<code className="text-blue-600 font-bold">users.role</code>). No hardcoded passwords or roles.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={loadUsers}
+              className="border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-md transition shadow-2xs cursor-pointer flex items-center gap-1 self-start sm:self-auto"
+            >
+              <span>🔄</span>
+              <span>Refresh Users</span>
+            </button>
+          </div>
+
+          {userRoleMessage && (
+            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs p-3 rounded-lg flex items-center gap-2">
+              <span>✓</span>
+              <span>{userRoleMessage}</span>
+            </div>
+          )}
+
+          {loadingUsers ? (
+            <div className="p-8 text-center text-xs text-gray-500">
+              Loading users from Cloudflare D1 database...
+            </div>
+          ) : usersList.length === 0 ? (
+            <div className="p-8 text-center text-xs text-gray-500">
+              No users registered yet. When visitors sign in with Google OAuth, their profile is automatically recorded here.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs text-gray-700">
+                <thead className="bg-gray-50 border-y border-gray-200 text-gray-600 uppercase font-semibold text-[11px] tracking-wider">
+                  <tr>
+                    <th className="py-3 px-4">User</th>
+                    <th className="py-3 px-4">Email</th>
+                    <th className="py-3 px-4">Database Role</th>
+                    <th className="py-3 px-4">Registered On</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {usersList.map((u) => (
+                    <tr key={u.id} className="hover:bg-gray-50/80 transition">
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-3">
+                          {u.picture ? (
+                            <img
+                              src={u.picture}
+                              alt={u.name}
+                              className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-xs">
+                              {u.name ? u.name.charAt(0).toUpperCase() : 'U'}
+                            </div>
+                          )}
+                          <span className="font-bold text-gray-900">{u.name}</span>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4 font-mono text-gray-600">{u.email}</td>
+                      <td className="py-3.5 px-4">
+                        {u.role === 'admin' ? (
+                          <span className="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-emerald-200">
+                            🛡️ ADMIN
+                          </span>
+                        ) : (
+                          <span className="bg-slate-100 text-slate-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-slate-200">
+                            👤 USER
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 text-gray-500">
+                        {u.created_at ? new Date(u.created_at).toLocaleDateString('en-IN') : 'N/A'}
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() => handleRoleToggle(u.id, u.role)}
+                          className={`text-xs font-bold px-3 py-1 rounded transition cursor-pointer ${
+                            u.role === 'admin'
+                              ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+                              : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                          }`}
+                        >
+                          {u.role === 'admin' ? 'Demote to User' : 'Promote to Admin'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 space-y-1">
+            <div className="font-bold text-slate-800">
+              💡 Direct D1 Terminal Management (Optional):
+            </div>
+            <p className="text-[11px] leading-relaxed">
+              You can also promote any user directly via Wrangler CLI:
+              <br />
+              <code className="bg-slate-200 px-1.5 py-0.5 rounded text-slate-800 font-mono text-[10px]">
+                npx wrangler d1 execute travel-agencie-db --remote --command &quot;UPDATE users SET role = &apos;admin&apos; WHERE email = &apos;user@gmail.com&apos;;&quot;
+              </code>
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+

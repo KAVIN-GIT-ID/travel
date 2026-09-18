@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { Package, Vehicle, Booking, BookingRequest } from './types';
+import type { Package, Vehicle, Booking, BookingRequest, User } from './types';
 import { packageService, vehicleService, bookingService } from './services/api';
 import { Navbar, type NavTab } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
@@ -10,6 +10,7 @@ import { VehicleFleet } from './components/vehicles/VehicleFleet';
 import { CustomInquiry } from './components/inquiry/CustomInquiry';
 import { AdminPortal } from './components/admin/AdminPortal';
 import { BookingModal } from './components/booking/BookingModal';
+import { GoogleLoginModal } from './components/auth/GoogleLoginModal';
 
 const TAB_ROUTES: Record<NavTab, string> = {
   'home': '/',
@@ -33,6 +34,65 @@ const getTabFromPath = (path: string): NavTab => {
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTab>(() => getTabFromPath(window.location.pathname));
 
+  // Current Logged In User (Strictly database driven)
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    try {
+      const saved = localStorage.getItem('travel_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  // Google Login Modal State
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [locationNotice, setLocationNotice] = useState<string>('');
+
+  // 1. Ask for user location permission on application load
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          setLocationNotice(
+            `📍 Location verified (${latitude.toFixed(2)}, ${longitude.toFixed(2)}). South India departure hub auto-calibrated.`
+          );
+          setTimeout(() => setLocationNotice(''), 6000);
+        },
+        (err) => {
+          console.log('Location permission info:', err.message);
+        },
+        { timeout: 8000, enableHighAccuracy: false }
+      );
+    }
+  }, []);
+
+  // 2. Ask user to login/signup via Google OAuth after 10 seconds (if not logged in)
+  useEffect(() => {
+    if (!currentUser) {
+      const timer = setTimeout(() => {
+        const alreadyPrompted = sessionStorage.getItem('travel_login_prompted_10s');
+        if (!alreadyPrompted && !localStorage.getItem('travel_user')) {
+          sessionStorage.setItem('travel_login_prompted_10s', 'true');
+          setShowLoginModal(true);
+        }
+      }, 10000); // 10 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, [currentUser]);
+
+  const handleLoginSuccess = (user: User) => {
+    setCurrentUser(user);
+    localStorage.setItem('travel_user', JSON.stringify(user));
+    setShowLoginModal(false);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('travel_user');
+  };
+
   // Sync tab change with browser URL
   const handleSelectTab = (tab: NavTab) => {
     setActiveTab(tab);
@@ -50,7 +110,7 @@ export default function App() {
       window.history.replaceState({ tab: 'admin' }, '', '/admin');
     } else if (!Object.values(TAB_ROUTES).includes(currentPath)) {
       // Unknown route - normalize to /
-      window.history.replaceState({ tab: 'route-calc' }, '', '/');
+      window.history.replaceState({ tab: 'home' }, '', '/');
     }
 
     const handlePopState = (e: PopStateEvent) => {
@@ -167,6 +227,19 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
+      {/* Location Notice Banner */}
+      {locationNotice && (
+        <div className="bg-blue-600 text-white text-xs py-2 px-4 text-center font-medium shadow-sm transition flex items-center justify-center gap-2">
+          <span>{locationNotice}</span>
+          <button
+            onClick={() => setLocationNotice('')}
+            className="text-blue-200 hover:text-white font-bold ml-2 cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Enterprise Navbar */}
       <Navbar
         activeTab={activeTab}
@@ -174,6 +247,9 @@ export default function App() {
         onBookClick={() => {
           if (vehicles.length > 0) handleOpenVehicleRental(vehicles[0]);
         }}
+        currentUser={currentUser}
+        onOpenLogin={() => setShowLoginModal(true)}
+        onLogout={handleLogout}
       />
 
       {/* Main Responsive Viewport */}
@@ -217,6 +293,8 @@ export default function App() {
 
         {activeTab === 'admin' && (
           <AdminPortal
+            currentUser={currentUser}
+            onOpenLogin={() => setShowLoginModal(true)}
             bookings={bookings}
             packages={packages}
             vehicles={vehicles}
@@ -234,6 +312,15 @@ export default function App() {
           onSubmitBooking={handleSubmitBooking}
         />
       )}
+
+      {/* Google OAuth Login / Sign Up Modal */}
+      <GoogleLoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLoginSuccess={handleLoginSuccess}
+        title="Sign In with Google"
+        subtitle="Access exclusive South India travel fares, manage cab reservations, and verify permissions."
+      />
 
       {/* Enterprise Footer */}
       <Footer onSelectTab={handleSelectTab} />

@@ -360,6 +360,129 @@ export default {
         return jsonResponse({ inquiries: results });
       }
 
+      // ================= AUTH & USER ROLES API =================
+      // POST /api/auth/google (Google OAuth Login / Sign Up)
+      if (request.method === "POST" && url.pathname === "/api/auth/google") {
+        const body: any = await request.json();
+        let { credential, email, name, picture } = body;
+
+        // Decode Google JWT if credential provided
+        if (credential && (!email || !name)) {
+          try {
+            const parts = credential.split(".");
+            if (parts.length === 3) {
+              const base64Url = parts[1];
+              const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+              const decoded = JSON.parse(atob(base64));
+              email = email || decoded.email;
+              name = name || decoded.name;
+              picture = picture || decoded.picture;
+            }
+          } catch (e) {
+            console.error("Failed to parse Google JWT credential:", e);
+          }
+        }
+
+        if (!email) {
+          return jsonResponse({ error: "Email address is required for authentication." }, 400);
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+        const userName = name || normalizedEmail.split("@")[0];
+        const userPic = picture || null;
+
+        // Check if user exists in database
+        let user: any = await env.DB.prepare("SELECT * FROM users WHERE email = ?")
+          .bind(normalizedEmail)
+          .first();
+
+        if (user) {
+          // Update profile details on login
+          await env.DB.prepare(
+            "UPDATE users SET name = ?, picture = COALESCE(?, picture), updated_at = CURRENT_TIMESTAMP WHERE id = ?"
+          )
+            .bind(userName, userPic, user.id)
+            .run();
+
+          // Refresh user to get exact role stored in DB
+          user = await env.DB.prepare("SELECT * FROM users WHERE id = ?").bind(user.id).first();
+        } else {
+          // Insert new user into database with default 'user' role
+          const insertRes = await env.DB.prepare(
+            "INSERT INTO users (email, name, picture, role) VALUES (?, ?, ?, 'user')"
+          )
+            .bind(normalizedEmail, userName, userPic)
+            .run();
+
+          user = await env.DB.prepare("SELECT * FROM users WHERE id = ?")
+            .bind(insertRes.meta?.last_row_id)
+            .first();
+        }
+
+        return jsonResponse({
+          success: true,
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            picture: user.picture,
+            role: user.role, // role directly from DB ('user' or 'admin')
+            created_at: user.created_at,
+          },
+        });
+      }
+
+      // GET /api/auth/me?email=...
+      if (request.method === "GET" && url.pathname === "/api/auth/me") {
+        const email = url.searchParams.get("email");
+        if (!email) {
+          return jsonResponse({ error: "Email is required" }, 400);
+        }
+
+        const user: any = await env.DB.prepare("SELECT id, email, name, picture, role, created_at FROM users WHERE email = ?")
+          .bind(email.toLowerCase().trim())
+          .first();
+
+        if (!user) {
+          return jsonResponse({ error: "User not found" }, 404);
+        }
+
+        return jsonResponse({ user });
+      }
+
+      // GET /api/admin/users (View all users from DB)
+      if (request.method === "GET" && url.pathname === "/api/admin/users") {
+        const { results } = await env.DB.prepare(
+          "SELECT id, email, name, picture, role, created_at FROM users ORDER BY created_at DESC"
+        ).all();
+        return jsonResponse({ users: results });
+      }
+
+      // PATCH /api/admin/users/:id/role (Change user role in DB: 'user' <=> 'admin')
+      if (request.method === "PATCH" && url.pathname.startsWith("/api/admin/users/") && url.pathname.endsWith("/role")) {
+        const id = url.pathname.split("/")[4];
+        const body: any = await request.json();
+        const { role } = body;
+
+        if (role !== "user" && role !== "admin") {
+          return jsonResponse({ error: "Role must be 'user' or 'admin'." }, 400);
+        }
+
+        await env.DB.prepare("UPDATE users SET role = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?")
+          .bind(role, id)
+          .run();
+
+        const updated: any = await env.DB.prepare("SELECT id, email, name, picture, role FROM users WHERE id = ?")
+          .bind(id)
+          .first();
+
+        return jsonResponse({
+          success: true,
+          message: `User role updated to ${role}`,
+          user: updated,
+        });
+      }
+
       return jsonResponse({ error: "Not Found" }, 404);
     } catch (err: any) {
       return jsonResponse({ error: err.message || "Internal server error" }, 500);

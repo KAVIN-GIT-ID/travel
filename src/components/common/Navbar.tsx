@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import type { User } from '../../types';
 
 export type NavTab = 'home' | 'route-calc' | 'tours' | 'fleet' | 'inquiry' | 'admin';
 
@@ -6,12 +7,18 @@ interface NavbarProps {
   activeTab: NavTab;
   onSelectTab: (tab: NavTab) => void;
   onBookClick: () => void;
+  currentUser: User | null;
+  onOpenLogin: () => void;
+  onLogout: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   onSelectTab,
   onBookClick,
+  currentUser,
+  onOpenLogin,
+  onLogout,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -54,7 +61,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     {
       id: 'admin',
       label: 'My Bookings / Admin',
-      sublabel: 'Staff Portal',
+      sublabel: currentUser?.role === 'admin' ? '🛡️ Admin Access' : 'User Portal',
       icon: '📑',
     },
   ];
@@ -81,13 +88,46 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="text-slate-600">|</span>
             <span className="text-slate-300">Tolls, Driver Beta &amp; Taxes Included</span>
           </div>
+
           <div className="flex items-center gap-4 text-xs">
-            <button
-              onClick={() => handleTabClick('admin')}
-              className="text-slate-300 hover:text-white transition flex items-center gap-1 cursor-pointer"
-            >
-              <span>Manage My Reservation</span>
-            </button>
+            {currentUser ? (
+              <div className="flex items-center gap-2">
+                <span className="text-slate-200 font-medium flex items-center gap-1.5">
+                  {currentUser.picture ? (
+                    <img
+                      src={currentUser.picture}
+                      alt={currentUser.name}
+                      className="w-4 h-4 rounded-full"
+                    />
+                  ) : (
+                    <span>👤</span>
+                  )}
+                  <span>{currentUser.name}</span>
+                </span>
+                <span
+                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                    currentUser.role === 'admin'
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                      : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                  }`}
+                >
+                  {currentUser.role === 'admin' ? '🛡️ ADMIN (DB)' : 'USER'}
+                </span>
+                <button
+                  onClick={onLogout}
+                  className="text-slate-400 hover:text-rose-300 underline text-[11px] ml-1 cursor-pointer"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={onOpenLogin}
+                className="text-white bg-blue-600 hover:bg-blue-500 px-2.5 py-0.5 rounded font-semibold text-[11px] transition flex items-center gap-1 cursor-pointer"
+              >
+                <span>Google Login</span>
+              </button>
+            )}
             <span className="text-slate-600">|</span>
             <span className="text-blue-400 font-semibold">Tamil Nadu • Kerala • Karnataka</span>
           </div>
@@ -138,7 +178,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <span className={`text-xs font-bold leading-tight ${isActive ? 'text-[#008cff]' : 'text-gray-800'}`}>
                     {item.label}
                   </span>
-                  <span className="text-[10px] text-gray-600 font-normal leading-tight hidden xl:block">
+                  <span className="text-[10px] text-gray-500 font-normal leading-tight hidden xl:block">
                     {item.sublabel}
                   </span>
                 </button>
@@ -148,6 +188,45 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Right Action */}
           <div className="hidden lg:flex items-center gap-3">
+            {currentUser ? (
+              <div className="flex items-center gap-2 border border-gray-200 py-1.5 px-3 rounded-full bg-gray-50">
+                {currentUser.picture ? (
+                  <img
+                    src={currentUser.picture}
+                    alt={currentUser.name}
+                    className="w-6 h-6 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-[10px]">
+                    {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+                  </div>
+                )}
+                <div className="text-left">
+                  <div className="text-xs font-bold text-gray-900 leading-none truncate max-w-[100px]">
+                    {currentUser.name}
+                  </div>
+                  <div className="text-[9px] font-semibold text-emerald-700 uppercase leading-none mt-0.5">
+                    {currentUser.role === 'admin' ? '🛡️ Admin' : 'Customer'}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={onOpenLogin}
+                className="border border-gray-300 hover:border-gray-400 bg-white text-gray-800 font-bold text-xs px-3.5 py-2 rounded-full transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              >
+                {/* Google Icon */}
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span>Login / Sign Up</span>
+              </button>
+            )}
+
             <button
               onClick={onBookClick}
               className="bg-gradient-to-r from-[#008cff] to-[#0a58ca] hover:from-[#007ad6] hover:to-[#084298] text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-md shadow-sm transition active:scale-95 cursor-pointer"
@@ -158,6 +237,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Mobile Menu Hamburger */}
           <div className="flex lg:hidden items-center gap-2">
+            {!currentUser ? (
+              <button
+                onClick={onOpenLogin}
+                className="text-xs bg-blue-600 text-white px-2.5 py-1 rounded font-bold cursor-pointer"
+              >
+                Login
+              </button>
+            ) : null}
             <button
               onClick={onBookClick}
               className="bg-[#008cff] text-white px-3 py-1.5 rounded-md text-xs font-semibold"

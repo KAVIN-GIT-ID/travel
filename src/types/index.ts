@@ -89,3 +89,15 @@ export interface InquiryRequest {
   subject?: string;
   message: string;
 }
+
+export type UserRole = 'user' | 'admin';
+
+export interface User {
+  id: number;
+  email: string;
+  name: string;
+  picture?: string;
+  role: UserRole;
+  created_at?: string;
+}
+

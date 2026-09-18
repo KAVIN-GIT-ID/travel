@@ -128,3 +128,38 @@ export const healthService = {
     }
   },
 };
+
+// Auth & Users Service
+export const authService = {
+  async loginWithGoogle(data: {
+    credential?: string;
+    email?: string;
+    name?: string;
+    picture?: string;
+  }): Promise<{ success: boolean; user: import('../types').User }> {
+    return await request('/api/auth/google', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async getMe(email: string): Promise<{ user: import('../types').User }> {
+    return await request(`/api/auth/me?email=${encodeURIComponent(email)}`);
+  },
+
+  async getAllUsers(): Promise<import('../types').User[]> {
+    const res = await request<{ users: import('../types').User[] }>('/api/admin/users');
+    return res.users || [];
+  },
+
+  async updateUserRole(
+    userId: number,
+    role: 'user' | 'admin'
+  ): Promise<{ success: boolean; user: import('../types').User }> {
+    return await request(`/api/admin/users/${userId}/role`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role }),
+    });
+  },
+};
+
