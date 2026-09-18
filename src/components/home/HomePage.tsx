@@ -401,61 +401,19 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
         {/* ------------------------------------------------------------ */}
-        {/* COMPACT MOBILE-FIRST TRIP PLANNER WIDGET */}
+        {/* SIMPLE HUMAN TRAVEL SEARCH BAR */}
         {/* ------------------------------------------------------------ */}
-        <div id="tourist-planner-anchor" className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-5">
-          <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100">
-            <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-900">
-              <svg className="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              <span>Interactive Holiday &amp; Itinerary Planner</span>
-            </div>
-            <span className="text-[11px] sm:text-xs text-emerald-700 font-semibold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
-              ✓ Tolls, Driver &amp; Fuel Included
-            </span>
-          </div>
-
-          {/* 4 Compact Inputs Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
-            {/* 1. Destination */}
-            <div className="col-span-2 sm:col-span-1 bg-gray-50 hover:bg-blue-50/40 p-2.5 sm:p-3 rounded-xl border border-gray-200 transition">
-              <label className="flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">
-                <svg className="w-3 h-3 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>Holiday Destination</span>
-              </label>
-              <select
-                value={selectedDestId}
-                onChange={(e) => {
-                  setSelectedDestId(e.target.value);
-                  const dest = TOURIST_DESTINATIONS.find((d) => d.id === e.target.value);
-                  if (dest) setSelectedDays(dest.defaultDays);
-                }}
-                className="w-full bg-transparent font-bold text-xs sm:text-sm text-gray-900 focus:outline-none cursor-pointer py-0.5"
-              >
-                {TOURIST_DESTINATIONS.map((dest) => (
-                  <option key={dest.id} value={dest.id}>
-                    {dest.name} ({dest.state})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* 2. Departure Hub */}
-            <div className="col-span-1 bg-gray-50 hover:bg-blue-50/40 p-2.5 sm:p-3 rounded-xl border border-gray-200 transition">
-              <label className="flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">
-                <svg className="w-3 h-3 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-                <span>Departure Hub</span>
+        <div id="tourist-planner-anchor" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-3.5 sm:p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-3 items-center">
+            {/* 1. Departure Hub */}
+            <div className="px-3.5 py-2 bg-gray-50 hover:bg-gray-100/70 rounded-xl border border-gray-200/80 transition">
+              <label className="block text-[11px] font-semibold text-gray-500 mb-0.5">
+                From
               </label>
               <select
                 value={selectedHubId}
                 onChange={(e) => setSelectedHubId(e.target.value)}
-                className="w-full bg-transparent font-bold text-xs sm:text-sm text-gray-900 focus:outline-none cursor-pointer py-0.5"
+                className="w-full bg-transparent font-bold text-sm text-gray-900 focus:outline-none cursor-pointer"
               >
                 {DEPARTURE_HUBS.map((hub) => (
                   <option key={hub.id} value={hub.id}>
@@ -465,70 +423,90 @@ export const HomePage: React.FC<HomePageProps> = ({
               </select>
             </div>
 
+            {/* 2. Destination */}
+            <div className="px-3.5 py-2 bg-gray-50 hover:bg-gray-100/70 rounded-xl border border-gray-200/80 transition">
+              <label className="block text-[11px] font-semibold text-gray-500 mb-0.5">
+                To (Destination)
+              </label>
+              <select
+                value={selectedDestId}
+                onChange={(e) => {
+                  setSelectedDestId(e.target.value);
+                  const dest = TOURIST_DESTINATIONS.find((d) => d.id === e.target.value);
+                  if (dest) setSelectedDays(dest.defaultDays);
+                }}
+                className="w-full bg-transparent font-bold text-sm text-gray-900 focus:outline-none cursor-pointer"
+              >
+                {TOURIST_DESTINATIONS.map((dest) => (
+                  <option key={dest.id} value={dest.id}>
+                    {dest.name} ({dest.state})
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* 3. Duration */}
-            <div className="col-span-1 bg-gray-50 hover:bg-blue-50/40 p-2.5 sm:p-3 rounded-xl border border-gray-200 transition">
-              <label className="flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">
-                <svg className="w-3 h-3 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span>Duration</span>
+            <div className="px-3.5 py-2 bg-gray-50 hover:bg-gray-100/70 rounded-xl border border-gray-200/80 transition">
+              <label className="block text-[11px] font-semibold text-gray-500 mb-0.5">
+                Duration
               </label>
               <select
                 value={selectedDays}
                 onChange={(e) => setSelectedDays(Number(e.target.value))}
-                className="w-full bg-transparent font-bold text-xs sm:text-sm text-gray-900 focus:outline-none cursor-pointer py-0.5"
+                className="w-full bg-transparent font-bold text-sm text-gray-900 focus:outline-none cursor-pointer"
               >
-                <option value={2}>2 Days / 1N</option>
-                <option value={3}>3 Days / 2N</option>
-                <option value={4}>4 Days / 3N</option>
-                <option value={5}>5 Days / 4N</option>
-                <option value={6}>6 Days / 5N</option>
+                <option value={2}>2 Days / 1 Night</option>
+                <option value={3}>3 Days / 2 Nights</option>
+                <option value={4}>4 Days / 3 Nights</option>
+                <option value={5}>5 Days / 4 Nights</option>
+                <option value={6}>6 Days / 5 Nights</option>
               </select>
             </div>
 
             {/* 4. Vehicle Type */}
-            <div className="col-span-2 sm:col-span-1 bg-gray-50 hover:bg-blue-50/40 p-2.5 sm:p-3 rounded-xl border border-gray-200 transition">
-              <label className="flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">
-                <svg className="w-3 h-3 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
-                </svg>
-                <span>Vehicle Type</span>
+            <div className="px-3.5 py-2 bg-gray-50 hover:bg-gray-100/70 rounded-xl border border-gray-200/80 transition">
+              <label className="block text-[11px] font-semibold text-gray-500 mb-0.5">
+                Vehicle
               </label>
               <select
                 value={selectedVehicleType}
                 onChange={(e) => setSelectedVehicleType(e.target.value)}
-                className="w-full bg-transparent font-bold text-xs sm:text-sm text-gray-900 focus:outline-none cursor-pointer py-0.5"
+                className="w-full bg-transparent font-bold text-sm text-gray-900 focus:outline-none cursor-pointer"
               >
-                <option value="Sedan">AC Sedan (Dzire - 4 Seats)</option>
-                <option value="SUV">Prime SUV (Innova Crysta - 7 Seats)</option>
-                <option value="Van">Tempo Traveller (12-16 Seats)</option>
-                <option value="Bus">Luxury Tourist Coach (21-40 Seats)</option>
+                <option value="Sedan">Sedan (Dzire - 4 seats)</option>
+                <option value="SUV">SUV (Innova - 7 seats)</option>
+                <option value="Van">Tempo (12-16 seats)</option>
+                <option value="Bus">Coach (21-40 seats)</option>
               </select>
+            </div>
+
+            {/* 5. Search Trips Action */}
+            <div>
+              <button
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById('generated-itinerary-card');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
+                className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-2.5 px-4 rounded-xl shadow-xs transition flex items-center justify-center gap-2 cursor-pointer text-sm"
+              >
+                <span>Search Trips</span>
+                <span>➔</span>
+              </button>
             </div>
           </div>
 
-          {/* Quick Action & Total Summary */}
-          <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-xs flex-wrap">
-              <span className="font-bold text-blue-600">Selected Tour:</span>
-              <span className="font-semibold text-gray-900">{currentHub.name} ➔ {currentDestination.name}</span>
-              <span className="text-gray-400 hidden sm:inline">•</span>
-              <span className="text-sm font-black text-gray-900 price">{formatINR(estimatedTourFare)}</span>
-              <span className="text-xs text-gray-500">({chosenVehicle?.name || 'Innova Crysta'})</span>
+          {/* Simple Clean Fare Note */}
+          <div className="mt-3 pt-2.5 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-gray-500 gap-1.5">
+            <div>
+              Route: <span className="font-medium text-gray-800">{currentHub.name} ➔ {currentDestination.name}</span>
+              <span className="mx-2 text-gray-300">•</span>
+              Est. Fare: <strong className="text-gray-900 font-bold price">{formatINR(estimatedTourFare)}</strong>
+              <span className="text-gray-400 ml-1">({chosenVehicle?.name || 'Innova Crysta'})</span>
             </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                const el = document.getElementById('generated-itinerary-card');
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }}
-              className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-xs transition flex items-center justify-center gap-2 cursor-pointer shrink-0"
-            >
-              <span>View Trip Plan &amp; Itinerary</span>
-              <span>➔</span>
-            </button>
+            <div className="text-[11px] text-gray-400">
+              Includes vehicle, fuel, driver allowance &amp; tolls
+            </div>
           </div>
         </div>
 
