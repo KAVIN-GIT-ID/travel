@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { User } from '../../types';
 import { authService } from '../../services/api';
+import { BusLogo } from '../common/BusLogo';
 
 interface GoogleLoginModalProps {
   isOpen: boolean;
@@ -37,14 +38,13 @@ export const GoogleLoginModal: React.FC<GoogleLoginModalProps> = ({
   const googleBtnRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [clientId, setClientId] = useState<string>(() => {
+  const [clientId] = useState<string>(() => {
     return (
       (import.meta.env.VITE_GOOGLE_CLIENT_ID as string) ||
       localStorage.getItem('saved_google_client_id') ||
       DEFAULT_GOOGLE_CLIENT_ID
     );
   });
-  const [showManualClientInput, setShowManualClientInput] = useState(false);
   const [emailInput, setEmailInput] = useState('');
   const [nameInput, setNameInput] = useState('');
 
@@ -143,12 +143,6 @@ export const GoogleLoginModal: React.FC<GoogleLoginModalProps> = ({
     }
   }, [isOpen, clientId]);
 
-  const handleSaveClientId = (id: string) => {
-    setClientId(id);
-    localStorage.setItem('saved_google_client_id', id);
-    setShowManualClientInput(false);
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -167,15 +161,9 @@ export const GoogleLoginModal: React.FC<GoogleLoginModalProps> = ({
         </button>
 
         {/* Modal Header */}
-        <div className="bg-gradient-to-br from-[#051329] via-[#0d274d] to-[#051329] text-white p-6 pb-7 text-center relative overflow-hidden">
-          <div className="inline-flex items-center gap-1.5 mb-2">
-            <div className="h-7 px-2 rounded-l-md bg-[#008cff] text-white flex items-center font-black text-sm tracking-tighter">
-              my
-            </div>
-            <div className="h-7 px-1.5 rounded-r-md bg-rose-600 text-white flex items-center font-bold text-[10px] uppercase tracking-wider">
-              TRIP
-            </div>
-            <span className="text-xs font-semibold text-slate-300 ml-1">South India Travels</span>
+        <div className="bg-[#051329] text-white p-6 pb-7 text-center relative overflow-hidden">
+          <div className="flex justify-center mb-3">
+            <BusLogo size="sm" variant="light" layout="stacked" />
           </div>
 
           <h3 className="text-xl font-black text-white tracking-tight">{title}</h3>
@@ -261,53 +249,6 @@ export const GoogleLoginModal: React.FC<GoogleLoginModalProps> = ({
               <span>{loading ? 'Authenticating...' : 'Continue with Google'}</span>
             </button>
           </form>
-
-          {/* Database Role Security Badge */}
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-600 space-y-1">
-            <div className="font-bold text-slate-800 flex items-center gap-1.5">
-              <span>🔒</span>
-              <span>Role-Based Database Authentication</span>
-            </div>
-            <p className="text-[11px] leading-relaxed">
-              Roles are stored directly in Cloudflare D1. Regular users get the <code className="bg-slate-200 px-1 rounded text-slate-800">user</code> role, while <code className="bg-emerald-100 px-1 rounded text-emerald-800 font-semibold">admin</code> privileges are managed in the database without any hardcoded passwords.
-            </p>
-          </div>
-
-          {/* Optional Google Client ID Config Drawer */}
-          <div className="pt-2 border-t border-gray-100 text-center">
-            <button
-              type="button"
-              onClick={() => setShowManualClientInput(!showManualClientInput)}
-              className="text-[11px] text-blue-600 hover:text-blue-800 font-semibold cursor-pointer underline"
-            >
-              {showManualClientInput ? 'Hide Google Client ID setting' : 'Configure Google Client ID'}
-            </button>
-
-            {showManualClientInput && (
-              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg text-left space-y-2 text-xs">
-                <label className="font-bold text-gray-700 block">
-                  Google OAuth Client ID (.apps.googleusercontent.com)
-                </label>
-                <input
-                  type="text"
-                  placeholder="123456789-abcdef.apps.googleusercontent.com"
-                  defaultValue={clientId}
-                  id="client_id_input_field"
-                  className="w-full p-2 bg-white rounded border border-gray-300 text-xs font-mono"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    const el = document.getElementById('client_id_input_field') as HTMLInputElement;
-                    if (el) handleSaveClientId(el.value);
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded text-xs cursor-pointer"
-                >
-                  Save Client ID
-                </button>
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </div>

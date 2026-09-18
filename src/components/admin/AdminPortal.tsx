@@ -205,7 +205,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold mb-4">
           🛡️
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full">
+        <span className="text-[11px] font-semibold uppercase tracking-wider bg-amber-100 text-amber-800 px-2.5 py-1 rounded">
           Admin Permission Required
         </span>
         <h3 className="text-xl font-extrabold text-gray-900 mt-3">
@@ -244,8 +244,8 @@ npx wrangler d1 execute travel-agencie-db --remote --command "UPDATE users SET r
             <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block">
               Operations &amp; Fleet Management
             </span>
-            <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
-              DB Admin Verified: {currentUser.name}
+            <span className="bg-emerald-50 text-emerald-700 text-xs font-semibold px-2 py-0.5 rounded border border-emerald-200">
+              Admin: {currentUser.name}
             </span>
           </div>
           <h2 className="text-xl font-bold text-gray-900 mt-0.5">
@@ -794,12 +794,12 @@ npx wrangler d1 execute travel-agencie-db --remote --command "UPDATE users SET r
                       <td className="py-3.5 px-4 font-mono text-gray-600">{u.email}</td>
                       <td className="py-3.5 px-4">
                         {u.role === 'admin' ? (
-                          <span className="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-emerald-200">
-                            🛡️ ADMIN
+                          <span className="bg-emerald-50 text-emerald-700 text-xs font-semibold px-2.5 py-0.5 rounded border border-emerald-200">
+                            Admin
                           </span>
                         ) : (
-                          <span className="bg-slate-100 text-slate-700 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-slate-200">
-                            👤 USER
+                          <span className="bg-gray-100 text-gray-700 text-xs font-medium px-2.5 py-0.5 rounded border border-gray-200">
+                            Customer
                           </span>
                         )}
                       </td>

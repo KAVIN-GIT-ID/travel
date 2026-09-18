@@ -110,9 +110,8 @@ export const LeafletMap: React.FC<LeafletMapProps> = ({
         className="w-full h-full"
       />
       {/* Map Helper Badge */}
-      <div className="absolute top-3 right-3 z-[400] bg-white/95 backdrop-blur px-3 py-1.5 rounded-lg shadow-sm border border-slate-200 text-xs font-semibold text-slate-700 flex items-center gap-1.5 pointer-events-none">
-        <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
-        Click anywhere on map to change destination
+      <div className="absolute top-3 right-3 z-[400] bg-white/95 px-3 py-1.5 rounded-md shadow-xs border border-gray-200 text-xs font-medium text-gray-700 pointer-events-none">
+        Click map to adjust destination
       </div>
     </div>
   );

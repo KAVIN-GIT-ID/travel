@@ -1,8 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import type { Package, Vehicle, LocationPoint } from '../../types';
+import type { Package, Vehicle } from '../../types';
 import type { NavTab } from '../common/Navbar';
-import { SOUTH_INDIA_LOCATIONS, POPULAR_ROUTES } from '../../data/southIndiaLocations';
-import { calculateRoadDistanceKm, formatDrivingDuration, formatINR } from '../../utils/distance';
+import { formatINR } from '../../utils/distance';
 
 interface HomePageProps {
   packages: Package[];
@@ -19,734 +18,699 @@ interface HomePageProps {
   }) => void;
 }
 
+interface TouristDestination {
+  id: string;
+  name: string;
+  state: 'Tamil Nadu' | 'Kerala' | 'Karnataka';
+  tagline: string;
+  category: 'Hill Station' | 'Backwaters' | 'Heritage' | 'Wildlife' | 'Coastal';
+  defaultDays: number;
+  baseKmFromHub: number;
+  imageUrl: string;
+  topSights: string[];
+  suggestedItinerary: { day: number; title: string; sights: string }[];
+  matchedPackageTitle?: string;
+}
+
+const TOURIST_DESTINATIONS: TouristDestination[] = [
+  {
+    id: 'dest-ooty',
+    name: 'Ooty & Coonoor',
+    state: 'Tamil Nadu',
+    tagline: 'Queen of Nilgiri Hill Stations',
+    category: 'Hill Station',
+    defaultDays: 3,
+    baseKmFromHub: 280,
+    imageUrl: 'https://images.unsplash.com/photo-1589182373726-e4f658ab50f0?auto=format&fit=crop&w=1000&q=80',
+    topSights: ['Nilgiri Toy Train', 'Doddabetta Peak', 'Pykara Lake & Falls', 'Sim’s Park Coonoor', 'Tea Factory'],
+    matchedPackageTitle: 'Queen of Hills & Tea Valleys',
+    suggestedItinerary: [
+      { day: 1, title: 'Scenic Nilgiri Ghat Climb & Ooty Arrival', sights: 'Drive through Bandipur/Mudumalai, check-in, Botanical Gardens & sunset boat ride at Ooty Lake.' },
+      { day: 2, title: 'Full Day Pykara & Mountain Peak Safari', sights: 'Doddabetta Peak panoramic view, Tea Museum & tasting, Pykara Falls & motorboat safari.' },
+      { day: 3, title: 'Heritage Toy Train & Coonoor Valleys', sights: 'Historic Nilgiri Toy Train to Coonoor, Dolphin’s Nose viewpoint, Sim’s Park, leisurely return drive.' },
+    ],
+  },
+  {
+    id: 'dest-munnar',
+    name: 'Munnar & Alleppey',
+    state: 'Kerala',
+    tagline: 'Misty Tea Hills & Serene Backwaters',
+    category: 'Backwaters',
+    defaultDays: 4,
+    baseKmFromHub: 290,
+    imageUrl: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=1000&q=80',
+    topSights: ['Eravikulam Tahr Park', 'Mattupetty Dam', 'Alleppey Houseboat', 'Vembanad Lake', 'Spice Gardens'],
+    matchedPackageTitle: 'Emerald Hills & Alleppey Backwaters',
+    suggestedItinerary: [
+      { day: 1, title: 'Munnar Arrival & Cardamom Hills', sights: 'Scenic drive past Cheeyappara & Valara waterfalls, hotel check-in, evening spice plantation walk.' },
+      { day: 2, title: 'Eravikulam National Park & Tea Estate Sights', sights: 'Spot Nilgiri Tahr at Rajamalai, Mattupetty Dam boating, Echo Point, Tea Museum.' },
+      { day: 3, title: 'Scenic Descent to Alleppey Houseboat Cruise', sights: 'Drive down to Alleppey jetty, board traditional luxury AC houseboat, backwater canal cruise.' },
+      { day: 4, title: 'Morning Canoe Ride & Coastal Journey', sights: 'Sunrise village canoe ride in backwaters, traditional Kerala lunch, return journey.' },
+    ],
+  },
+  {
+    id: 'dest-coorg',
+    name: 'Coorg (Madikeri)',
+    state: 'Karnataka',
+    tagline: 'Scotland of India & Coffee Highlands',
+    category: 'Hill Station',
+    defaultDays: 3,
+    baseKmFromHub: 250,
+    imageUrl: 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?auto=format&fit=crop&w=1000&q=80',
+    topSights: ['Abbey Falls', 'Namdroling Golden Temple', 'Dubare Elephant Camp', 'Raja’s Seat', 'Mandalpatti Safari'],
+    matchedPackageTitle: 'Scotland of India & Coffee Country',
+    suggestedItinerary: [
+      { day: 1, title: 'Bylakuppe Tibetan Monasteries & Madikeri Check-in', sights: 'Visit Namdroling Monastery Golden Temple, Cauvery Nisargadhama, sunset at Raja’s Seat.' },
+      { day: 2, title: 'Abbey Falls & Mandalpatti 4x4 Jeep Safari', sights: 'Trek to cascading Abbey Falls, thrilling off-road jeep safari to Mandalpatti peak, spice shopping.' },
+      { day: 3, title: 'Dubare Elephant Camp & River Rafting', sights: 'Dubare Elephant Camp river crossing, elephant interaction, organic coffee estate tour, return drive.' },
+    ],
+  },
+  {
+    id: 'dest-kodai',
+    name: 'Kodaikanal',
+    state: 'Tamil Nadu',
+    tagline: 'Princess of Hills & Pine Forests',
+    category: 'Hill Station',
+    defaultDays: 3,
+    baseKmFromHub: 210,
+    imageUrl: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1000&q=80',
+    topSights: ['Kodaikanal Lake', 'Pillar Rocks', 'Coaker’s Walk', 'Pine Forest', 'Silver Cascade Falls'],
+    matchedPackageTitle: 'Princess of Hill Stations',
+    suggestedItinerary: [
+      { day: 1, title: 'Scenic Palani Ghat Climb & Lake Boating', sights: 'Silver Cascade waterfall photo stop, check-in, pedal boating on star-shaped Kodai Lake.' },
+      { day: 2, title: 'Pillar Rocks, Caves & Pine Forest Trails', sights: 'Panoramic Pillar Rocks view, Guna Caves, misty Pine Forest walk, Coaker’s Walk promenade.' },
+      { day: 3, title: 'Bryant Park & Homemade Chocolates', sights: 'Floral tour at Bryant Park, homemade Kodai artisan chocolate tasting, leisurely descent.' },
+    ],
+  },
+  {
+    id: 'dest-wayanad',
+    name: 'Wayanad',
+    state: 'Kerala',
+    tagline: 'Misty Rainforests, Waterfalls & Ancient Caves',
+    category: 'Wildlife',
+    defaultDays: 3,
+    baseKmFromHub: 270,
+    imageUrl: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=1000&q=80',
+    topSights: ['Edakkal Caves', 'Banasura Sagar Dam', 'Soochipara Falls', 'Wayanad Sanctuary', 'Chembra View'],
+    matchedPackageTitle: 'Rainforest Trails & Ancient Caves',
+    suggestedItinerary: [
+      { day: 1, title: 'Thamarassery Ghat Drive & Banasura Dam', sights: 'Drive through 9 hairpin bends, check-in, Asia’s 2nd largest earth dam speedboating at Banasura.' },
+      { day: 2, title: 'Prehistoric Edakkal Caves & Soochipara Falls', sights: 'Climb to Neolithic rock carvings at Edakkal Caves, three-tier Soochipara waterfall dip, tea estates.' },
+      { day: 3, title: 'Wildlife Sanctuary & Heritage Village', sights: 'Muthanga Wildlife safari, bamboo crafts shopping in Sultan Bathery, return journey.' },
+    ],
+  },
+  {
+    id: 'dest-hampi',
+    name: 'Hampi & Badami',
+    state: 'Karnataka',
+    tagline: 'UNESCO World Heritage Stone Empire',
+    category: 'Heritage',
+    defaultDays: 4,
+    baseKmFromHub: 350,
+    imageUrl: 'https://images.unsplash.com/photo-1600100397608-f010f443b2a3?auto=format&fit=crop&w=1000&q=80',
+    topSights: ['Stone Chariot', 'Virupaksha Temple', 'Tungabhadra Coracle', 'Badami Caves', 'Pattadakal'],
+    matchedPackageTitle: 'UNESCO Vijayanagara Stone Empire',
+    suggestedItinerary: [
+      { day: 1, title: 'Arrival at Vijayanagara & Hemakuta Sunset', sights: 'Drive from hub to Hampi, check-in, sunset at boulder-strewn Hemakuta Hill and Sasivekalu Ganesha.' },
+      { day: 2, title: 'Iconic Stone Chariot & Tungabhadra Coracle', sights: 'Vijaya Vittala musical pillars & Stone Chariot, active Virupaksha shrine, circular Coracle boat ride.' },
+      { day: 3, title: 'Royal Enclosure & Badami Rock-Cut Caves', sights: 'Lotus Mahal, Elephant Stables, afternoon drive to Badami 6th-century rock-cut cave temples & lake.' },
+      { day: 4, title: 'Aihole & Pattadakal UNESCO Monuments', sights: 'Cradle of Indian temple architecture at Aihole, Pattadakal complex, return journey.' },
+    ],
+  },
+  {
+    id: 'dest-ramesh',
+    name: 'Madurai & Rameshwaram',
+    state: 'Tamil Nadu',
+    tagline: 'Sacred Temples, Pamban Sea Bridge & Dhanushkodi',
+    category: 'Heritage',
+    defaultDays: 3,
+    baseKmFromHub: 320,
+    imageUrl: 'https://images.unsplash.com/photo-1621847468516-1ed5d0df56fe?auto=format&fit=crop&w=1000&q=80',
+    topSights: ['Meenakshi Amman Temple', 'Pamban Bridge', 'Rameshwaram 22 Teerthams', 'Dhanushkodi Ghost Town', 'APJ Kalam Memorial'],
+    suggestedItinerary: [
+      { day: 1, title: 'Madurai Meenakshi Temple & Royal Palace', sights: 'Magnificent Meenakshi Amman Temple darshan, Thirumalai Nayakkar Mahal evening sound & light show.' },
+      { day: 2, title: 'Pamban Sea Bridge & Rameshwaram Teerthams', sights: 'Drive over historic ocean bridge, Ramanathaswamy 1200-pillar corridor, holy teertham holy bath.' },
+      { day: 3, title: 'Dhanushkodi Ghost Town & Indian Ocean Coast', sights: '4x4 shoreline drive to Dhanushkodi tip (Arichal Munai), Dr. APJ Abdul Kalam memorial, return drive.' },
+    ],
+  },
+];
+
+const DEPARTURE_HUBS = [
+  { id: 'hub-blr', name: 'Bengaluru (Bangalore)', state: 'Karnataka' },
+  { id: 'hub-che', name: 'Chennai', state: 'Tamil Nadu' },
+  { id: 'hub-cbe', name: 'Coimbatore', state: 'Tamil Nadu' },
+  { id: 'hub-koc', name: 'Kochi (Cochin)', state: 'Kerala' },
+  { id: 'hub-mdu', name: 'Madurai', state: 'Tamil Nadu' },
+  { id: 'hub-mng', name: 'Mangalore', state: 'Karnataka' },
+];
+
 export const HomePage: React.FC<HomePageProps> = ({
   packages,
   vehicles,
   onNavigate,
   onBookPackage,
   onRentVehicle,
-  onBookRoute,
 }) => {
-  // Search Widget State - default Chennai to Bengaluru
-  const [tripType, setTripType] = useState<'oneway' | 'roundtrip' | 'airport'>('oneway');
-  const [pickupCityId, setPickupCityId] = useState<string>('tn-che'); // Chennai
-  const [dropoffCityId, setDropoffCityId] = useState<string>('ka-blr'); // Bengaluru
-  const [departureDate, setDepartureDate] = useState<string>(() => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
-  });
-  const [pickupTime, setPickupTime] = useState<string>('06:00');
-  const [categoryFilter, setCategoryFilter] = useState<'All' | 'Car' | 'Bus'>('All');
+  // Planner State
+  const [selectedDestId, setSelectedDestId] = useState<string>('dest-ooty');
+  const [selectedHubId, setSelectedHubId] = useState<string>('hub-blr');
+  const [selectedDays, setSelectedDays] = useState<number>(3);
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedVehicleType, setSelectedVehicleType] = useState<string>('SUV'); // 'Sedan' | 'SUV' | 'Van' | 'Bus'
 
-  // Selected Points
-  const pickupPoint = useMemo<LocationPoint>(() => {
-    return SOUTH_INDIA_LOCATIONS.find((l) => l.id === pickupCityId) || SOUTH_INDIA_LOCATIONS[0];
-  }, [pickupCityId]);
+  // Active Destination
+  const currentDestination = useMemo(() => {
+    return TOURIST_DESTINATIONS.find((d) => d.id === selectedDestId) || TOURIST_DESTINATIONS[0];
+  }, [selectedDestId]);
 
-  const dropoffPoint = useMemo<LocationPoint>(() => {
-    return SOUTH_INDIA_LOCATIONS.find((l) => l.id === dropoffCityId) || SOUTH_INDIA_LOCATIONS[20];
-  }, [dropoffCityId]);
+  const currentHub = useMemo(() => {
+    return DEPARTURE_HUBS.find((h) => h.id === selectedHubId) || DEPARTURE_HUBS[0];
+  }, [selectedHubId]);
 
-  // Road distance and duration calculation
-  const distanceKm = useMemo(() => {
-    const rawKm = calculateRoadDistanceKm(
-      pickupPoint.lat,
-      pickupPoint.lng,
-      dropoffPoint.lat,
-      dropoffPoint.lng
-    );
-    return tripType === 'roundtrip' ? rawKm * 2 : rawKm;
-  }, [pickupPoint, dropoffPoint, tripType]);
+  // Match package from backend if available
+  const matchedPackage = useMemo(() => {
+    if (!packages || packages.length === 0) return null;
+    return packages.find(
+      (p) =>
+        p.destination.toLowerCase().includes(currentDestination.name.toLowerCase().split(' ')[0]) ||
+        p.title.toLowerCase().includes(currentDestination.name.toLowerCase().split(' ')[0])
+    ) || packages[0];
+  }, [packages, currentDestination]);
 
-  const durationText = useMemo(() => {
-    return formatDrivingDuration(distanceKm);
-  }, [distanceKm]);
+  // Selected Tourist Vehicle for the Trip
+  const chosenVehicle = useMemo(() => {
+    if (selectedVehicleType === 'Sedan') {
+      return vehicles.find((v) => v.type === 'Car' && v.category === 'Sedan') || vehicles[0];
+    }
+    if (selectedVehicleType === 'Van') {
+      return vehicles.find((v) => v.category.includes('Tempo') || v.category.includes('Traveler') || v.capacity >= 12) || vehicles[2] || vehicles[0];
+    }
+    if (selectedVehicleType === 'Bus') {
+      return vehicles.find((v) => v.type === 'Bus' && v.capacity >= 20) || vehicles[3] || vehicles[0];
+    }
+    // Default Prime SUV (Crysta)
+    return vehicles.find((v) => v.category.includes('SUV')) || vehicles[1] || vehicles[0];
+  }, [vehicles, selectedVehicleType]);
 
-  // Filtered vehicles for search results
-  const filteredVehicles = useMemo(() => {
-    if (categoryFilter === 'All') return vehicles;
-    return vehicles.filter((v) => v.type === categoryFilter);
-  }, [vehicles, categoryFilter]);
+  // Calculate estimated complete tour price
+  const estimatedTourFare = useMemo(() => {
+    const dailyAllowance = 600 * selectedDays;
+    const estTotalKm = currentDestination.baseKmFromHub * 2 + selectedDays * 70; // 70km sightseeing per day
+    const kmFare = estTotalKm * (chosenVehicle?.per_km_rate || 18);
+    const baseTourFare = kmFare + dailyAllowance + (chosenVehicle?.base_fare || 500);
+    return Math.round(baseTourFare / 100) * 100;
+  }, [currentDestination, selectedDays, chosenVehicle]);
 
-  // City swapping
-  const handleSwapCities = () => {
-    const temp = pickupCityId;
-    setPickupCityId(dropoffCityId);
-    setDropoffCityId(temp);
-  };
+  // Filtered packages for the explore grid
+  const filteredPackages = useMemo(() => {
+    if (selectedCategory === 'All') return packages;
+    return packages.filter((p) => p.category.toLowerCase().includes(selectedCategory.toLowerCase()));
+  }, [packages, selectedCategory]);
 
-  // Popular route selection handler
-  const handleSelectPopularRoute = (fromId: string, toId: string) => {
-    setPickupCityId(fromId);
-    setDropoffCityId(toId);
-    // Smooth scroll to search results
-    const resultsEl = document.getElementById('search-results-anchor');
-    if (resultsEl) {
-      resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const handleBookCurrentPlan = () => {
+    if (matchedPackage) {
+      onBookPackage(matchedPackage);
+    } else if (chosenVehicle) {
+      onRentVehicle(chosenVehicle);
     }
   };
 
-  // Trigger search
-  const handleSearchClick = () => {
-    const resultsEl = document.getElementById('search-results-anchor');
-    if (resultsEl) {
-      resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const scrollToPlanner = (destId?: string) => {
+    if (destId) setSelectedDestId(destId);
+    const el = document.getElementById('tourist-planner-anchor');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
-
-  // Format date for MMT display (e.g., "19 Sep'26, Sat")
-  const formattedDisplayDate = useMemo(() => {
-    try {
-      const d = new Date(departureDate);
-      return d.toLocaleDateString('en-IN', {
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      });
-    } catch {
-      return departureDate;
-    }
-  }, [departureDate]);
-
-  // Featured lists
-  const featuredPackages = packages.slice(0, 3);
-  const featuredFleet = vehicles.slice(0, 4);
 
   return (
-    <div className="space-y-10 sm:space-y-14 -mt-2">
+    <div className="space-y-8 sm:space-y-14 -mt-1 sm:-mt-2">
       {/* ============================================================ */}
-      {/* 1. MAKEMYTRIP SIGNATURE HERO & OUTSTATION SEARCH WIDGET */}
+      {/* 1. TOURIST TRIP PLANNER HERO BANNER */}
       {/* ============================================================ */}
-      <div className="relative bg-gradient-to-b from-[#051329] via-[#092247] to-[#0c2f60] text-white rounded-2xl shadow-xl overflow-hidden border border-slate-800">
-        {/* Subtle Background Pattern & Glow */}
-        <div className="absolute inset-0 z-0 opacity-15 bg-[radial-gradient(#008cff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 px-4 sm:px-8 pt-8 pb-14 max-w-6xl mx-auto">
-          {/* Top Brand Subheader */}
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-            <div className="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-400/30 px-3 py-1 rounded-full text-blue-300 text-xs font-semibold uppercase tracking-wider">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>South India Outstation Cabs &amp; Tourist Buses</span>
+      <div className="relative bg-[#051329] text-white rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden border border-slate-800">
+        <div className="relative z-10 px-3.5 py-6 sm:px-10 sm:pt-10 sm:pb-14 max-w-6xl mx-auto">
+          {/* Header Subtitle Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3 text-xs font-medium text-slate-300">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-blue-400 font-bold uppercase tracking-wider text-[11px] sm:text-xs">
+                South India Holiday Specialist
+              </span>
+              <span className="text-slate-600 hidden sm:inline">|</span>
+              <span className="text-slate-300 text-[11px] sm:text-xs">
+                Tamil Nadu • Kerala • Karnataka
+              </span>
             </div>
-            <div className="text-xs text-slate-300 flex items-center gap-3">
-              <span>Coverage: <strong className="text-white">Tamil Nadu • Kerala • Karnataka</strong></span>
-              <span className="text-slate-600">|</span>
-              <span className="text-emerald-400 font-semibold">✓ AITP All-India Permits</span>
+            <div className="flex items-center gap-2">
+              <span className="text-emerald-400 font-semibold text-[11px] sm:text-xs">
+                ✓ Verified Tourist Chauffeurs
+              </span>
             </div>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white mb-2 leading-tight">
-            Book Outstation Cabs &amp; Buses Across South India
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white mb-2 sm:mb-3 leading-tight">
+            Plan Your South India Holiday &amp; Tourist Trips
           </h1>
-          <p className="text-slate-300 text-sm sm:text-base max-w-3xl mb-8">
-            Transparent per-kilometer billing with verified commercial chauffeurs. Clean AC sedans, Innova Crystas, Tempo Travelers, and luxury tourist buses.
+          <p className="text-slate-300 text-xs sm:text-base max-w-3xl mb-5 sm:mb-8 leading-relaxed">
+            Handcrafted tour packages, day-by-day sightseeing itineraries, and private tourist vehicles across Ooty, Munnar, Coorg, Kodaikanal, Wayanad &amp; heritage circuits.
           </p>
 
           {/* ------------------------------------------------------------ */}
-          {/* THE MAKEMYTRIP ELEVATED SEARCH BOX */}
+          {/* INTERACTIVE TOUR TRIP PLANNER WIDGET */}
           {/* ------------------------------------------------------------ */}
-          <div className="bg-white text-gray-900 rounded-2xl shadow-2xl border border-gray-100 p-4 sm:p-6 transition">
-            {/* Top Trip Type Radio Bar */}
-            <div className="flex flex-wrap items-center gap-6 pb-4 border-b border-gray-100 text-sm font-semibold">
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="radio"
-                  name="tripType"
-                  value="oneway"
-                  checked={tripType === 'oneway'}
-                  onChange={() => setTripType('oneway')}
-                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 cursor-pointer"
-                />
-                <span className={tripType === 'oneway' ? 'text-blue-600 font-bold' : 'text-gray-600'}>
-                  ONE WAY DROP
-                </span>
-              </label>
+          <div id="tourist-planner-anchor" className="bg-white text-gray-900 rounded-xl sm:rounded-2xl shadow-2xl border border-gray-100 p-3.5 sm:p-7">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+              <div className="flex items-center gap-2">
+                <span className="text-lg sm:text-xl">🗺️</span>
+                <div>
+                  <h2 className="text-sm sm:text-base font-extrabold text-gray-900">
+                    Interactive Holiday &amp; Itinerary Planner
+                  </h2>
+                  <p className="text-[11px] sm:text-xs text-gray-500">
+                    Tap a destination below or customize duration &amp; vehicle for an instant plan.
+                  </p>
+                </div>
+              </div>
+              <span className="hidden md:inline-block text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">
+                ✓ Interstate Permits &amp; Sightseeing Tolls Included
+              </span>
+            </div>
 
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="radio"
-                  name="tripType"
-                  value="roundtrip"
-                  checked={tripType === 'roundtrip'}
-                  onChange={() => setTripType('roundtrip')}
-                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 cursor-pointer"
-                />
-                <span className={tripType === 'roundtrip' ? 'text-blue-600 font-bold' : 'text-gray-600'}>
-                  ROUND TRIP
+            {/* Mobile-First Visual Destination Swipe Carousel */}
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                  Popular Holiday Destinations (1-Tap Select):
                 </span>
-              </label>
-
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="radio"
-                  name="tripType"
-                  value="airport"
-                  checked={tripType === 'airport'}
-                  onChange={() => setTripType('airport')}
-                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 cursor-pointer"
-                />
-                <span className={tripType === 'airport' ? 'text-blue-600 font-bold' : 'text-gray-600'}>
-                  AIRPORT / RAILWAY TRANSFER
-                </span>
-              </label>
-
-              <div className="ml-auto hidden md:flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md font-medium border border-emerald-200">
-                <span>🛡️ Zero Hidden Charges • Tolls Included Option</span>
+                <span className="text-[10px] text-blue-600 font-semibold sm:hidden">Swipe ➔</span>
+              </div>
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar scroll-smooth">
+                {TOURIST_DESTINATIONS.map((dest) => {
+                  const isSelected = selectedDestId === dest.id;
+                  return (
+                    <button
+                      key={dest.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedDestId(dest.id);
+                        setSelectedDays(dest.defaultDays);
+                      }}
+                      className={`shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl border text-left transition active:scale-95 cursor-pointer ${
+                        isSelected
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-sm ring-2 ring-blue-300'
+                          : 'bg-slate-50 hover:bg-gray-100 text-gray-800 border-gray-200'
+                      }`}
+                    >
+                      <img
+                        src={dest.imageUrl}
+                        alt={dest.name}
+                        className="w-8 h-8 rounded-lg object-cover shrink-0"
+                      />
+                      <div>
+                        <div className="text-xs font-bold whitespace-nowrap leading-none">
+                          {dest.name}
+                        </div>
+                        <div className={`text-[10px] mt-0.5 whitespace-nowrap ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
+                          {dest.defaultDays} Days • {dest.state}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* MMT Tile Grid */}
-            <div className="relative grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-0 mt-4 border md:border-gray-200 md:rounded-xl overflow-visible bg-white">
-              {/* Tile 1: FROM CITY (col 1-4) */}
-              <div className="md:col-span-4 p-3.5 sm:p-4 hover:bg-blue-50/40 transition rounded-lg md:rounded-l-xl md:rounded-r-none border-b md:border-b-0 md:border-r border-gray-200 relative group">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                    FROM (PICKUP CITY)
-                  </span>
-                  <span className="text-[10px] bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded">
-                    {pickupPoint.state}
-                  </span>
-                </div>
-                <div className="mt-1">
-                  <select
-                    value={pickupCityId}
-                    onChange={(e) => setPickupCityId(e.target.value)}
-                    aria-label="Select Pickup City"
-                    className="w-full text-lg sm:text-xl font-black text-gray-900 bg-transparent border-0 p-0 focus:ring-0 cursor-pointer"
-                  >
-                    <optgroup label="Tamil Nadu">
-                      {SOUTH_INDIA_LOCATIONS.filter((l) => l.state === 'Tamil Nadu').map((loc) => (
-                        <option key={loc.id} value={loc.id}>
-                          {loc.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="Kerala">
-                      {SOUTH_INDIA_LOCATIONS.filter((l) => l.state === 'Kerala').map((loc) => (
-                        <option key={loc.id} value={loc.id}>
-                          {loc.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="Karnataka">
-                      {SOUTH_INDIA_LOCATIONS.filter((l) => l.state === 'Karnataka').map((loc) => (
-                        <option key={loc.id} value={loc.id}>
-                          {loc.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                  </select>
-                  <p className="text-xs text-gray-500 truncate mt-0.5">
-                    Any Address, Airport or Hotel in {pickupPoint.name}
-                  </p>
-                </div>
-              </div>
-
-              {/* City Swap Floating Button (centered over divider) */}
-              <div className="hidden md:flex absolute left-[33.33%] top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-                <button
-                  type="button"
-                  onClick={handleSwapCities}
-                  title="Swap Pickup and Dropoff"
-                  className="w-8 h-8 rounded-full bg-white border border-gray-300 shadow-md flex items-center justify-center text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition transform hover:scale-110 active:scale-95 cursor-pointer"
-                >
-                  ⇄
-                </button>
-              </div>
-
-              {/* Tile 2: TO CITY (col 5-8) */}
-              <div className="md:col-span-4 p-3.5 sm:p-4 hover:bg-blue-50/40 transition border-b md:border-b-0 md:border-r border-gray-200 relative group">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                    TO (DROPOFF CITY)
-                  </span>
-                  <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">
-                    {dropoffPoint.state}
-                  </span>
-                </div>
-                <div className="mt-1">
-                  <select
-                    value={dropoffCityId}
-                    onChange={(e) => setDropoffCityId(e.target.value)}
-                    aria-label="Select Dropoff City"
-                    className="w-full text-lg sm:text-xl font-black text-gray-900 bg-transparent border-0 p-0 focus:ring-0 cursor-pointer"
-                  >
-                    <optgroup label="Tamil Nadu">
-                      {SOUTH_INDIA_LOCATIONS.filter((l) => l.state === 'Tamil Nadu').map((loc) => (
-                        <option key={loc.id} value={loc.id}>
-                          {loc.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="Kerala">
-                      {SOUTH_INDIA_LOCATIONS.filter((l) => l.state === 'Kerala').map((loc) => (
-                        <option key={loc.id} value={loc.id}>
-                          {loc.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="Karnataka">
-                      {SOUTH_INDIA_LOCATIONS.filter((l) => l.state === 'Karnataka').map((loc) => (
-                        <option key={loc.id} value={loc.id}>
-                          {loc.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                  </select>
-                  <p className="text-xs text-gray-500 truncate mt-0.5">
-                    Doorstep Drop / Destination in {dropoffPoint.name}
-                  </p>
-                </div>
-              </div>
-
-              {/* Tile 3: DEPARTURE DATE (col 9-10) */}
-              <div className="md:col-span-2 p-3.5 sm:p-4 hover:bg-blue-50/40 transition border-b md:border-b-0 md:border-r border-gray-200">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 block">
-                  DEPARTURE DATE
-                </span>
-                <input
-                  type="date"
-                  value={departureDate}
-                  onChange={(e) => setDepartureDate(e.target.value)}
-                  className="w-full font-bold text-gray-900 bg-transparent border-0 p-0 text-sm focus:ring-0 cursor-pointer mt-1"
-                />
-                <span className="text-[11px] text-blue-600 font-semibold block truncate">
-                  {formattedDisplayDate}
-                </span>
-              </div>
-
-              {/* Tile 4: PICKUP TIME (col 11-12) */}
-              <div className="md:col-span-2 p-3.5 sm:p-4 hover:bg-blue-50/40 transition rounded-lg md:rounded-r-xl md:rounded-l-none">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 block">
-                  PICKUP TIME
-                </span>
+            {/* 4-Step Tourist Planner Selector Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              {/* 1. Tourist Destination */}
+              <div className="bg-slate-50 hover:bg-blue-50/50 p-3 sm:p-3.5 rounded-xl border border-gray-200 transition">
+                <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                  1. Holiday Destination
+                </label>
                 <select
-                  value={pickupTime}
-                  onChange={(e) => setPickupTime(e.target.value)}
-                  aria-label="Select Pickup Time"
-                  className="w-full font-bold text-gray-900 bg-transparent border-0 p-0 text-sm focus:ring-0 cursor-pointer mt-1"
+                  value={selectedDestId}
+                  onChange={(e) => {
+                    setSelectedDestId(e.target.value);
+                    const dest = TOURIST_DESTINATIONS.find((d) => d.id === e.target.value);
+                    if (dest) setSelectedDays(dest.defaultDays);
+                  }}
+                  className="w-full bg-transparent font-bold text-sm text-gray-900 focus:outline-none cursor-pointer py-1"
                 >
-                  <option value="05:00">05:00 AM (Early Start)</option>
-                  <option value="06:00">06:00 AM</option>
-                  <option value="07:00">07:00 AM</option>
-                  <option value="08:00">08:00 AM</option>
-                  <option value="09:00">09:00 AM</option>
-                  <option value="10:00">10:00 AM</option>
-                  <option value="12:00">12:00 PM (Noon)</option>
-                  <option value="14:00">02:00 PM</option>
-                  <option value="18:00">06:00 PM</option>
-                  <option value="21:00">09:00 PM (Night)</option>
+                  {TOURIST_DESTINATIONS.map((dest) => (
+                    <option key={dest.id} value={dest.id}>
+                      {dest.name} ({dest.state})
+                    </option>
+                  ))}
                 </select>
-                <span className="text-[11px] text-gray-500 block truncate">
-                  24/7 Chauffeur Dispatch
-                </span>
+                <div className="text-[11px] text-blue-600 font-semibold mt-0.5 truncate">
+                  {currentDestination.tagline}
+                </div>
+              </div>
+
+              {/* 2. Departure Hub */}
+              <div className="bg-slate-50 hover:bg-blue-50/50 p-3.5 rounded-xl border border-gray-200 transition">
+                <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                  2. Starting Departure Hub
+                </label>
+                <select
+                  value={selectedHubId}
+                  onChange={(e) => setSelectedHubId(e.target.value)}
+                  className="w-full bg-transparent font-bold text-sm text-gray-900 focus:outline-none cursor-pointer"
+                >
+                  {DEPARTURE_HUBS.map((hub) => (
+                    <option key={hub.id} value={hub.id}>
+                      {hub.name}
+                    </option>
+                  ))}
+                </select>
+                <div className="text-[11px] text-gray-500 font-medium mt-1">
+                  Home / Hotel / Airport Pickup
+                </div>
+              </div>
+
+              {/* 3. Tour Duration */}
+              <div className="bg-slate-50 hover:bg-blue-50/50 p-3.5 rounded-xl border border-gray-200 transition">
+                <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                  3. Tour Duration (Days / Nights)
+                </label>
+                <select
+                  value={selectedDays}
+                  onChange={(e) => setSelectedDays(Number(e.target.value))}
+                  className="w-full bg-transparent font-bold text-sm text-gray-900 focus:outline-none cursor-pointer"
+                >
+                  <option value={2}>2 Days / 1 Night (Weekend Trip)</option>
+                  <option value={3}>3 Days / 2 Nights (Classic Holiday)</option>
+                  <option value={4}>4 Days / 3 Nights (Explorer Tour)</option>
+                  <option value={5}>5 Days / 4 Nights (Grand Circuit)</option>
+                  <option value={6}>6 Days / 5 Nights (Extended Tour)</option>
+                </select>
+                <div className="text-[11px] text-emerald-700 font-semibold mt-1">
+                  {selectedDays} Days sightseeing plan
+                </div>
+              </div>
+
+              {/* 4. Tourist Vehicle */}
+              <div className="bg-slate-50 hover:bg-blue-50/50 p-3.5 rounded-xl border border-gray-200 transition">
+                <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                  4. Travel Group Vehicle
+                </label>
+                <select
+                  value={selectedVehicleType}
+                  onChange={(e) => setSelectedVehicleType(e.target.value)}
+                  className="w-full bg-transparent font-bold text-sm text-gray-900 focus:outline-none cursor-pointer"
+                >
+                  <option value="Sedan">AC Sedan (Swift Dzire / Etios - 4 Seats)</option>
+                  <option value="SUV">Prime SUV (Innova Crysta - 6-7 Seats)</option>
+                  <option value="Van">Tempo Traveller (12-16 Pushback Seats)</option>
+                  <option value="Bus">Luxury Tourist Coach (21-40 Seater)</option>
+                </select>
+                <div className="text-[11px] text-gray-600 font-medium mt-1 truncate">
+                  {chosenVehicle?.name || 'Innova Crysta'} (₹{chosenVehicle?.per_km_rate}/km)
+                </div>
               </div>
             </div>
 
-            {/* Centered MakeMyTrip Big Search Button */}
-            <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3">
+            {/* Quick Holiday Vibe Chips */}
+            <div className="mt-5 pt-4 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span className="font-bold text-gray-500 mr-1 text-[11px] uppercase tracking-wider">
+                  Holiday Vibes:
+                </span>
+                {[
+                  { label: '🏔️ Hill Stations', destId: 'dest-ooty' },
+                  { label: '🌴 Backwaters', destId: 'dest-munnar' },
+                  { label: '☕ Coffee Highlands', destId: 'dest-coorg' },
+                  { label: '🛕 Temple Circuits', destId: 'dest-ramesh' },
+                  { label: '🏛️ World Heritage', destId: 'dest-hampi' },
+                  { label: '🐅 Wildlife Forests', destId: 'dest-wayanad' },
+                ].map((vibe) => (
+                  <button
+                    key={vibe.label}
+                    type="button"
+                    onClick={() => {
+                      setSelectedDestId(vibe.destId);
+                      const d = TOURIST_DESTINATIONS.find((x) => x.id === vibe.destId);
+                      if (d) setSelectedDays(d.defaultDays);
+                    }}
+                    className={`px-3 py-1 rounded-md text-xs font-semibold transition cursor-pointer border ${
+                      selectedDestId === vibe.destId
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-200'
+                    }`}
+                  >
+                    {vibe.label}
+                  </button>
+                ))}
+              </div>
+
               <button
                 type="button"
-                onClick={handleSearchClick}
-                className="w-full sm:w-auto px-10 py-3.5 rounded-full bg-gradient-to-r from-[#008cff] to-[#0055ff] hover:from-[#0077e6] hover:to-[#0044dd] text-white font-extrabold text-sm sm:text-base uppercase tracking-wider shadow-lg shadow-blue-500/30 transition transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer flex items-center justify-center gap-2"
+                onClick={() => {
+                  const el = document.getElementById('generated-itinerary-card');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
+                className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider shadow-sm transition cursor-pointer flex items-center justify-center gap-1.5"
               >
-                <span>SEARCH CABS &amp; BUSES</span>
+                <span>View Trip Plan &amp; Itinerary</span>
                 <span>➔</span>
               </button>
             </div>
           </div>
-
-          {/* Quick Popular Corridors Strip */}
-          <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-slate-300">
-            <span className="text-slate-400 font-bold uppercase tracking-wider text-[11px]">
-              Popular Routes:
-            </span>
-            {POPULAR_ROUTES.map((route) => (
-              <button
-                key={route.title}
-                type="button"
-                onClick={() => handleSelectPopularRoute(route.fromId, route.toId)}
-                className="bg-slate-800/80 hover:bg-blue-600 hover:text-white px-3 py-1 rounded-full text-slate-200 border border-slate-700 transition cursor-pointer text-xs font-medium"
-              >
-                {route.title}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
       {/* ============================================================ */}
-      {/* 2. MAKEMYTRIP STYLE CAB SEARCH RESULTS SECTION */}
+      {/* 2. GENERATED DAY-BY-DAY TOUR ITINERARY & VEHICLE PACKAGE */}
       {/* ============================================================ */}
-      <div id="search-results-anchor" className="scroll-mt-24 space-y-6">
-        {/* Route Summary Ribbon */}
-        <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">
-                {pickupPoint.name} to {dropoffPoint.name} Cabs &amp; Buses
-              </h2>
-              <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded">
-                {tripType === 'roundtrip' ? 'Round Trip' : 'One Way'}
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600 mt-1.5">
-              <span className="font-semibold text-gray-900">
-                🛣️ Distance: <strong className="text-blue-600">{distanceKm} km</strong>
-              </span>
-              <span>•</span>
-              <span>⏱️ Driving Duration: <strong>~{durationText}</strong></span>
-              <span>•</span>
-              <span>📅 {formattedDisplayDate} at {pickupTime}</span>
-              <span>•</span>
-              <span className="text-emerald-700 font-medium">✓ Tolls &amp; Driver Beta Included</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5 w-full md:w-auto">
-            {/* Filter Pills */}
-            <div className="inline-flex rounded-lg border border-gray-200 p-0.5 bg-gray-50 text-xs font-semibold">
-              {(['All', 'Car', 'Bus'] as const).map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setCategoryFilter(cat)}
-                  className={`px-3 py-1.5 rounded-md transition cursor-pointer ${
-                    categoryFilter === cat
-                      ? 'bg-white text-blue-600 shadow-xs font-bold'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  {cat === 'All' ? 'All Fleet' : cat === 'Car' ? 'Cars (4-7)' : 'Buses (12-40)'}
-                </button>
-              ))}
-            </div>
-
-            {/* Map Route Button */}
-            <button
-              onClick={() => onNavigate('route-calc')}
-              className="border border-blue-200 hover:border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-bold px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
-              title="Open full interactive map route calculator"
-            >
-              <span>🗺️</span>
-              <span className="hidden sm:inline">Interactive Map</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Results Cards List */}
-        <div className="space-y-4">
-          {filteredVehicles.map((vehicle) => {
-            const vehicleFare = distanceKm * vehicle.per_km_rate + vehicle.base_fare;
-            const originalPrice = Math.round(vehicleFare * 1.15); // Strikethrough MMT style
-
-            return (
-              <div
-                key={vehicle.id}
-                className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-xs hover:border-blue-300 hover:shadow-md transition flex flex-col md:flex-row items-start md:items-center justify-between gap-5"
-              >
-                {/* Column 1: Image & Badges */}
-                <div className="w-full md:w-48 sm:shrink-0 flex md:flex-col items-center md:items-start gap-3">
-                  <div className="relative w-28 h-20 md:w-44 md:h-28 rounded-lg overflow-hidden bg-gray-100 border border-gray-100 shrink-0">
-                    <img
-                      src={vehicle.image_url}
-                      alt={vehicle.name}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                    <span className="absolute top-1.5 left-1.5 bg-gray-900/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-                      {vehicle.type}
-                    </span>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-1 text-[11px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 w-fit">
-                      <span>★ 4.8</span>
-                      <span className="text-gray-400 font-normal">/ 5.0 (300+ trips)</span>
-                    </div>
-                    <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 w-fit">
-                      AITP Certified
-                    </span>
-                  </div>
-                </div>
-
-                {/* Column 2: Vehicle Specs & Inclusions */}
-                <div className="flex-1 space-y-2">
-                  <div>
-                    <h3 className="text-lg font-black text-gray-900 tracking-tight">
-                      {vehicle.name}
-                    </h3>
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600 mt-1">
-                      <span className="font-semibold text-gray-800">
-                        👥 {vehicle.capacity} Passengers
-                      </span>
-                      <span>•</span>
-                      <span>❄️ {vehicle.ac_type}</span>
-                      <span>•</span>
-                      <span>🧳 {vehicle.type === 'Car' ? '3 Large Bags' : 'Luggage Boot'}</span>
-                      <span>•</span>
-                      <span>⛽ Diesel / GPS</span>
-                    </div>
-                  </div>
-
-                  {/* MakeMyTrip Inclusions Checklist */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1 text-xs text-gray-600">
-                    <div className="flex items-center gap-1.5 text-emerald-700">
-                      <span>✓</span>
-                      <span>{distanceKm} km included in total fare</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-gray-700">
-                      <span>✓</span>
-                      <span>Extra km rate: <strong>₹{vehicle.per_km_rate}/km</strong></span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-gray-700">
-                      <span>✓</span>
-                      <span>Interstate taxes &amp; permits pre-paid</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-gray-700">
-                      <span>✓</span>
-                      <span>Driver Beta &amp; allowances included</span>
-                    </div>
-                  </div>
-
-                  <p className="text-[11px] text-gray-500 pt-1">
-                    Free cancellation up to 6 hours before scheduled departure. Instant reservation confirmation.
-                  </p>
-                </div>
-
-                {/* Column 3: MMT Price Block & Instant Book Button */}
-                <div className="w-full md:w-56 pt-3 md:pt-0 border-t md:border-t-0 md:border-l md:border-gray-100 md:pl-6 flex md:flex-col items-center md:items-end justify-between md:justify-center gap-3 shrink-0">
-                  <div className="text-left md:text-right">
-                    <div className="text-xs text-gray-400 line-through">
-                      {formatINR(originalPrice)}
-                    </div>
-                    <div className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight leading-none">
-                      {formatINR(vehicleFare)}
-                    </div>
-                    <span className="text-[10px] text-emerald-700 font-semibold block mt-1">
-                      Taxes &amp; Tolls Included
-                    </span>
-                    <span className="text-[11px] text-gray-500 font-medium">
-                      Base rate: ₹{vehicle.per_km_rate}/km
-                    </span>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onBookRoute({
-                        pickup: pickupPoint.name,
-                        dropoff: dropoffPoint.name,
-                        distanceKm,
-                        vehicle,
-                        totalFare: vehicleFare,
-                      })
-                    }
-                    className="w-full sm:w-auto md:w-full bg-[#008cff] hover:bg-[#0077e6] active:bg-[#0055ff] text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider px-6 py-3 rounded-lg shadow-sm transition cursor-pointer text-center"
-                  >
-                    BOOK NOW
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ============================================================ */}
-      {/* 3. POPULAR OUTSTATION CORRIDORS (MMT STYLE CARDS) */}
-      {/* ============================================================ */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block">
-              Frequent Routes
-            </span>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-              Popular Outstation Corridors in South India
-            </h2>
-          </div>
-          <button
-            onClick={() => onNavigate('route-calc')}
-            className="text-xs sm:text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
-          >
-            <span>Explore All on Map</span>
-            <span>➔</span>
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { from: 'ka-blr', to: 'tn-oot', title: 'Bangalore ➔ Ooty', km: 280, fromCity: 'Bangalore', toCity: 'Ooty', rate: 4200, state: 'KA - TN' },
-            { from: 'ka-blr', to: 'ka-coo', title: 'Bangalore ➔ Coorg', km: 255, fromCity: 'Bangalore', toCity: 'Coorg', rate: 3850, state: 'KA' },
-            { from: 'tn-che', to: 'tn-ram', title: 'Chennai ➔ Rameshwaram', km: 560, fromCity: 'Chennai', toCity: 'Rameshwaram', rate: 8400, state: 'TN' },
-            { from: 'kl-koc', to: 'kl-mun', title: 'Kochi ➔ Munnar', km: 130, fromCity: 'Kochi', toCity: 'Munnar', rate: 2100, state: 'KL' },
-            { from: 'tn-che', to: 'ka-blr', title: 'Chennai ➔ Bangalore', km: 345, fromCity: 'Chennai', toCity: 'Bangalore', rate: 5200, state: 'TN - KA' },
-            { from: 'ka-blr', to: 'ka-mys', title: 'Bangalore ➔ Mysore', km: 145, fromCity: 'Bangalore', toCity: 'Mysore', rate: 2200, state: 'KA' },
-            { from: 'tn-cbe', to: 'tn-kod', title: 'Coimbatore ➔ Kodaikanal', km: 175, fromCity: 'Coimbatore', toCity: 'Kodaikanal', rate: 2650, state: 'TN' },
-            { from: 'kl-koc', to: 'kl-all', title: 'Kochi ➔ Alleppey', km: 60, fromCity: 'Kochi', toCity: 'Alleppey', rate: 1200, state: 'KL' },
-          ].map((corridor) => (
-            <div
-              key={corridor.title}
-              onClick={() => handleSelectPopularRoute(corridor.from, corridor.to)}
-              className="bg-white border border-gray-200 hover:border-blue-500 rounded-xl p-4 shadow-xs hover:shadow-md transition cursor-pointer flex flex-col justify-between group"
-            >
-              <div>
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                  <span className="font-semibold text-blue-600">{corridor.state}</span>
-                  <span>{corridor.km} km</span>
-                </div>
-                <h3 className="font-bold text-base text-gray-900 group-hover:text-blue-600 transition">
-                  {corridor.title}
-                </h3>
-                <p className="text-xs text-gray-500 mt-1">
-                  One-way drop &amp; round trip available
-                </p>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] text-gray-400 block uppercase">Fares From</span>
-                  <span className="font-extrabold text-sm text-gray-900">
-                    {formatINR(corridor.rate)}
-                  </span>
-                </div>
-                <span className="text-xs font-bold text-blue-600 group-hover:translate-x-0.5 transition">
-                  Book ➔
+      <div id="generated-itinerary-card" className="scroll-mt-20 space-y-4 sm:space-y-6">
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-8">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6 pb-5 sm:pb-6 border-b border-gray-200">
+            <div>
+              <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                <span className="bg-blue-100 text-blue-800 text-[11px] sm:text-xs font-extrabold px-2 py-0.5 rounded">
+                  {currentDestination.category} Holiday
+                </span>
+                <span className="text-xs font-semibold text-gray-500">
+                  {currentDestination.state}
+                </span>
+                <span className="text-xs text-gray-400">•</span>
+                <span className="text-xs font-bold text-emerald-700">
+                  {selectedDays} Days / {selectedDays - 1} Nights Complete Tour
                 </span>
               </div>
+              <h2 className="text-xl sm:text-3xl font-black text-gray-900 tracking-tight">
+                {currentHub.name} ➔ {currentDestination.name} Tour
+              </h2>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                Private air-conditioned tourist vehicle dedicated for your entire tour with verified local sightseeing chauffeur.
+              </p>
             </div>
-          ))}
+
+            {/* Total Tour Fare & Booking CTA */}
+            <div className="bg-slate-50 border border-slate-200 p-3.5 sm:p-4 rounded-xl flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-5 w-full lg:w-auto justify-between lg:justify-start">
+              <div>
+                <span className="text-[10px] text-gray-500 uppercase font-bold block">
+                  Complete Tour Package From
+                </span>
+                <div className="text-2xl sm:text-3xl font-black text-gray-900 leading-none mt-0.5">
+                  {formatINR(estimatedTourFare)}
+                </div>
+                <span className="text-[11px] text-emerald-700 font-semibold block mt-1">
+                  ✓ Fuel, Driver Batta &amp; Tolls Included
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleBookCurrentPlan}
+                className="bg-[#008cff] hover:bg-[#0077e6] active:bg-[#0055ff] text-white font-extrabold text-xs sm:text-sm uppercase tracking-wider px-5 py-3 rounded-lg shadow-md transition cursor-pointer text-center"
+              >
+                Book This Tour
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-6">
+            {/* Left: Day-by-Day Sightseeing Itinerary (8 cols) */}
+            <div className="lg:col-span-8 space-y-6">
+              <div>
+                <h3 className="text-base font-extrabold text-gray-900 uppercase tracking-wide flex items-center gap-2 mb-4">
+                  <span>🗓️ Day-by-Day Sightseeing Itinerary</span>
+                  <span className="text-xs text-gray-500 font-normal">({selectedDays} Days)</span>
+                </h3>
+
+                <div className="space-y-4">
+                  {currentDestination.suggestedItinerary.slice(0, selectedDays).map((itin, idx) => (
+                    <div
+                      key={itin.day}
+                      className="flex items-start gap-4 p-4 rounded-xl border border-gray-100 bg-slate-50/60 hover:bg-slate-50 transition"
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-blue-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-xs">
+                        D{idx + 1}
+                      </div>
+                      <div className="space-y-1">
+                        <h4 className="font-bold text-sm sm:text-base text-gray-900">
+                          {itin.title}
+                        </h4>
+                        <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                          {itin.sights}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+
+                  {selectedDays > currentDestination.suggestedItinerary.length && (
+                    <div className="flex items-start gap-4 p-4 rounded-xl border border-gray-100 bg-slate-50/60">
+                      <div className="w-10 h-10 rounded-lg bg-blue-600 text-white font-black text-sm flex items-center justify-center shrink-0">
+                        D{selectedDays}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-sm sm:text-base text-gray-900">
+                          Extended Leisure &amp; Return Departure
+                        </h4>
+                        <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                          Morning sunrise viewpoints, local organic spice/handicraft shopping, and comfortable return drop to {currentHub.name}.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Key Attractions Included */}
+              <div>
+                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2.5">
+                  Sightseeing Highlights Included:
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {currentDestination.topSights.map((sight) => (
+                    <span
+                      key={sight}
+                      className="bg-white border border-gray-200 text-gray-800 text-xs font-medium px-3 py-1 rounded-md shadow-2xs flex items-center gap-1.5"
+                    >
+                      <span className="text-emerald-600">✓</span>
+                      <span>{sight}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Assigned Tourist Vehicle & Trip Inclusions (4 cols) */}
+            <div className="lg:col-span-4 space-y-5">
+              <div className="border border-gray-200 rounded-xl p-5 bg-white shadow-2xs space-y-4">
+                <div className="relative h-44 rounded-lg overflow-hidden bg-gray-100 border border-gray-100">
+                  <img
+                    src={chosenVehicle?.image_url || currentDestination.imageUrl}
+                    alt={chosenVehicle?.name || 'Tourist Vehicle'}
+                    className="w-full h-full object-cover"
+                  />
+                  <span className="absolute top-2.5 left-2.5 bg-gray-900/85 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                    {chosenVehicle?.type === 'Bus' ? 'Tourist Bus / Coach' : 'Private Tourist Cab'}
+                  </span>
+                  <span className="absolute top-2.5 right-2.5 bg-blue-600 text-white text-xs font-extrabold px-2 py-0.5 rounded shadow-sm">
+                    {chosenVehicle?.capacity} Seats
+                  </span>
+                </div>
+
+                <div>
+                  <h4 className="font-extrabold text-base text-gray-900">
+                    {chosenVehicle?.name || 'Toyota Innova Crysta'}
+                  </h4>
+                  <div className="text-xs text-gray-500 mt-0.5">
+                    {chosenVehicle?.category || 'Prime SUV'} • {chosenVehicle?.ac_type || 'Dual Air Conditioned'}
+                  </div>
+                </div>
+
+                {/* Inclusions Checklist */}
+                <div className="space-y-2 pt-2 border-t border-gray-100 text-xs text-gray-700">
+                  <div className="flex items-center gap-2 text-emerald-700 font-semibold">
+                    <span>✓</span>
+                    <span>100% Local Sightseeing Included</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>✓</span>
+                    <span>Hill-Driving Certified Chauffeur</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>✓</span>
+                    <span>Driver Batta &amp; Night Stay Included</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>✓</span>
+                    <span>Interstate All-India Tourist Permit (AITP)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>✓</span>
+                    <span>Highway Toll Taxes &amp; Sightseeing Parking</span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleBookCurrentPlan}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg text-xs uppercase tracking-wider transition cursor-pointer"
+                >
+                  Reserve This Tour Package
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* ============================================================ */}
-      {/* 4. TRUST & VALUE PROPOSITIONS (WHY BOOK WITH US) */}
-      {/* ============================================================ */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-xs">
-        <div className="text-center max-w-2xl mx-auto mb-8">
-          <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">
-            Why Book With Us
-          </span>
-          <h2 className="text-2xl font-black text-gray-900 tracking-tight">
-            South India Interstate Travel Specialists
-          </h2>
-          <p className="text-sm text-gray-600 mt-1">
-            Authorised interstate tourist transport covering Tamil Nadu, Kerala, and Karnataka with verified commercial chauffeurs.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg shrink-0">
-              ₹
-            </div>
-            <div>
-              <h3 className="font-bold text-sm text-gray-900">Fixed Per-KM Rates</h3>
-              <p className="text-xs text-gray-600 mt-1 leading-relaxed">
-                Zero surge pricing. Rates strictly fixed per kilometer from ₹14/km for Sedans to ₹45/km for Volvo coaches.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg shrink-0">
-              ✓
-            </div>
-            <div>
-              <h3 className="font-bold text-sm text-gray-900">AITP Border Permits</h3>
-              <p className="text-xs text-gray-600 mt-1 leading-relaxed">
-                All commercial vehicles possess valid All-India Tourist Permits. No stoppage at interstate checkposts.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg shrink-0">
-              👥
-            </div>
-            <div>
-              <h3 className="font-bold text-sm text-gray-900">Cars &amp; Large Buses</h3>
-              <p className="text-xs text-gray-600 mt-1 leading-relaxed">
-                Whether 4 passengers in a Dzire or 40 passengers in a Volvo coach for college or marriage trips, we have you covered.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg shrink-0">
-              📞
-            </div>
-            <div>
-              <h3 className="font-bold text-sm text-gray-900">24x7 Trip Support</h3>
-              <p className="text-xs text-gray-600 mt-1 leading-relaxed">
-                Round-the-clock telephone control room at +91 98401 23456 with live GPS vehicle dispatch and driver coordination.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ============================================================ */}
-      {/* 5. INTERACTIVE ROUTE MAP TEASER */}
-      {/* ============================================================ */}
-      <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white rounded-2xl p-6 sm:p-8 shadow-md flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-800">
-        <div className="max-w-2xl">
-          <span className="text-xs font-bold text-blue-400 uppercase tracking-wider block mb-1">
-            Need Live Map View?
-          </span>
-          <h3 className="text-xl sm:text-2xl font-black text-white">
-            Open Interactive South India Route &amp; Distance Calculator
-          </h3>
-          <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
-            Click any two points on the map or use your current GPS location to see real driving paths, ghat road curves, driving durations, and exact per-km vehicle pricing.
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => onNavigate('route-calc')}
-          className="bg-white hover:bg-slate-100 text-gray-900 font-extrabold px-6 py-3 rounded-lg text-sm shadow-md transition whitespace-nowrap cursor-pointer flex items-center gap-2"
-        >
-          <span>Open Route Map</span>
-          <span>➔</span>
-        </button>
-      </div>
-
-      {/* ============================================================ */}
-      {/* 6. FEATURED HOLIDAY TOUR PACKAGES */}
+      {/* 3. FEATURED SOUTH INDIA HOLIDAY PACKAGES */}
       {/* ============================================================ */}
       <div>
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-5 sm:mb-6">
           <div>
             <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block">
               Curated Holidays
             </span>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-              South India Holiday Tour Packages
+            <h2 className="text-xl sm:text-2xl font-black text-gray-900">
+              Popular South India Holiday Tour Packages
             </h2>
             <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
-              All-inclusive itineraries with private car/bus transport and handpicked hotels.
+              Handcrafted packages with private transport, sightseeing, and verified hotel options.
             </p>
           </div>
 
-          <button
-            onClick={() => onNavigate('tours')}
-            className="text-xs sm:text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
-          >
-            <span>View All Packages</span>
-            <span>➔</span>
-          </button>
+          <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1 no-scrollbar">
+            {/* Category Filter Pills */}
+            <div className="inline-flex rounded-lg border border-gray-200 p-0.5 bg-gray-50 text-xs font-semibold shrink-0">
+              {['All', 'Hill Station', 'Backwaters', 'Heritage'].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-md transition cursor-pointer text-xs ${
+                    selectedCategory === cat
+                      ? 'bg-white text-blue-600 shadow-xs font-bold'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  {cat === 'All' ? 'All Tours' : cat}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => onNavigate('tours')}
+              className="text-xs sm:text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0 ml-2"
+            >
+              <span>View All</span>
+              <span>➔</span>
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredPackages.map((pkg) => (
+          {filteredPackages.slice(0, 6).map((pkg) => (
             <div
               key={pkg.id}
-              className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xs hover:border-blue-400 hover:shadow-md transition flex flex-col group"
+              className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-xs hover:border-blue-400 hover:shadow-md transition flex flex-col group"
             >
-              <div className="relative h-48 bg-gray-100 overflow-hidden">
+              <div className="relative h-52 bg-gray-100 overflow-hidden">
                 <img
                   src={pkg.image_url}
                   alt={pkg.title}
@@ -762,31 +726,53 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
 
               <div className="p-5 flex flex-col flex-1">
-                <div className="text-xs text-blue-600 font-semibold mb-1">
-                  {pkg.destination} • {pkg.duration_days} Days / {pkg.duration_days - 1} Nights
+                <div className="flex items-center justify-between text-xs text-blue-600 font-semibold mb-1">
+                  <span>{pkg.destination}</span>
+                  <span className="text-gray-500 font-medium">
+                    {pkg.duration_days} Days / {pkg.duration_days - 1} Nights
+                  </span>
                 </div>
-                <h3 className="font-bold text-base text-gray-900 group-hover:text-blue-600 transition">
+
+                <h3 className="font-bold text-lg text-gray-900 group-hover:text-blue-600 transition leading-snug">
                   {pkg.title}
                 </h3>
+
                 <p className="text-xs text-gray-600 mt-2 line-clamp-2 leading-relaxed">
                   {pkg.description}
                 </p>
 
+                {/* Sights Checklist */}
+                <div className="mt-3 pt-3 border-t border-gray-100 space-y-1 text-xs text-gray-600">
+                  <div className="font-semibold text-gray-800 text-[11px] uppercase tracking-wider mb-1">
+                    Key Highlights:
+                  </div>
+                  {pkg.highlights.split(',').slice(0, 2).map((h, i) => (
+                    <div key={i} className="flex items-center gap-1.5 truncate">
+                      <span className="text-emerald-600">✓</span>
+                      <span className="truncate">{h.trim()}</span>
+                    </div>
+                  ))}
+                </div>
+
                 <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] text-gray-400 uppercase font-semibold block">All Inclusive From</span>
-                    <span className="text-lg font-black text-gray-900">
+                    <span className="text-[10px] text-gray-400 uppercase font-semibold block">
+                      Tour Package From
+                    </span>
+                    <span className="text-xl font-black text-gray-900">
                       {formatINR(pkg.price)}
                     </span>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => onBookPackage(pkg)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-xs cursor-pointer"
-                  >
-                    Book Tour
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onBookPackage(pkg)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-xs cursor-pointer"
+                    >
+                      Book Tour
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -795,19 +781,141 @@ export const HomePage: React.FC<HomePageProps> = ({
       </div>
 
       {/* ============================================================ */}
-      {/* 7. FLEET PREVIEW & GROUP TRAVEL BANNER */}
+      {/* 4. CLASSIC MULTI-DAY TOUR CIRCUITS IN SOUTH INDIA */}
+      {/* ============================================================ */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block">
+              Multi-Day Road Trips
+            </span>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+              Iconic South India Holiday Circuits
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
+              Multi-destination scenic road trips connecting waterfalls, wildlife sanctuaries, and hill peaks.
+            </p>
+          </div>
+          <button
+            onClick={() => onNavigate('route-calc')}
+            className="text-xs sm:text-sm font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
+          >
+            <span>Circuit Map</span>
+            <span>➔</span>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[
+            {
+              circuit: 'Nilgiri Mountain & Tea Trail',
+              route: 'Bangalore ➔ Mysore Palace ➔ Ooty ➔ Coonoor',
+              days: '3 Days / 2 Nights',
+              state: 'Karnataka & Tamil Nadu',
+              highlight: 'Toy Train & Doddabetta',
+              fare: 12500,
+              destId: 'dest-ooty',
+            },
+            {
+              circuit: 'God’s Own Backwaters & Tea Hills',
+              route: 'Kochi ➔ Munnar Hills ➔ Alleppey Houseboat',
+              days: '4 Days / 3 Nights',
+              state: 'Kerala',
+              highlight: 'Houseboat & Eravikulam',
+              fare: 16800,
+              destId: 'dest-munnar',
+            },
+            {
+              circuit: 'Southern Temple Odyssey',
+              route: 'Madurai ➔ Pamban ➔ Rameshwaram ➔ Kanyakumari',
+              days: '4 Days / 3 Nights',
+              state: 'Tamil Nadu',
+              highlight: 'Sea Bridge & Meenakshi',
+              fare: 17200,
+              destId: 'dest-ramesh',
+            },
+            {
+              circuit: 'Coffee & Wilderness Trail',
+              route: 'Bangalore ➔ Coorg Coffee Country ➔ Dubare Camp',
+              days: '3 Days / 2 Nights',
+              state: 'Karnataka',
+              highlight: 'Abbey Falls & Elephants',
+              fare: 13900,
+              destId: 'dest-coorg',
+            },
+            {
+              circuit: 'Vijayanagara Stone Empire',
+              route: 'Bangalore ➔ Hampi Chariot ➔ Badami Caves',
+              days: '4 Days / 3 Nights',
+              state: 'Karnataka',
+              highlight: 'UNESCO Stone Chariot',
+              fare: 15500,
+              destId: 'dest-hampi',
+            },
+            {
+              circuit: 'Palani Hills & Pine Forests',
+              route: 'Coimbatore ➔ Kodaikanal Lake ➔ Pillar Rocks',
+              days: '3 Days / 2 Nights',
+              state: 'Tamil Nadu',
+              highlight: 'Misty Lake & Caves',
+              fare: 11800,
+              destId: 'dest-kodai',
+            },
+          ].map((c) => (
+            <div
+              key={c.circuit}
+              onClick={() => scrollToPlanner(c.destId)}
+              className="bg-white border border-gray-200 hover:border-blue-500 rounded-2xl p-5 shadow-xs hover:shadow-md transition cursor-pointer flex flex-col justify-between group"
+            >
+              <div>
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-1.5">
+                  <span className="font-bold text-blue-600">{c.state}</span>
+                  <span className="bg-blue-50 text-blue-700 font-semibold px-2 py-0.5 rounded text-[11px]">
+                    {c.days}
+                  </span>
+                </div>
+                <h3 className="font-extrabold text-base text-gray-900 group-hover:text-blue-600 transition">
+                  {c.circuit}
+                </h3>
+                <p className="text-xs text-gray-600 mt-1 font-medium">
+                  {c.route}
+                </p>
+                <div className="text-[11px] text-emerald-700 mt-2 flex items-center gap-1">
+                  <span>★ Top Sight:</span>
+                  <span className="font-semibold">{c.highlight}</span>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-gray-400 block uppercase">Estimated Package</span>
+                  <span className="font-black text-base text-gray-900">
+                    {formatINR(c.fare)}
+                  </span>
+                </div>
+                <span className="text-xs font-bold text-blue-600 group-hover:translate-x-0.5 transition">
+                  Plan Itinerary ➔
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ============================================================ */}
+      {/* 5. TOURIST FLEET FOR FAMILIES & GROUP TRAVEL */}
       {/* ============================================================ */}
       <div>
         <div className="flex items-center justify-between mb-6">
           <div>
             <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block">
-              Verified Vehicles
+              Dedicated Tourist Vehicles
             </span>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-              Commercial Fleet &amp; Fixed Kilometric Rates
+              Tourist Cabs, Vans &amp; Luxury Coaches
             </h2>
             <p className="text-xs sm:text-sm text-gray-600 mt-0.5">
-              Sedans, Premium SUVs, Tempo Travelers, and Luxury Coaches.
+              Air-conditioned vehicles with luggage carriers, pushback seats, and hill-driving certified drivers.
             </p>
           </div>
 
@@ -821,7 +929,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {featuredFleet.map((v) => (
+          {vehicles.slice(0, 4).map((v) => (
             <div
               key={v.id}
               className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xs hover:border-gray-300 transition flex flex-col"
@@ -844,14 +952,16 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div className="p-4 flex flex-col flex-1">
                 <h3 className="font-bold text-sm text-gray-900">{v.name}</h3>
                 <div className="text-xs text-gray-500 mt-1">
-                  👥 {v.capacity} Seats • ❄️ {v.ac_type}
+                  👥 {v.capacity} Passenger Seats • ❄️ {v.ac_type}
                 </div>
+                <p className="text-[11px] text-gray-600 mt-2 line-clamp-2">
+                  {v.description}
+                </p>
 
                 <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
-                  <div>
-                    <span className="text-xs font-bold text-gray-900">₹{v.per_km_rate}</span>
-                    <span className="text-[10px] text-gray-500"> / km</span>
-                  </div>
+                  <span className="text-[11px] font-semibold text-emerald-700">
+                    Ghat Driving Certified
+                  </span>
 
                   <button
                     type="button"
@@ -867,17 +977,86 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </div>
 
-      {/* Group Bus Charter Card */}
+      {/* ============================================================ */}
+      {/* 6. WHY TOUR WITH SOUTH INDIA TRAVELS */}
+      {/* ============================================================ */}
+      <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-xs">
+        <div className="text-center max-w-2xl mx-auto mb-8">
+          <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">
+            Why Tour With Us
+          </span>
+          <h2 className="text-2xl font-black text-gray-900 tracking-tight">
+            Designed for Sightseeing &amp; Leisure Touring
+          </h2>
+          <p className="text-sm text-gray-600 mt-1">
+            Unlike regular city-to-city cabs, our fleet and chauffeurs are dedicated to multi-day tourist sightseeing.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg shrink-0">
+              🌄
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-gray-900">100% Sightseeing Flexibility</h3>
+              <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                Stop at viewpoints, tea gardens, and roadside waterfalls at your pace without arbitrary point-to-point drop constraints.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg shrink-0">
+              ⛰️
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-gray-900">Ghat Road Experts</h3>
+              <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                Commercial chauffeurs verified for hairpin curves across Ooty (36 hairpins), Munnar, Kodaikanal, and Wayanad.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg shrink-0">
+              ✓
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-gray-900">All-India Tourist Permits</h3>
+              <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                Valid AITP permits for Tamil Nadu, Kerala, and Karnataka. Seamless interstate border checkpost crossings.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg shrink-0">
+              📞
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-gray-900">24x7 Trip Concierge</h3>
+              <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                Direct route manager support at +91 98401 23456 for hotel coordination, driver logistics, and itinerary adjustments.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ============================================================ */}
+      {/* 7. GROUP TOUR & BULK BUS CHARTER */}
+      {/* ============================================================ */}
       <div className="bg-[#051329] text-white rounded-2xl p-6 sm:p-8 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6">
         <div>
           <span className="text-xs font-bold text-blue-400 uppercase tracking-wider block mb-1">
-            Group &amp; Corporate Bus Rentals
+            Group, College &amp; Family Tour Charters
           </span>
           <h3 className="text-xl sm:text-2xl font-extrabold text-white">
-            Need Bulk Bus Booking for Weddings, Colleges, or Corporate Offsites?
+            Need a Dedicated Tourist Bus or Custom Holiday Itinerary?
           </h3>
           <p className="text-xs sm:text-sm text-slate-300 mt-1.5 max-w-2xl leading-relaxed">
-            We provide 21-seater mini coaches and 40-seater multi-axle sleeper buses with customized pickup points, luggage space, and dedicated trip coordinators.
+            We provide 14-seater Tempo Travellers, 21-seater mini coaches, and 40-seater luxury Volvo buses for college industrial trips, family reunions, and pilgrim tours across South India.
           </p>
         </div>
 
@@ -886,7 +1065,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           onClick={() => onNavigate('inquiry')}
           className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-extrabold px-6 py-3 rounded-lg text-sm shadow-md transition whitespace-nowrap cursor-pointer"
         >
-          Send Bulk Inquiry ➔
+          Plan Custom Group Tour ➔
         </button>
       </div>
     </div>

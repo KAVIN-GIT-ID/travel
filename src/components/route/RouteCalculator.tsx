@@ -110,19 +110,19 @@ export const RouteCalculator: React.FC<RouteCalculatorProps> = ({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Route Planner Box */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-200">
+      <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-5 border-b border-gray-200">
           <div>
             <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">
-              Intercity Route Planner
+              Tourist Circuit &amp; Route Planner
             </span>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-              South India Distance &amp; Fare Calculator
+              South India Sightseeing &amp; Holiday Circuit Map
             </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Select pickup and destination locations across Tamil Nadu, Kerala, and Karnataka for instant distance and per-KM fare computation.
+            <p className="text-xs sm:text-sm text-gray-600 mt-1">
+              Select your departure hub and holiday sightseeing destination across Tamil Nadu, Kerala, and Karnataka for driving paths, ghat road travel times, and tourist vehicle pricing.
             </p>
           </div>
 
@@ -130,9 +130,9 @@ export const RouteCalculator: React.FC<RouteCalculatorProps> = ({
             type="button"
             onClick={handleCurrentLocation}
             disabled={isLocating}
-            className="inline-flex items-center gap-2 px-3.5 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition disabled:opacity-50 self-start sm:self-auto cursor-pointer"
+            className="inline-flex items-center gap-2 px-3 py-2 border border-gray-300 shadow-sm text-xs sm:text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none transition disabled:opacity-50 self-start sm:self-auto cursor-pointer"
           >
-            <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
@@ -149,7 +149,7 @@ export const RouteCalculator: React.FC<RouteCalculatorProps> = ({
         {/* Popular Quick Route Chips */}
         <div className="mt-5">
           <div className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
-            Popular South India Routes:
+            Popular Holiday Circuits:
           </div>
           <div className="flex flex-wrap gap-2">
             {POPULAR_ROUTES.map((route) => (
@@ -265,10 +265,10 @@ export const RouteCalculator: React.FC<RouteCalculatorProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h3 className="text-xl font-bold text-gray-900">
-              Select Vehicle &amp; Calculate Fare ({distanceKm} km)
+              Select Tourist Vehicle &amp; Calculate Tour Fare ({distanceKm} km)
             </h3>
             <p className="text-xs sm:text-sm text-gray-600">
-              Standard commercial per-KM rates with driver allowance included.
+              Dedicated tourist vehicle with certified ghat road chauffeur and sightseeing allowance included.
             </p>
           </div>
 

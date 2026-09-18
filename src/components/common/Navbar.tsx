@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { User } from '../../types';
+import { BusLogo } from './BusLogo';
 
 export type NavTab = 'home' | 'route-calc' | 'tours' | 'fleet' | 'inquiry' | 'admin';
 
@@ -31,37 +32,37 @@ export const Navbar: React.FC<NavbarProps> = ({
     {
       id: 'home',
       label: 'Home',
-      sublabel: 'Overview',
+      sublabel: 'Holiday Trips',
       icon: '🏠',
     },
     {
-      id: 'route-calc',
-      label: 'Outstation Cabs',
-      sublabel: 'Route & Map',
-      icon: '🚗',
-    },
-    {
       id: 'tours',
-      label: 'Holiday Packages',
-      sublabel: 'TN • KL • KA',
+      label: 'Tour Packages',
+      sublabel: 'Curated Holidays',
       icon: '🌴',
     },
     {
+      id: 'route-calc',
+      label: 'Trip Planner',
+      sublabel: 'Route & Map',
+      icon: '🗺️',
+    },
+    {
       id: 'fleet',
-      label: 'Bus & Car Fleet',
-      sublabel: '4 to 40 Seaters',
+      label: 'Tourist Fleet',
+      sublabel: 'Cabs & Buses',
       icon: '🚌',
     },
     {
       id: 'inquiry',
-      label: 'Group Travel',
-      sublabel: 'Bulk Bus Charter',
-      icon: '🏢',
+      label: 'Group Tours',
+      sublabel: 'Custom Charters',
+      icon: '👥',
     },
     {
       id: 'admin',
-      label: 'My Bookings / Admin',
-      sublabel: currentUser?.role === 'admin' ? '🛡️ Admin Access' : 'User Portal',
+      label: 'My Bookings',
+      sublabel: currentUser?.role === 'admin' ? 'Admin Access' : 'User Portal',
       icon: '📑',
     },
   ];
@@ -86,99 +87,52 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="text-slate-600">|</span>
             <span className="text-emerald-400 font-medium">✓ All-India Tourist Permit (AITP) Certified</span>
             <span className="text-slate-600">|</span>
-            <span className="text-slate-300">Tolls, Driver Beta &amp; Taxes Included</span>
+            <span className="text-slate-300">Tolls, Driver Allowance &amp; Taxes Included</span>
           </div>
 
           <div className="flex items-center gap-4 text-xs">
-            {currentUser ? (
-              <div className="flex items-center gap-2">
-                <span className="text-slate-200 font-medium flex items-center gap-1.5">
-                  {currentUser.picture ? (
-                    <img
-                      src={currentUser.picture}
-                      alt={currentUser.name}
-                      className="w-4 h-4 rounded-full"
-                    />
-                  ) : (
-                    <span>👤</span>
-                  )}
-                  <span>{currentUser.name}</span>
-                </span>
-                <span
-                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                    currentUser.role === 'admin'
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                      : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                  }`}
-                >
-                  {currentUser.role === 'admin' ? '🛡️ ADMIN (DB)' : 'USER'}
-                </span>
-                <button
-                  onClick={onLogout}
-                  className="text-slate-400 hover:text-rose-300 underline text-[11px] ml-1 cursor-pointer"
-                >
-                  Sign Out
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={onOpenLogin}
-                className="text-white bg-blue-600 hover:bg-blue-500 px-2.5 py-0.5 rounded font-semibold text-[11px] transition flex items-center gap-1 cursor-pointer"
-              >
-                <span>Google Login</span>
-              </button>
-            )}
-            <span className="text-slate-600">|</span>
             <span className="text-blue-400 font-semibold">Tamil Nadu • Kerala • Karnataka</span>
+            <span className="text-slate-600">|</span>
+            <span className="text-slate-300">Fast Interstate Permits</span>
           </div>
         </div>
       </div>
 
       {/* Main Bar with MakeMyTrip Navigation Layout */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-18">
-          {/* MakeMyTrip Style Logo */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-15 sm:h-18">
+          {/* Brand Logo with Moving Bus Emblem */}
           <div
-            className="flex items-center gap-2.5 cursor-pointer select-none py-1"
+            className="cursor-pointer select-none py-1"
             onClick={() => handleTabClick('home')}
           >
-            <div className="flex items-center">
-              <div className="h-9 px-2.5 rounded-l-md bg-[#008cff] text-white flex items-center font-black text-lg tracking-tighter shadow-xs">
-                my
-              </div>
-              <div className="h-9 px-2 rounded-r-md bg-rose-600 text-white flex items-center font-bold text-xs uppercase tracking-wider shadow-xs">
-                TRIP
-              </div>
+            <div className="block sm:hidden">
+              <BusLogo size="sm" showTagline={false} />
             </div>
-            <div>
-              <div className="font-extrabold text-gray-900 text-base sm:text-lg tracking-tight leading-none uppercase">
-                South India Travels
-              </div>
-              <div className="text-[10px] text-gray-500 font-semibold tracking-wide mt-0.5">
-                Outstation Cabs &amp; Holiday Tours
-              </div>
+            <div className="hidden sm:block">
+              <BusLogo size="md" />
             </div>
           </div>
 
-          {/* Desktop Category Navigation Icons (MakeMyTrip signature navigation) */}
-          <nav className="hidden lg:flex items-center gap-1 h-full">
+          {/* Desktop Category Navigation Icons */}
+          <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1 h-full">
             {navCategories.map((item) => {
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
                   onClick={() => handleTabClick(item.id)}
-                  className={`h-full px-3.5 flex flex-col items-center justify-center transition-all border-b-3 cursor-pointer ${
+                  className={`h-full px-2 xl:px-3.5 flex flex-col items-center justify-center transition-all border-b-3 cursor-pointer ${
                     isActive
                       ? 'border-[#008cff] text-[#008cff] bg-blue-50/40'
                       : 'border-transparent text-gray-600 hover:text-[#008cff] hover:bg-gray-50'
                   }`}
                 >
                   <span className="text-lg leading-none mb-1">{item.icon}</span>
-                  <span className={`text-xs font-bold leading-tight ${isActive ? 'text-[#008cff]' : 'text-gray-800'}`}>
+                  <span className={`text-xs font-bold leading-tight whitespace-nowrap ${isActive ? 'text-[#008cff]' : 'text-gray-800'}`}>
                     {item.label}
                   </span>
-                  <span className="text-[10px] text-gray-500 font-normal leading-tight hidden xl:block">
+                  <span className="text-[10px] text-gray-500 font-normal leading-tight hidden xl:block whitespace-nowrap">
                     {item.sublabel}
                   </span>
                 </button>
@@ -187,9 +141,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           </nav>
 
           {/* Right Action */}
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-2.5 shrink-0">
             {currentUser ? (
-              <div className="flex items-center gap-2 border border-gray-200 py-1.5 px-3 rounded-full bg-gray-50">
+              <div className="flex items-center gap-2 border border-gray-200 py-1.5 px-3 rounded-lg bg-gray-50 shrink-0">
                 {currentUser.picture ? (
                   <img
                     src={currentUser.picture}
@@ -206,18 +160,25 @@ export const Navbar: React.FC<NavbarProps> = ({
                     {currentUser.name}
                   </div>
                   <div className="text-[9px] font-semibold text-emerald-700 uppercase leading-none mt-0.5">
-                    {currentUser.role === 'admin' ? '🛡️ Admin' : 'Customer'}
+                    {currentUser.role === 'admin' ? 'Admin' : 'Customer'}
                   </div>
                 </div>
+                <button
+                  onClick={onLogout}
+                  className="text-gray-400 hover:text-rose-600 text-xs ml-1 cursor-pointer"
+                  title="Sign Out"
+                >
+                  ✕
+                </button>
               </div>
             ) : (
               <button
                 type="button"
                 onClick={onOpenLogin}
-                className="border border-gray-300 hover:border-gray-400 bg-white text-gray-800 font-bold text-xs px-3.5 py-2 rounded-full transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                className="border border-gray-300 hover:border-gray-400 bg-white text-gray-800 font-bold text-xs px-3.5 py-2 rounded-lg transition flex items-center gap-1.5 cursor-pointer shadow-2xs whitespace-nowrap shrink-0"
               >
                 {/* Google Icon */}
-                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
@@ -229,34 +190,61 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <button
               onClick={onBookClick}
-              className="bg-gradient-to-r from-[#008cff] to-[#0a58ca] hover:from-[#007ad6] hover:to-[#084298] text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-md shadow-sm transition active:scale-95 cursor-pointer"
+              className="bg-[#008cff] hover:bg-[#0077e6] active:bg-[#0055ff] text-white font-bold text-xs uppercase tracking-wider px-4 py-2.5 rounded-md shadow-sm transition active:scale-95 cursor-pointer whitespace-nowrap shrink-0"
             >
-              Book Cab Now
+              Plan a Tour
             </button>
           </div>
 
-          {/* Mobile Menu Hamburger */}
+          {/* Mobile Right Action */}
           <div className="flex lg:hidden items-center gap-2">
+            {/* Quick Call Button */}
+            <a
+              href="tel:+919840123456"
+              className="flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1.5 rounded-lg transition shrink-0"
+              title="24x7 Helpline"
+            >
+              <span>📞</span>
+              <span className="hidden xs:inline">Call</span>
+            </a>
+
+            {/* Mobile Auth Button */}
             {!currentUser ? (
               <button
+                type="button"
                 onClick={onOpenLogin}
-                className="text-xs bg-blue-600 text-white px-2.5 py-1 rounded font-bold cursor-pointer"
+                className="border border-gray-300 bg-white text-gray-800 font-bold text-xs px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 cursor-pointer shadow-2xs shrink-0"
               >
-                Login
+                <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span>Login</span>
               </button>
-            ) : null}
-            <button
-              onClick={onBookClick}
-              className="bg-[#008cff] text-white px-3 py-1.5 rounded-md text-xs font-semibold"
-            >
-              Book
-            </button>
+            ) : (
+              <div className="flex items-center gap-1 bg-gray-100 py-1 px-2 rounded-lg text-xs">
+                <span className="w-5 h-5 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-[10px]">
+                  {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
+                </span>
+                <button
+                  onClick={onLogout}
+                  className="text-gray-400 hover:text-rose-600 ml-1 text-xs"
+                  title="Logout"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            {/* Mobile Menu Hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-md text-gray-700 hover:bg-gray-100 transition"
+              className="p-1.5 rounded-lg text-gray-700 hover:bg-gray-100 transition border border-gray-200"
               aria-label="Toggle Menu"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {mobileMenuOpen ? (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 ) : (
@@ -268,9 +256,9 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile Top Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-gray-200 bg-white px-4 py-3 space-y-1 shadow-lg">
+        <div className="lg:hidden border-t border-gray-200 bg-white px-4 py-3 space-y-1 shadow-xl">
           {navCategories.map((item) => (
             <button
               key={item.id}
@@ -294,6 +282,57 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
       )}
+
+      {/* Mobile Bottom Navigation Bar (Native App Grade UX) */}
+      <nav
+        aria-label="Mobile Bottom Navigation"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-gray-200 py-1.5 px-2 flex justify-around items-center shadow-lg"
+      >
+        {[
+          { id: 'home', label: 'Holidays', icon: '🏠' },
+          { id: 'tours', label: 'Packages', icon: '🌴' },
+          { id: 'route-calc', label: 'Plan Tour', icon: '🗺️' },
+          { id: 'fleet', label: 'Fleet', icon: '🚌' },
+          { id: 'inquiry', label: 'Custom', icon: '👥' },
+          { id: 'admin', label: 'Bookings', icon: '📑' },
+        ].map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => handleTabClick(tab.id as NavTab)}
+              className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-all active:scale-95 ${
+                isActive ? 'text-[#008cff]' : 'text-gray-500 hover:text-gray-800'
+              }`}
+            >
+              <span className={`text-lg leading-none transition-transform ${isActive ? 'scale-110' : ''}`}>
+                {tab.icon}
+              </span>
+              <span className={`text-[10px] tracking-tight mt-1 whitespace-nowrap ${isActive ? 'font-black text-[#008cff]' : 'font-medium'}`}>
+                {tab.label}
+              </span>
+              {isActive && (
+                <span className="w-1.5 h-1 bg-[#008cff] rounded-full mt-0.5" />
+              )}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Floating WhatsApp Quick Action for Mobile & Desktop */}
+      <a
+        href="https://wa.me/919840123456?text=Hello%20South%20India%20Travels,%20I%20would%20like%20to%20plan%20a%20holiday%20tour."
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-18 right-3.5 lg:bottom-6 lg:right-6 z-40 bg-[#25D366] hover:bg-[#20bd5a] text-white p-3 rounded-full shadow-2xl flex items-center gap-2 transition active:scale-95 group"
+        title="Chat with Tour Planner on WhatsApp"
+      >
+        <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+        </svg>
+        <span className="hidden sm:inline text-xs font-bold tracking-wide">WhatsApp Us</span>
+      </a>
     </header>
   );
 };
