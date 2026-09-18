@@ -185,6 +185,7 @@ export default function App() {
             onNavigate={handleSelectTab}
             onBookPackage={handleOpenTourBooking}
             onRentVehicle={handleOpenVehicleRental}
+            onBookRoute={handleOpenRouteBooking}
           />
         )}
 
