@@ -390,28 +390,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* ============================================================ */}
       <div className="space-y-6 sm:space-y-8">
         {/* Simple & Clean Hero Header */}
-        <div className="pt-2 sm:pt-4">
-          <div className="flex flex-wrap items-center justify-between gap-2.5 mb-3 sm:mb-4">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1 rounded-full border border-blue-200 text-xs font-semibold">
-                <svg className="w-3.5 h-3.5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>South India Holiday Specialist • TN • KL • KA</span>
-              </span>
-              <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200 text-xs font-medium">
-                <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>All-India Tourist Permit (AITP)</span>
-              </span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-500 text-xs font-medium">
-              <span className="text-amber-500 font-bold">★ 4.9/5</span>
-              <span>(12,400+ Holiday Travelers)</span>
-            </div>
-          </div>
+        <div className="pt-1 sm:pt-2">
 
           <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 mb-2 leading-tight">
             Plan Your South India Holiday &amp; Tourist Trips
