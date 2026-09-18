@@ -10,8 +10,57 @@ import { CustomInquiry } from './components/inquiry/CustomInquiry';
 import { AdminPortal } from './components/admin/AdminPortal';
 import { BookingModal } from './components/booking/BookingModal';
 
+const TAB_ROUTES: Record<NavTab, string> = {
+  'route-calc': '/',
+  'tours': '/tours',
+  'fleet': '/fleet',
+  'inquiry': '/group-travel',
+  'admin': '/admin',
+};
+
+const getTabFromPath = (path: string): NavTab => {
+  const cleanPath = path.toLowerCase().replace(/\/+$/, '') || '/';
+  if (cleanPath === '/admin' || cleanPath === '/login') return 'admin';
+  if (cleanPath === '/tours' || cleanPath === '/packages') return 'tours';
+  if (cleanPath === '/fleet' || cleanPath === '/vehicles') return 'fleet';
+  if (cleanPath === '/group-travel' || cleanPath === '/custom' || cleanPath === '/inquiry') return 'inquiry';
+  return 'route-calc';
+};
+
 export default function App() {
-  const [activeTab, setActiveTab] = useState<NavTab>('route-calc');
+  const [activeTab, setActiveTab] = useState<NavTab>(() => getTabFromPath(window.location.pathname));
+
+  // Sync tab change with browser URL
+  const handleSelectTab = (tab: NavTab) => {
+    setActiveTab(tab);
+    const targetPath = TAB_ROUTES[tab];
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState({ tab }, '', targetPath);
+    }
+  };
+
+  // Sync browser back/forward and normalize initial URL
+  useEffect(() => {
+    const currentPath = window.location.pathname.toLowerCase().replace(/\/+$/, '') || '/';
+    // If user arrived on /login, normalize URL to /admin
+    if (currentPath === '/login') {
+      window.history.replaceState({ tab: 'admin' }, '', '/admin');
+    } else if (!Object.values(TAB_ROUTES).includes(currentPath)) {
+      // Unknown route - normalize to /
+      window.history.replaceState({ tab: 'route-calc' }, '', '/');
+    }
+
+    const handlePopState = (e: PopStateEvent) => {
+      if (e.state?.tab) {
+        setActiveTab(e.state.tab);
+      } else {
+        setActiveTab(getTabFromPath(window.location.pathname));
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Application Data
   const [packages, setPackages] = useState<Package[]>([]);
@@ -118,7 +167,7 @@ export default function App() {
       {/* Enterprise Navbar */}
       <Navbar
         activeTab={activeTab}
-        onSelectTab={setActiveTab}
+        onSelectTab={handleSelectTab}
         onBookClick={() => {
           if (vehicles.length > 0) handleOpenVehicleRental(vehicles[0]);
         }}
@@ -173,7 +222,7 @@ export default function App() {
       )}
 
       {/* Enterprise Footer */}
-      <Footer onSelectTab={setActiveTab} />
+      <Footer onSelectTab={handleSelectTab} />
     </div>
   );
 }
