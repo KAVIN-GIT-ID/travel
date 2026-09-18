@@ -385,271 +385,281 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* ============================================================ */}
       {/* 1. TOURIST TRIP PLANNER & VISUAL DESTINATION HERO BANNER */}
       {/* ============================================================ */}
-      <div className="relative bg-gradient-to-br from-[#061826] via-[#09223a] to-[#04101c] text-white rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden border border-slate-800">
-        <div className="relative z-10 px-3.5 py-4 sm:px-8 sm:py-7 max-w-6xl mx-auto">
-          {/* Header Subtitle Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-2 sm:mb-3">
+      {/* ============================================================ */}
+      {/* 1. TOURIST TRIP PLANNER & VISUAL DESTINATION HERO SECTION */}
+      {/* ============================================================ */}
+      <div className="space-y-6 sm:space-y-8">
+        {/* Simple & Clean Hero Header */}
+        <div className="pt-2 sm:pt-4">
+          <div className="flex flex-wrap items-center justify-between gap-2.5 mb-3 sm:mb-4">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="eyebrow bg-blue-500/20 text-blue-300 px-2.5 py-0.5 rounded-full border border-blue-400/30 text-[10px] sm:text-xs">
-                🌴 Tamil Nadu • Kerala • Karnataka
+              <span className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1 rounded-full border border-blue-200 text-xs font-semibold">
+                <svg className="w-3.5 h-3.5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>South India Holiday Specialist • TN • KL • KA</span>
               </span>
-              <span className="text-emerald-400 font-semibold text-[11px] sm:text-xs flex items-center gap-1">
-                ✓ All-India Tourist Permit (AITP)
+              <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200 text-xs font-medium">
+                <svg className="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>All-India Tourist Permit (AITP)</span>
               </span>
             </div>
-            <div className="flex items-center gap-2 text-slate-300 text-[11px] sm:text-xs">
-              <span className="text-amber-400">★ 4.9/5</span>
+            <div className="flex items-center gap-2 text-gray-500 text-xs font-medium">
+              <span className="text-amber-500 font-bold">★ 4.9/5</span>
               <span>(12,400+ Holiday Travelers)</span>
             </div>
           </div>
 
-          <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white mb-1.5 sm:mb-2 leading-tight">
-            Curated South India Holidays &amp; Tourist Fleets
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 mb-2 leading-tight">
+            Plan Your South India Holiday &amp; Tourist Trips
           </h1>
-          <p className="text-slate-300 text-xs sm:text-sm max-w-2xl mb-3 sm:mb-4 leading-relaxed">
-            Private AC tourist cabs, tempo travellers &amp; luxury coaches for families and group tours with verified local sightseeing chauffeurs.
+          <p className="text-gray-600 text-sm sm:text-base max-w-2xl leading-relaxed">
+            Handcrafted tour packages, day-by-day sightseeing itineraries, and private tourist vehicles across Ooty, Munnar, Coorg, Kodaikanal, Wayanad &amp; heritage circuits.
           </p>
+        </div>
 
-          {/* ------------------------------------------------------------ */}
-          {/* COMPACT MOBILE-FIRST TRIP PLANNER WIDGET */}
-          {/* ------------------------------------------------------------ */}
-          <div id="tourist-planner-anchor" className="bg-white text-gray-900 rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 p-3 sm:p-4 mb-4 sm:mb-5">
-            <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-gray-100">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-gray-900">
-                <svg className="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        {/* ------------------------------------------------------------ */}
+        {/* COMPACT MOBILE-FIRST TRIP PLANNER WIDGET */}
+        {/* ------------------------------------------------------------ */}
+        <div id="tourist-planner-anchor" className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-5">
+          <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100">
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-900">
+              <svg className="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span>Interactive Holiday &amp; Itinerary Planner</span>
+            </div>
+            <span className="text-[11px] sm:text-xs text-emerald-700 font-semibold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+              ✓ Tolls, Driver &amp; Fuel Included
+            </span>
+          </div>
+
+          {/* 4 Compact Inputs Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+            {/* 1. Destination */}
+            <div className="col-span-2 sm:col-span-1 bg-gray-50 hover:bg-blue-50/40 p-2.5 sm:p-3 rounded-xl border border-gray-200 transition">
+              <label className="flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">
+                <svg className="w-3 h-3 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span>Instant Holiday Route &amp; Fare Planner</span>
-              </div>
-              <span className="text-[11px] text-emerald-700 font-semibold">
-                ✓ Tolls, Driver &amp; Fuel Included
-              </span>
-            </div>
-
-            {/* 4 Compact Inputs Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-              {/* 1. Destination */}
-              <div className="col-span-2 sm:col-span-1 bg-slate-50 hover:bg-blue-50/50 p-2 sm:p-2.5 rounded-lg border border-gray-200 transition">
-                <label className="flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">
-                  <svg className="w-3 h-3 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span>Holiday Destination</span>
-                </label>
-                <select
-                  value={selectedDestId}
-                  onChange={(e) => {
-                    setSelectedDestId(e.target.value);
-                    const dest = TOURIST_DESTINATIONS.find((d) => d.id === e.target.value);
-                    if (dest) setSelectedDays(dest.defaultDays);
-                  }}
-                  className="w-full bg-transparent font-bold text-xs sm:text-sm text-gray-900 focus:outline-none cursor-pointer py-0.5"
-                >
-                  {TOURIST_DESTINATIONS.map((dest) => (
-                    <option key={dest.id} value={dest.id}>
-                      {dest.name} ({dest.state})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* 2. Departure Hub */}
-              <div className="col-span-1 bg-slate-50 hover:bg-blue-50/50 p-2 sm:p-2.5 rounded-lg border border-gray-200 transition">
-                <label className="flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">
-                  <svg className="w-3 h-3 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg>
-                  <span>Departure Hub</span>
-                </label>
-                <select
-                  value={selectedHubId}
-                  onChange={(e) => setSelectedHubId(e.target.value)}
-                  className="w-full bg-transparent font-bold text-xs sm:text-sm text-gray-900 focus:outline-none cursor-pointer py-0.5"
-                >
-                  {DEPARTURE_HUBS.map((hub) => (
-                    <option key={hub.id} value={hub.id}>
-                      {hub.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* 3. Duration */}
-              <div className="col-span-1 bg-slate-50 hover:bg-blue-50/50 p-2 sm:p-2.5 rounded-lg border border-gray-200 transition">
-                <label className="flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">
-                  <svg className="w-3 h-3 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span>Duration</span>
-                </label>
-                <select
-                  value={selectedDays}
-                  onChange={(e) => setSelectedDays(Number(e.target.value))}
-                  className="w-full bg-transparent font-bold text-xs sm:text-sm text-gray-900 focus:outline-none cursor-pointer py-0.5"
-                >
-                  <option value={2}>2 Days / 1N</option>
-                  <option value={3}>3 Days / 2N</option>
-                  <option value={4}>4 Days / 3N</option>
-                  <option value={5}>5 Days / 4N</option>
-                  <option value={6}>6 Days / 5N</option>
-                </select>
-              </div>
-
-              {/* 4. Vehicle Type */}
-              <div className="col-span-2 sm:col-span-1 bg-slate-50 hover:bg-blue-50/50 p-2 sm:p-2.5 rounded-lg border border-gray-200 transition">
-                <label className="flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">
-                  <svg className="w-3 h-3 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
-                  </svg>
-                  <span>Vehicle Type</span>
-                </label>
-                <select
-                  value={selectedVehicleType}
-                  onChange={(e) => setSelectedVehicleType(e.target.value)}
-                  className="w-full bg-transparent font-bold text-xs sm:text-sm text-gray-900 focus:outline-none cursor-pointer py-0.5"
-                >
-                  <option value="Sedan">AC Sedan (Dzire - 4 Seats)</option>
-                  <option value="SUV">Prime SUV (Innova Crysta - 7 Seats)</option>
-                  <option value="Van">Tempo Traveller (12-16 Seats)</option>
-                  <option value="Bus">Luxury Tourist Coach (21-40 Seats)</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Quick Action & Total Summary */}
-            <div className="mt-2.5 pt-2.5 border-t border-gray-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-xs flex-wrap">
-                <span className="font-bold text-blue-600">Selected Tour:</span>
-                <span className="font-semibold text-gray-900">{currentHub.name} ➔ {currentDestination.name}</span>
-                <span className="text-gray-400 hidden sm:inline">•</span>
-                <span className="text-xs font-black text-gray-900 price">{formatINR(estimatedTourFare)}</span>
-                <span className="text-[11px] text-gray-500">({chosenVehicle?.name || 'Innova Crysta'})</span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  const el = document.getElementById('generated-itinerary-card');
-                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                <span>Holiday Destination</span>
+              </label>
+              <select
+                value={selectedDestId}
+                onChange={(e) => {
+                  setSelectedDestId(e.target.value);
+                  const dest = TOURIST_DESTINATIONS.find((d) => d.id === e.target.value);
+                  if (dest) setSelectedDays(dest.defaultDays);
                 }}
-                className="bg-[#008cff] hover:bg-[#0077e6] active:bg-[#0060cc] text-white font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-lg shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                className="w-full bg-transparent font-bold text-xs sm:text-sm text-gray-900 focus:outline-none cursor-pointer py-0.5"
               >
-                <span>View Trip Plan &amp; Itinerary</span>
-                <span>➔</span>
-              </button>
+                {TOURIST_DESTINATIONS.map((dest) => (
+                  <option key={dest.id} value={dest.id}>
+                    {dest.name} ({dest.state})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 2. Departure Hub */}
+            <div className="col-span-1 bg-gray-50 hover:bg-blue-50/40 p-2.5 sm:p-3 rounded-xl border border-gray-200 transition">
+              <label className="flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">
+                <svg className="w-3 h-3 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+                <span>Departure Hub</span>
+              </label>
+              <select
+                value={selectedHubId}
+                onChange={(e) => setSelectedHubId(e.target.value)}
+                className="w-full bg-transparent font-bold text-xs sm:text-sm text-gray-900 focus:outline-none cursor-pointer py-0.5"
+              >
+                {DEPARTURE_HUBS.map((hub) => (
+                  <option key={hub.id} value={hub.id}>
+                    {hub.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 3. Duration */}
+            <div className="col-span-1 bg-gray-50 hover:bg-blue-50/40 p-2.5 sm:p-3 rounded-xl border border-gray-200 transition">
+              <label className="flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">
+                <svg className="w-3 h-3 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Duration</span>
+              </label>
+              <select
+                value={selectedDays}
+                onChange={(e) => setSelectedDays(Number(e.target.value))}
+                className="w-full bg-transparent font-bold text-xs sm:text-sm text-gray-900 focus:outline-none cursor-pointer py-0.5"
+              >
+                <option value={2}>2 Days / 1N</option>
+                <option value={3}>3 Days / 2N</option>
+                <option value={4}>4 Days / 3N</option>
+                <option value={5}>5 Days / 4N</option>
+                <option value={6}>6 Days / 5N</option>
+              </select>
+            </div>
+
+            {/* 4. Vehicle Type */}
+            <div className="col-span-2 sm:col-span-1 bg-gray-50 hover:bg-blue-50/40 p-2.5 sm:p-3 rounded-xl border border-gray-200 transition">
+              <label className="flex items-center gap-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-0.5">
+                <svg className="w-3 h-3 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+                </svg>
+                <span>Vehicle Type</span>
+              </label>
+              <select
+                value={selectedVehicleType}
+                onChange={(e) => setSelectedVehicleType(e.target.value)}
+                className="w-full bg-transparent font-bold text-xs sm:text-sm text-gray-900 focus:outline-none cursor-pointer py-0.5"
+              >
+                <option value="Sedan">AC Sedan (Dzire - 4 Seats)</option>
+                <option value="SUV">Prime SUV (Innova Crysta - 7 Seats)</option>
+                <option value="Van">Tempo Traveller (12-16 Seats)</option>
+                <option value="Bus">Luxury Tourist Coach (21-40 Seats)</option>
+              </select>
             </div>
           </div>
 
-          {/* ------------------------------------------------------------ */}
-          {/* MAIN VISUAL DESTINATIONS CONTENT (VISIBLE RIGHT ON HERO!) */}
-          {/* ------------------------------------------------------------ */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <div>
-                <span className="eyebrow text-blue-400 block text-[10px]">
-                  Visual Holiday Explorer (Tap to Select)
-                </span>
-                <h2 className="text-sm sm:text-base font-bold text-white leading-tight">
-                  Top Tourist Destinations Across South India
-                </h2>
-              </div>
-              <div className="text-[11px] text-slate-300 font-medium hidden sm:flex items-center gap-1">
-                <span>Swipe to explore</span>
-                <span>➔</span>
-              </div>
+          {/* Quick Action & Total Summary */}
+          <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs flex-wrap">
+              <span className="font-bold text-blue-600">Selected Tour:</span>
+              <span className="font-semibold text-gray-900">{currentHub.name} ➔ {currentDestination.name}</span>
+              <span className="text-gray-400 hidden sm:inline">•</span>
+              <span className="text-sm font-black text-gray-900 price">{formatINR(estimatedTourFare)}</span>
+              <span className="text-xs text-gray-500">({chosenVehicle?.name || 'Innova Crysta'})</span>
             </div>
 
-            {/* Category Filter Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-2 no-scrollbar mb-2.5">
-              {['All', 'Tamil Nadu', 'Kerala', 'Karnataka', 'Hill Station', 'Backwaters', 'Heritage', 'Wildlife'].map((f) => (
-                <button
-                  key={f}
-                  type="button"
-                  onClick={() => setHeroDestFilter(f)}
-                  className={`shrink-0 px-2.5 py-1 rounded-full text-[11px] font-semibold transition cursor-pointer border ${
-                    heroDestFilter === f
-                      ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                      : 'bg-white/10 text-slate-200 hover:bg-white/20 border-white/15'
+            <button
+              type="button"
+              onClick={() => {
+                const el = document.getElementById('generated-itinerary-card');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+              className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-xs transition flex items-center justify-center gap-2 cursor-pointer shrink-0"
+            >
+              <span>View Trip Plan &amp; Itinerary</span>
+              <span>➔</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ------------------------------------------------------------ */}
+        {/* MAIN VISUAL DESTINATIONS CONTENT */}
+        {/* ------------------------------------------------------------ */}
+        <div className="space-y-3 pt-1">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+            <div>
+              <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block">
+                Visual Holiday Explorer
+              </span>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mt-0.5">
+                Top Tourist Destinations Across South India
+              </h2>
+            </div>
+            <div className="text-xs text-gray-500 font-medium hidden sm:flex items-center gap-1">
+              <span>Swipe cards to explore</span>
+              <span>➔</span>
+            </div>
+          </div>
+
+          {/* Category Filter Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+            {['All', 'Tamil Nadu', 'Kerala', 'Karnataka', 'Hill Station', 'Backwaters', 'Heritage', 'Wildlife'].map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setHeroDestFilter(f)}
+                className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer border ${
+                  heroDestFilter === f
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-200'
+                }`}
+              >
+                {f === 'All' ? 'All Destinations' : f}
+              </button>
+            ))}
+          </div>
+
+          {/* Rich Visual Cards Horizontal Carousel */}
+          <div className="flex items-stretch gap-3.5 overflow-x-auto pb-3 -mx-1 px-1 no-scrollbar scroll-smooth">
+            {visibleDestinations.map((dest) => {
+              const isSelected = selectedDestId === dest.id;
+              const startFare = getDestStartingFare(dest);
+              return (
+                <div
+                  key={dest.id}
+                  onClick={() => {
+                    setSelectedDestId(dest.id);
+                    setSelectedDays(dest.defaultDays);
+                    const el = document.getElementById('generated-itinerary-card');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  className={`shrink-0 w-56 sm:w-64 bg-white text-gray-900 rounded-2xl overflow-hidden border transition-all duration-200 cursor-pointer flex flex-col group ${
+                    isSelected
+                      ? 'ring-2 ring-blue-600 border-blue-600 shadow-md scale-[1.01]'
+                      : 'border-gray-200 hover:border-gray-300 shadow-xs hover:shadow-md'
                   }`}
                 >
-                  {f === 'All' ? '🌟 All Destinations' : f}
-                </button>
-              ))}
-            </div>
+                  <div className="relative h-32 sm:h-36 bg-gray-100 overflow-hidden">
+                    <img
+                      src={dest.imageUrl}
+                      alt={dest.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                      loading="lazy"
+                    />
+                    <span className="absolute top-2.5 left-2.5 bg-gray-900/80 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                      {dest.state}
+                    </span>
+                    <span className="absolute top-2.5 right-2.5 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-xs">
+                      {dest.defaultDays}D / {dest.defaultDays - 1}N
+                    </span>
+                    <span className="absolute bottom-2.5 left-2.5 bg-black/60 backdrop-blur-xs text-white text-[10px] font-medium px-2 py-0.5 rounded">
+                      {dest.category}
+                    </span>
+                  </div>
 
-            {/* Rich Visual Cards Horizontal Carousel */}
-            <div className="flex items-stretch gap-3 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar scroll-smooth">
-              {visibleDestinations.map((dest) => {
-                const isSelected = selectedDestId === dest.id;
-                const startFare = getDestStartingFare(dest);
-                return (
-                  <div
-                    key={dest.id}
-                    onClick={() => {
-                      setSelectedDestId(dest.id);
-                      setSelectedDays(dest.defaultDays);
-                      const el = document.getElementById('generated-itinerary-card');
-                      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }}
-                    className={`shrink-0 w-52 sm:w-60 bg-white text-gray-900 rounded-xl overflow-hidden border transition-all duration-200 cursor-pointer flex flex-col group ${
-                      isSelected
-                        ? 'ring-3 ring-blue-400 shadow-lg scale-[1.02] border-blue-400'
-                        : 'border-slate-700/60 hover:border-slate-400 shadow-md hover:shadow-lg'
-                    }`}
-                  >
-                    <div className="relative h-28 sm:h-32 bg-gray-200 overflow-hidden">
-                      <img
-                        src={dest.imageUrl}
-                        alt={dest.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                        loading="lazy"
-                      />
-                      <span className="absolute top-2 left-2 bg-gray-900/85 text-white text-[10px] font-bold px-2 py-0.5 rounded">
-                        {dest.state}
-                      </span>
-                      <span className="absolute top-2 right-2 bg-blue-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded shadow-xs">
-                        {dest.defaultDays}D / {dest.defaultDays - 1}N
-                      </span>
-                      <span className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-xs text-white text-[10px] font-semibold px-2 py-0.5 rounded">
-                        {dest.category}
-                      </span>
+                  <div className="p-3.5 flex flex-col flex-1 justify-between">
+                    <div>
+                      <h3 className="font-bold text-sm text-gray-900 group-hover:text-blue-600 transition leading-snug">
+                        {dest.name}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-1 line-clamp-1">
+                        {dest.tagline}
+                      </p>
+                      <div className="text-[11px] text-gray-600 mt-1.5 truncate">
+                        • {dest.topSights.slice(0, 2).join(' • ')}
+                      </div>
                     </div>
 
-                    <div className="p-3 flex flex-col flex-1 justify-between">
+                    <div className="mt-3 pt-2.5 border-t border-gray-100 flex items-center justify-between">
                       <div>
-                        <h3 className="font-bold text-sm text-gray-900 group-hover:text-blue-600 transition leading-snug">
-                          {dest.name}
-                        </h3>
-                        <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-1">
-                          {dest.tagline}
-                        </p>
-                        <div className="text-[10px] text-gray-600 mt-1.5 truncate">
-                          ★ {dest.topSights.slice(0, 2).join(' • ')}
-                        </div>
-                      </div>
-
-                      <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between">
-                        <div>
-                          <span className="text-[9px] text-gray-400 uppercase font-semibold block">Tour From</span>
-                          <span className="text-xs font-black text-gray-900 price">
-                            {formatINR(startFare)}
-                          </span>
-                        </div>
-                        <span className={`text-[11px] font-bold px-2 py-1 rounded transition ${
-                          isSelected
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white'
-                        }`}>
-                          {isSelected ? 'Selected ✓' : 'Plan Trip ➔'}
+                        <span className="text-[10px] text-gray-400 uppercase font-semibold block">Tour From</span>
+                        <span className="text-sm font-extrabold text-gray-900 price">
+                          {formatINR(startFare)}
                         </span>
                       </div>
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded transition ${
+                        isSelected
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white'
+                      }`}>
+                        {isSelected ? 'Selected ✓' : 'Plan Trip ➔'}
+                      </span>
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -1241,15 +1251,15 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* ============================================================ */}
       {/* 7. GROUP TOUR & BULK BUS CHARTER */}
       {/* ============================================================ */}
-      <div className="bg-[#051329] text-white rounded-2xl p-6 sm:p-8 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className="bg-gradient-to-r from-blue-50 via-sky-50 to-indigo-50 rounded-2xl p-6 sm:p-8 border border-blue-200/80 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xs">
         <div>
-          <span className="eyebrow text-blue-400 block mb-1">
+          <span className="text-xs font-bold text-blue-700 uppercase tracking-wider block mb-1">
             Group, College &amp; Family Tour Charters
           </span>
-          <h3 className="text-xl sm:text-2xl font-extrabold text-white">
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
             Need a Dedicated Tourist Bus or Custom Holiday Itinerary?
           </h3>
-          <p className="text-xs sm:text-sm text-slate-300 mt-1.5 max-w-2xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-gray-600 mt-1.5 max-w-2xl leading-relaxed">
             We provide 14-seater Tempo Travellers, 21-seater mini coaches, and 40-seater luxury Volvo buses for college industrial trips, family reunions, and pilgrim tours across South India.
           </p>
         </div>
@@ -1257,7 +1267,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         <button
           type="button"
           onClick={() => onNavigate('inquiry')}
-          className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-extrabold px-6 py-3 rounded-lg text-sm shadow-md transition whitespace-nowrap cursor-pointer"
+          className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-xs transition whitespace-nowrap cursor-pointer shrink-0"
         >
           Plan Custom Group Tour ➔
         </button>
